@@ -7,10 +7,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'tollens': '#005485',
-        'kansai':'#6f848c',
-        'resene':'#cbd4d4',
-        'ghostwhite':'#F8F8FF',
+        'tollens': '#4d71ba', //tom de azul
+        'kansai':'#6f848c', //tom de cinza
+        'resene':'#cbd4d4', //cinza mais claro
+        'ghostwhite':'#F8F8FF', //branco
       }
     },
   },

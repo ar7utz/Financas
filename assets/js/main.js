@@ -75,7 +75,7 @@ function atualizarHistorico(transacao) {
 
 function fecharModal() {
     modalOverlay.style.display = 'none';
-}
+
 
 function abrirModal() {
     modalOverlay.style.display = 'flex';
