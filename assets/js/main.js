@@ -182,3 +182,4 @@ function atualizarHistorico() {
 
     console.log('Transações:', transacoes);
 }
+}
