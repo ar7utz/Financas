@@ -45,13 +45,13 @@ $resultado = $stmt->get_result();
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
-    <title>Gerenciamento de Finanças</title>
+    <title>Finstash - Gerenciamento de Finanças Pessoal</title>
 </head>
 
 <body class="bg-gray-100">
 
     <!-- Header -->
-    <?php include_once ('../../assets/templates/navbar.php') ?>
+    <?php include_once('../../assets/templates/navbar.php') ?>
 
     <main class="p-6">
 
@@ -86,7 +86,7 @@ $resultado = $stmt->get_result();
 
         <!--div transação-->
         <div class="flex items-center justify-center mb-8">
-            <button id="modal" class="bg-tollens text-white justify-center py-2 px-4 rounded hover:bg-purple-500">
+            <button id="abrirModal" class="bg-tollens text-white justify-center py-2 px-4 rounded hover:bg-purple-500">
                 + Nova Transação
             </button>
         </div>
@@ -145,24 +145,27 @@ $resultado = $stmt->get_result();
                     $stmt->execute();
                     $resultado = $stmt->get_result();
 
-                    // Verificar se há transações
+                    // Verifica se há transações
                     if ($resultado->num_rows > 0) {
+                        // Exibe um título das colunas
+                        echo '<div class="grid grid-cols-4 gap-4 items-center mb-2">';
+                        echo '<div class="col-span-1 text-center font-bold">Descrição</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Data</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Valor</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Ações</div>';
+                        echo '</div>';
                         // Exibir as transações no histórico
                         while ($row = $resultado->fetch_assoc()) {
-                            echo '<div class="bg-white p-4 rounded-lg shadow-lg">';
-                            echo '<table class="w-full table-auto">';
-                            echo '<tbody>';
-                            echo '<tr class="border-t">';
-                            echo '<td id="descricao" class="py-3 px-6 text-left">' . $row['descricao'] . '</td>';
-                            echo '<td id="data" class="py-3 px-6 text-center">' . $row['data'] . '</td>';
-                            echo '<td id="valor" class="py-3 px-6 text-right font-semibold">' . $row['valor'] . '</td>';
-                            echo '<td class="py-3 px-6 text-right">';
-                            echo '<button id="btn_editar" class="bg-purple-600 text-white py-1 px-3 rounded hover:bg-purple-500 mr-2"><a href="../../modulos/transacoes/editar_transacao.php?id=' . $row['id'] . '">Editar</a></button>';
-                            echo '<button id="btn_excluir" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button>';
-                            echo '</td>';
-                            echo '</tr>';
-                            echo '</tbody>';
-                            echo '</table>';
+                            echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
+                            echo '<div class="grid grid-cols-4 gap-4 items-center">';
+                            echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . $row['descricao'] . '</div>';
+                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . $row['data'] . '</div>';
+                            echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . $row['valor'] . '</div>';
+                            echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
+                            echo '<a href="../../modulos/transacoes/editar_transacao.php?id=' . $row['id'] . '"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
+                            echo '<a href="../../modulos/transacoes/excluir_transacao.php?id=' . $row['id'] . '"><button id="btn_excluir" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button><a/>';
+                            echo '</div>';
+                            echo '</div>';
                             echo '</div>';
                         }
                     } else {
@@ -180,12 +183,17 @@ $resultado = $stmt->get_result();
                     <h2 class="text-2xl mb-4">Nova Transação</h2>
 
                     <!-- Seleção do Tipo de Transação -->
-                    <div class="mb-4">
-                        <select name="tipo" required class="w-full p-2 border border-gray-300 rounded">
-                            <option value="positivo">Transação Positiva</option>
-                            <option value="negativo">Transação Negativa</option>
-                        </select>
-                    </div>
+                    <fieldset class="mb-4">
+                        <label class="block mb-2 cursor-pointer">
+                            <input type="radio" name="tipo" value="positivo" required>
+                            Transação Positiva
+                        </label>
+                        <label class="block cursor-pointer">
+                            <input type="radio" name="tipo" value="negativo" required>
+                            Transação Negativa
+                        </label>
+                    </fieldset>
+
 
                     <!-- Formulário de Nova Transação -->
                     <form id="novaTransacaoForm" method="POST" action="adicionarTransacao.php">
@@ -218,18 +226,22 @@ $resultado = $stmt->get_result();
     </main>
 
     <script>
+        // Função para abrir o modal
+        document.getElementById('abrirModal').addEventListener('click', function() {
+            document.getElementById('modal').classList.remove('hidden');
+        });
+
+        // Função para fechar o modal
         document.getElementById('fecharModal').addEventListener('click', function() {
             document.getElementById('modal').classList.add('hidden');
         });
 
-        // Função para mostrar o modal
-        function abrirModal() {
-            document.getElementById('modal').classList.remove('hidden');
-        }
-
-        // Função para fechar modal de exclusão
-        document.getElementById('cancelarExcluirNota').addEventListener('click', function() {
-            document.getElementById('modalConfirmarExclusao').classList.add('hidden');
+        // Fechar modal clicando fora da caixa
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
         });
     </script>
 </body>
