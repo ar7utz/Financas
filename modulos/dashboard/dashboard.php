@@ -2,6 +2,8 @@
 session_start();
 include('../../assets/bd/conexao.php');
 
+$base_url = "../../../Financas"; //url base
+
 $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc';
 $usuario_id = $_SESSION['user_id'];
 $order_by = 'data DESC';
@@ -86,7 +88,7 @@ $resultado = $stmt->get_result();
 
         <!--div transação-->
         <div class="flex items-center justify-center mb-8">
-            <button id="abrirModal" class="bg-tollens text-white justify-center py-2 px-4 rounded hover:bg-purple-500">
+            <button id="abrirModalAddTransacao" class="bg-tollens text-white justify-center py-2 px-4 rounded hover:bg-purple-500">
                 + Nova Transação
             </button>
         </div>
@@ -164,11 +166,6 @@ $resultado = $stmt->get_result();
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
                             echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
                             echo '<a href="()?id=' . $row['id'] . '"><button onclick="abrirModalEditar(' . $row['id'] . ')" id="btn_excluir" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button><a/>';
-
-                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\')">';
-                            echo '<button class="bg-purple-600 text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>';
-                            echo '</a>';
-
                             echo '</div>';
                             echo '</div>';
                             echo '</div>';
@@ -181,34 +178,33 @@ $resultado = $stmt->get_result();
             </div>
         </div>
 
+
+
+        <!-- MODAL -->
+
+
         <form action="../transacoes/add_transacao.php" method="POST">
-            <!-- Modal Overlay -->
-            <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+            <!-- Modal para adicionar nova transação -->
+            <div id="AddTransacaoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
                 <div class="bg-white rounded-md shadow-lg p-8 text-center relative">
                     <h2 class="text-2xl mb-4">Nova Transação</h2>
 
-                    <!-- Seleção do Tipo de Transação -->
-                    <fieldset class="mb-4">
-                        <label class="block mb-2 cursor-pointer">
-                            <input type="radio" name="tipo" value="positivo" required>
-                            Transação Positiva
-                        </label>
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="tipo" value="negativo" required>
-                            Transação Negativa
-                        </label>
-                    </fieldset>
-
-
                     <!-- Formulário de Nova Transação -->
-                    <form id="novaTransacaoForm" method="POST" action="adicionarTransacao.php">
+                    <form id="novaTransacaoForm" method="POST" action="../transacoes/add_transacao.php">
+                        <fieldset class="mb-4">
+                            <label class="block mb-2 cursor-pointer">
+                                <input type="radio" name="tipo" value="positivo" required> Transação Positiva
+                            </label>
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="tipo" value="negativo" required> Transação Negativa
+                            </label>
+                        </fieldset>
                         <input type="text" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="text" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="date" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
 
-                        <!-- Botões de Ação -->
                         <div class="flex justify-center space-x-4">
-                            <button type="button" id="fecharModal" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
+                            <button type="button" id="fecharModalAdd" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
                             <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Salvar</button>
                         </div>
                     </form>
@@ -252,19 +248,19 @@ $resultado = $stmt->get_result();
         <!-- Modal editar transação -->
         <form action="../transacoes/editar_transacao.php" method="POST">
             <!-- Modal Overlay -->
-            <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+            <div id="modalEditarTransacao" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
                 <div class="bg-white rounded-md shadow-lg p-8 text-center relative">
                     <h2 class="text-2xl mb-4">Editar transação</h2>
 
-                    <!-- Formulário da transação -->
-                    <form id="novaTransacaoForm" method="POST" action="adicionarTransacao.php">
-                        <input type="text" id="descricao" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded" value="<?php echo $transacao['descricao']; ?>">
-                        <input type="text" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                        <input type="date" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-
-                        <!-- Botões de Ação -->
+                    <!-- Formulário de Edição -->
+                    <form id="editarTransacaoForm" method="POST" action="../transacoes/editar_transacao.php">
+                        <input type="hidden" id="idEditar" name="id">
+                        <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                        <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                        <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+            
                         <div class="flex justify-center space-x-4">
-                            <button type="button" id="fecharModal" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
+                            <button type="button" id="fecharModalEditar" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
                             <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Salvar</button>
                         </div>
                     </form>
@@ -276,55 +272,49 @@ $resultado = $stmt->get_result();
     </main>
 
     <script>
-        // Função para abrir o modal
-            document.getElementById('abrirModal').addEventListener('click', function() {
-                document.getElementById('modal').classList.remove('hidden');
-            });
+        // Funções para abrir e fechar o modal de adicionar transação
+        document.getElementById('abrirModalAddTransacao').addEventListener('click', function() {
+            document.getElementById('AddTransacaoModal').classList.remove('hidden');
+        });
 
-            // Função para fechar o modal
-            document.getElementById('fecharModal').addEventListener('click', function() {
-                document.getElementById('modal').classList.add('hidden');
-            });
+        document.getElementById('fecharModalAdd').addEventListener('click', function() {
+            document.getElementById('AddTransacaoModal').classList.add('hidden');
+        });
 
-            // Fechar modal clicando fora da caixa
-            window.addEventListener('click', function(event) {
-                const modal = document.getElementById('modal');
+        // Funções para abrir e fechar o modal de edição
+        function abrirModalEditar(id, descricao, valor, data) {
+            document.getElementById('idEditar').value = id;
+            document.getElementById('descricaoEditar').value = descricao;
+            document.getElementById('valorEditar').value = valor;
+            document.getElementById('dataEditar').value = data;
+            document.getElementById('modalEditarTransacao').classList.remove('hidden');
+        }
+
+        document.getElementById('fecharModalEditar').addEventListener('click', function() {
+            document.getElementById('modalEditarTransacao').classList.add('hidden');
+        });
+
+        // Funções para abrir e fechar o modal de confirmação de exclusão
+        function abrirModalExcluir(id) {
+            document.getElementById('confirmarExcluir').onclick = function() {
+                window.location.href = `../transacoes/excluir_transacao.php?id=${id}`;
+            };
+            document.getElementById('modalConfirmarExclusao').classList.remove('hidden');
+        }
+
+        document.getElementById('cancelarExcluir').addEventListener('click', function() {
+            document.getElementById('modalConfirmarExclusao').classList.add('hidden');
+        });
+
+        // Fechar modais clicando fora da caixa
+        window.addEventListener('click', function(event) {
+            const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
+            modais.forEach(function(modalId) {
+                const modal = document.getElementById(modalId);
                 if (event.target === modal) {
                     modal.classList.add('hidden');
                 }
             });
-
-
-            // Função para abrir o modal e preencher os dados da transação
-            function abrirModalEditar(id, descricao, valor, data, tipo) {
-            // Mostrar o modal
-            document.getElementById('modal').classList.remove('hidden');
-
-            // Preencher os campos do formulário com os dados da transação
-            document.getElementById('transacao_id').value = id;
-            document.getElementById('descricao').value = descricao;
-            document.getElementById('valor').value = valor;
-            document.getElementById('data').value = data;
-
-            // Verificar o tipo de transação e marcar o radio button correspondente
-            if (tipo === 'positivo') {
-                document.getElementById('tipo_positivo').checked = true;
-            } else if (tipo === 'negativo') {
-                document.getElementById('tipo_negativo').checked = true;
-            }
-        }
-
-        // Função para fechar o modal
-        document.getElementById('fecharModal').addEventListener('click', function() {
-            document.getElementById('modal').classList.add('hidden');
-        });
-    
-        // Fechar modal clicando fora da caixa
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('modal');
-            if (event.target === modal) {
-                modal.classList.add('hidden');
-            }
         });
     </script>
 </body>
