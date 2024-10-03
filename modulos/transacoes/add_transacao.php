@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
-        $sql = "INSERT INTO transacoes (descricao, valor, data, usuario_id) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO transacoes (descricao, valor, data, tipo, usuario_id) VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('sdsi', $descricao, $valor, $data, $usuario_id);
         $stmt->execute();

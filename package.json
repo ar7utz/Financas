@@ -16,6 +16,7 @@
     "brace-expansion": "^2.0.1",
     "braces": "^3.0.3",
     "camelcase-css": "^2.0.1",
+    "chart.js": "^4.4.4",
     "chokidar": "^3.6.0",
     "color-convert": "^2.0.1",
     "color-name": "^1.1.4",
