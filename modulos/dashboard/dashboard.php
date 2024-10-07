@@ -165,7 +165,7 @@ $resultado = $stmt->get_result();
                             echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . $row['valor'] . '</div>';
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
                             echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
-                            echo '<a href="()?id=' . $row['id'] . '"><button onclick="abrirModalEditar(' . $row['id'] . ')" id="btn_excluir" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button><a/>';
+                            echo '<a href="#" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>' ;
                             echo '</div>';
                             echo '</div>';
                             echo '</div>';
@@ -224,25 +224,25 @@ $resultado = $stmt->get_result();
         </div>
 
         <?php
-            include_once '../../assets/bd/conexao.php';
+        include_once '../../assets/bd/conexao.php';
 
-            if (isset($_GET['id'])) {
-                $id = $_GET['id'];
-            
-                // Query para buscar os dados da transação
-                $query = "SELECT * FROM transacoes WHERE id = ?";
-                $stmt = $conn->prepare($query);
-                $stmt->bind_param("i", $id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-            
-                if ($result->num_rows > 0) {
-                    $transacao = $result->fetch_assoc();
-                    echo json_encode($transacao);
-                } else {
-                    echo json_encode(['error' => 'Transação não encontrada']);
-                }
+        if (isset($_GET['id'])) {
+            $id = $_GET['id'];
+
+            // Query para buscar os dados da transação
+            $query = "SELECT * FROM transacoes WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $transacao = $result->fetch_assoc();
+                echo json_encode($transacao);
+            } else {
+                echo json_encode(['error' => 'Transação não encontrada']);
             }
+        }
         ?>
 
         <!-- Modal editar transação -->
@@ -258,7 +258,7 @@ $resultado = $stmt->get_result();
                         <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-            
+
                         <div class="flex justify-center space-x-4">
                             <button type="button" id="fecharModalEditar" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
                             <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Salvar</button>
@@ -271,8 +271,7 @@ $resultado = $stmt->get_result();
 
     </main>
 
-    <script>
-        // Funções para abrir e fechar o modal de adicionar transação
+    <script> // Funções para abrir e fechar o modal de adicionar transação
         document.getElementById('abrirModalAddTransacao').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.remove('hidden');
         });
@@ -280,8 +279,9 @@ $resultado = $stmt->get_result();
         document.getElementById('fecharModalAdd').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.add('hidden');
         });
+    </script>
 
-        // Funções para abrir e fechar o modal de edição
+    <script> // Funções para abrir e fechar o modal de edição
         function abrirModalEditar(id, descricao, valor, data) {
             document.getElementById('idEditar').value = id;
             document.getElementById('descricaoEditar').value = descricao;
@@ -293,29 +293,35 @@ $resultado = $stmt->get_result();
         document.getElementById('fecharModalEditar').addEventListener('click', function() {
             document.getElementById('modalEditarTransacao').classList.add('hidden');
         });
-
-        // Funções para abrir e fechar o modal de confirmação de exclusão
+    </script>
+    
+    <script> // Funções para abrir e fechar o modal de confirmação de exclusão
         function abrirModalExcluir(id) {
-            document.getElementById('confirmarExcluir').onclick = function() {
+            document.getElementById('confirmarExcluirNota').onclick = function() {
                 window.location.href = `../transacoes/excluir_transacao.php?id=${id}`;
             };
             document.getElementById('modalConfirmarExclusao').classList.remove('hidden');
         }
-
-        document.getElementById('cancelarExcluir').addEventListener('click', function() {
+        // Função para cancelar a exclusão e fechar o modal
+        document.getElementById('cancelarExcluirNota').addEventListener('click', function() {
             document.getElementById('modalConfirmarExclusao').classList.add('hidden');
         });
+    </script>
 
-        // Fechar modais clicando fora da caixa
+    <script> // Fechar modais clicando fora da caixa
         window.addEventListener('click', function(event) {
-            const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
-            modais.forEach(function(modalId) {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    modal.classList.add('hidden');
+        const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
+        modais.forEach(function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (event.target === modal) {
+        modal.classList.add('hidden');
                 }
             });
         });
+    </script>
+
+
+
     </script>
 </body>
 
