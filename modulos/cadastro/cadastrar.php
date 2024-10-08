@@ -6,6 +6,7 @@ include ('../../assets/bd/conexao.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Receber os dados do formulário
     $nome = $_POST['nome'];
+    $username = $_POST['username'];
     $email = $_POST['email'];
     $senha = $_POST['senha'];
     $telefone = $_POST['telefone'];
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Se não houver nenhum usuário com o mesmo e-mail, procede com o cadastro
     if ($result->num_rows === 0) {
-        $sql = "INSERT INTO user (nome, email, telefone, senha) VALUES ('$nome', '$email', '$telefone', '$senha')";
+        $sql = "INSERT INTO user (nome, username, email, telefone, senha) VALUES ('$nome', '$username', '$email', '$telefone', '$senha')";
         if($conn->query($sql) === true){
             $_SESSION['status_cadastro'] = true;
             header('Location: ../login/login.php');
@@ -34,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
 }
 
-$sql = "INSERT INTO user (nome, email, telefone, senha) VALUES ('$nome', '$email', '$telefone', '$senha')";
+$sql = "INSERT INTO user (nome, username, email, telefone, senha) VALUES ('$nome', '$username', '$email', '$telefone', '$senha')";
 if($conn->query ($sql) === true){
     $_SESSION['status_cadastro'] = true;
     header('Location: ../dashboard/hp_login.php');

@@ -3,17 +3,17 @@ session_start();
 
 include ('../../assets/bd/conexao.php');
 
-if (empty($_POST['email']) || empty($_POST['senha'])) {
+if (empty($_POST['login']) || empty($_POST['senha'])) {
     header('Location: ../index.php');
     exit;
 }
 
-$email = $_POST['email'];
+$login = $_POST['login']; //Pode realizar a entrada com o email ou com o nome de usuário
 $senha = $_POST['senha'];
 
-$sql = "SELECT id FROM user WHERE email = ? and senha = ?";
+$sql = "SELECT id FROM user WHERE (email = ? OR username = ?) and senha = ?";
 $preparacao = $conn->prepare($sql);
-$preparacao->bind_param('ss', $email, $senha);
+$preparacao->bind_param('sss', $login, $login, $senha);
 $preparacao->execute();
 $resultado = $preparacao->get_result();
 

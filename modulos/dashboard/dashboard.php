@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('../../assets/bd/conexao.php');
+include_once('../../assets/bd/conexao.php');
 
 $base_url = "../../../Financas"; //url base
 
@@ -47,6 +47,7 @@ $resultado = $stmt->get_result();
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
+    <script src="../../node_modules/@mariojgt/wind-notify/packages/index.js"></script>
     <title>Finstash - Gerenciamento de Finanças Pessoal</title>
 </head>
 
@@ -203,6 +204,8 @@ $resultado = $stmt->get_result();
                         <input type="text" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="date" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
 
+                        <input type="hidden" name="timezone" id="timezone">
+
                         <div class="flex justify-center space-x-4">
                             <button type="button" id="fecharModalAdd" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
                             <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Salvar</button>
@@ -320,9 +323,11 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-
-
+    <script> // Detecta o fuso horário local e preenche o campo oculto
+        document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     </script>
+
+    
 </body>
 
 </html>

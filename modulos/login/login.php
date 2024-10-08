@@ -16,7 +16,7 @@
             <h1 class="text-2xl font-bold text-gray-800">LOGIN</h1>
         </div>
         <div class="mb-4">
-            <input type="text" placeholder="Email" name="email" autocomplete="off" required
+            <input type="text" placeholder="Email ou usuário" name="login" autocomplete="off" required
                 class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div class="mb-4">

@@ -14,6 +14,17 @@ include_once '../../assets/bd/conexao.php'
     <title>Finstash - Meu Perfil</title>
 </head>
 <body>
-    <h1>teste tailwind</h1>
+    <?php
+        include_once ('../../assets/templates/navbar.php')
+    ?>
+    <div class="">
+        <div class=""> <!--lado esquerdo da tela, foto de perfil-->
+            <h1>foto.png</h1>
+        </div>
+        <div class=""> <!--lado direito da tela, informações-->
+            <label for="nome">Nome:</label>
+            <input type="text" disabled value="<?php echo ['nome'];?>">
+        </div>
+    </div>
 </body>
 </html>

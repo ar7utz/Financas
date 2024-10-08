@@ -37,6 +37,12 @@
         </div>
 
         <div class="mb-4">
+            <label class="block mb-1 text-gray-700 font-semibold">Nome de Usuário:</label>
+            <input type="text" placeholder="Usuário" name="username" required
+                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="mb-4">
             <label class="block mb-1 text-gray-700 font-semibold">E-mail:</label>
             <input type="email" placeholder="E-mail" name="email" required
                 class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
