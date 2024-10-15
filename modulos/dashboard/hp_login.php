@@ -49,134 +49,37 @@ $dados = obterDados($filtro);
 
 <body>
     <?php include_once('../../assets/templates/navbar.php') ?>
-    <h1>clima e horario</h1>
+    <div class="flex w-full">
+        <div class="justify-start">
+            <p>climatempo</p>
+        </div>
+        <div class="justify-end" id="localTime">
+            00:00:00H
+        </div>
+    </div>
     <?php include_once('../../assets/templates/navbar_lateral.php') ?>
 
     <div class="flex">
         <!-- Sidebar preta -->
         <?php include_once('../../assets/templates/navbar_lateral.php') ?>
 
-        <!-- Parte branca principal -->
-        <div class="w-full p-4">
-            <h1>Clima e Horário</h1>
-
-            <div class="mb-4">
-                <!-- Dropdown para escolher o filtro -->
-                <label for="filtro">Filtrar por:</label>
-                <select id="filtro" class="border p-2">
-                    <option value="semanal">Semanal</option>
-                    <option value="mensal">Mensal</option>
-                    <option value="anual">Anual</option>
-                </select>
-            </div>
-
-            <!-- Gráficos na parte branca -->
-            <div class="grid grid-cols-2 gap-4">
-                <!-- Gráfico de Pizza -->
-                <div class="bg-white p-4 shadow-md rounded">
-                    <canvas id="graficoPizza"></canvas>
-                </div>
-
-                <!-- Gráfico de Linha -->
-                <div class="bg-white p-4 shadow-md rounded">
-                    <canvas id="graficoLinha"></canvas>
-                </div>
-            </div>
-
-            <!-- Gráfico de Barras -->
-            <div class="mt-4 bg-white p-4 shadow-md rounded">
-                <canvas id="myChart"></canvas>
-            </div> 
-        </div>
-    </div>
-
     <script>
-        // Dados PHP para JavaScript
-        const dadosPHP = <?php echo json_encode($dados); ?>;
 
-        // Função para criar o gráfico de barras com Chart.js
-        function criarGrafico(entradas, saidas) {
-            const ctx = document.getElementById('myChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Entradas', 'Saídas'],
-                    datasets: [{
-                        label: 'Total',
-                        data: [entradas, saidas],
-                        backgroundColor: ['#36a2eb', '#ff6384'],
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
+    </script>
+
+    <script>//Função para buscar e exibir o horário local
+        function atualizarHorario() {
+            fetch('http://worldtimeapi.org/api/timezone/America/Sao_Paulo')
+                .then(response => response.json())
+                .then(data => {
+                    const timeString = new Date(data.datetime).toLocaleTimeString();
+                    document.getElementById('localTime').innerText = timeString;
+                })
+                .catch(error => console.error('Erro ao buscar o horário:', error));
         }
 
-        // Criar gráfico de pizza
-        function criarGraficoPizza(entradas, saidas) {
-            const ctx = document.getElementById('graficoPizza').getContext('2d');
-            new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Entradas', 'Saídas'],
-                    datasets: [{
-                        label: 'Total',
-                        data: [entradas, saidas],
-                        backgroundColor: ['#36a2eb', '#ff6384'],
-                    }]
-                }
-            });
-        }
-
-        // Criar gráfico de linha multi-eixo
-        function criarGraficoLinha() {
-            const ctx = document.getElementById('graficoLinha').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
-                    datasets: [{
-                        label: 'Entradas',
-                        data: [1000, 2000, 1500, 3000, 2500],
-                        borderColor: '#36a2eb',
-                        yAxisID: 'y'
-                    }, {
-                        label: 'Saídas',
-                        data: [500, 1000, 800, 2000, 1200],
-                        borderColor: '#ff6384',
-                        yAxisID: 'y1'
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            position: 'left',
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                        }
-                    }
-                }
-            });
-        }
-
-        // Criar os gráficos iniciais
-        criarGrafico(dadosPHP.entradas, dadosPHP.saidas);
-        criarGraficoPizza(dadosPHP.entradas, dadosPHP.saidas);
-        criarGraficoLinha();
-
-        // Atualizar os gráficos ao mudar o filtro
-        document.getElementById('filtro').addEventListener('change', function() {
-            const filtro = this.value;
-            window.location.href = "?filtro=" + filtro;
-        });
+        // Atualizar o horário a cada segundo
+        setInterval(atualizarHorario, 1000);
     </script>
 </body>
 

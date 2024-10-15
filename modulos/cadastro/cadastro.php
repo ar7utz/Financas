@@ -61,6 +61,11 @@
                 class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
+        <div class="mb-4">
+            <label class="block mb-1 text-gray-700 font-semibold">Escolher foto de perfil:</label>
+            <input type="file" id="foto_perfil" name="foto_perfil" accept="image/*" class="border p-2 w-full">
+        </div>
+
         <div>
             <input type="submit" value="Cadastrar"
                 class="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 cursor-pointer">

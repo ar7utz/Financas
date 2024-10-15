@@ -274,7 +274,7 @@ $resultado = $stmt->get_result();
 
     </main>
 
-    <script> // Funções para abrir e fechar o modal de adicionar transação
+    <script>//Funções para abrir e fechar o modal de adicionar transação
         document.getElementById('abrirModalAddTransacao').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.remove('hidden');
         });
@@ -284,7 +284,7 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script> // Funções para abrir e fechar o modal de edição
+    <script> //Funções para abrir e fechar o modal de edição
         function abrirModalEditar(id, descricao, valor, data) {
             document.getElementById('idEditar').value = id;
             document.getElementById('descricaoEditar').value = descricao;
@@ -298,14 +298,14 @@ $resultado = $stmt->get_result();
         });
     </script>
     
-    <script> // Funções para abrir e fechar o modal de confirmação de exclusão
+    <script> //Funções para abrir e fechar o modal de confirmação de exclusão
         function abrirModalExcluir(id) {
             document.getElementById('confirmarExcluirNota').onclick = function() {
                 window.location.href = `../transacoes/excluir_transacao.php?id=${id}`;
             };
             document.getElementById('modalConfirmarExclusao').classList.remove('hidden');
         }
-        // Função para cancelar a exclusão e fechar o modal
+        //Função para cancelar a exclusão e fechar o modal
         document.getElementById('cancelarExcluirNota').addEventListener('click', function() {
             document.getElementById('modalConfirmarExclusao').classList.add('hidden');
         });
@@ -323,7 +323,7 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script> // Detecta o fuso horário local e preenche o campo oculto
+    <script>//Detecta o fuso horário local e preenche o campo oculto
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     </script>
 
