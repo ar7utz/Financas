@@ -22,6 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($tipo === 'negativo') {
         $valor = -$valor;
+        $tipo = 2; // Tipo 2 para transações negativas
+    } else {
+        $tipo = 1; // Tipo 1 para transações positivas
     }
 
     if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {

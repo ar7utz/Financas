@@ -50,7 +50,7 @@ if ($resultado->num_rows > 0) {
         <div class="flex flex-row mt-8">
             <!-- Div da foto - lado esquerdo -->
             <div class="w-4/12 flex flex-col items-center">
-                <img src="" alt="Foto de perfil" class=" w-32 h-32 rounded-full object-cover">
+                <img src="<?php ?>" alt="Foto de perfil" class=" w-32 h-32 rounded-full object-cover">
                 <button class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Alterar Foto</button>
             </div>
             <!-- Div das informações - lado direito -->

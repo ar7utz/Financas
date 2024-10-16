@@ -2,15 +2,24 @@
 session_start();
 include_once('../../assets/bd/conexao.php');
 
+$data_original = '2024/10/16';
+$data = DateTime::createFromFormat('Y/m/d', $data_original);
+$data_formatada = $data->format('d/m/Y');
+
 $base_url = "../../../Financas"; //url base
 
-$filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc';
-$usuario_id = $_SESSION['user_id'];
-$order_by = 'data DESC';
+$filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc'; 
+$usuario_id = $_SESSION['user_id']; // Usuário logado
 
-$filter = isset($_GET['filtro']) ? $_GET['filtro'] : '';
-
+$order_by = '';
+// Defina a ordenação com base no filtro selecionado
 switch ($filtro) {
+    case 'valor-positivo':
+        $order_by = 'tipo = 1';
+        break;
+    case 'valor-negativo':
+        $order_by = 'tipo = 2';
+        break;
     case 'data-asc':
         $order_by = 'data ASC';
         break;
@@ -29,8 +38,12 @@ switch ($filtro) {
     case 'descricao-desc':
         $order_by = 'descricao DESC';
         break;
+    default:
+        $order_by = 'data DESC'; // Valor padrão se o filtro for inválido
+        break;
 }
 
+// Consulta ao banco de dados com o filtro aplicado
 $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY $order_by";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('i', $usuario_id);
@@ -120,19 +133,24 @@ $resultado = $stmt->get_result();
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h3 class="text-lg font-bold mb-4">Histórico</h3>
                 <div class="flex items-center mb-4">
+                    <!--Filtro-->
+                    <form id="filterForm" method="GET" action="" onchange="document.getElementById('filterForm').submit()">
                     <label for="filter" class="mr-2 font-semibold">Filtrar por:</label>
-                    <select id="filter" class="border border-gray-300 rounded p-2">
+                    <select id="filter" name="filtro" class="border border-gray-300 rounded p-2">
                         <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
                         <option value="data-desc" <?php echo ($filtro == 'data-desc') ? 'selected' : ''; ?>>Data (Mais recentes)</option>
                         <option value="valor-asc" <?php echo ($filtro == 'valor-asc') ? 'selected' : ''; ?>>Valor (Menor para maior)</option>
                         <option value="valor-desc" <?php echo ($filtro == 'valor-desc') ? 'selected' : ''; ?>>Valor (Maior para menor)</option>
+                        <option value="valor-positivo"<?php echo ($filtro == 'valor-positivo') ? 'selected' : ''; ?>>Valor Positivo</option>
+                        <option value="valor-negativo"<?php echo ($filtro == 'valor-negativo') ? 'selected' : ''; ?>>Valor Negativo</option>
                         <option value="descricao-asc" <?php echo ($filtro == 'descricao-asc') ? 'selected' : ''; ?>>Descrição (A-Z)</option>
                         <option value="descricao-desc" <?php echo ($filtro == 'descricao-desc') ? 'selected' : ''; ?>>Descrição (Z-A)</option>
                     </select>
-                    <div class="filtro-nav">
-                        <label for="filtroSearch"></label>
-                        <input type="text" placeholder="Procurar" class="ml-4 border border-gray-300 rounded p-2 w-full max-w-xs">
-                    </div>
+                </form>
+                        <div class="filtro-nav">
+                            <label for="filtroSearch"></label>
+                            <input type="text" placeholder="Procurar" class="ml-4 border border-gray-300 rounded p-2 w-full max-w-xs">
+                        </div>
                 </div>
 
                 <!-- Tabela de Transações -->
@@ -142,7 +160,7 @@ $resultado = $stmt->get_result();
                 if (isset($_SESSION['user_id'])) {
                     $usuario_id = $_SESSION['user_id'];
 
-                    $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY data DESC";
+                    $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY $order_by";
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param('i', $usuario_id);
                     $stmt->execute();
@@ -162,7 +180,7 @@ $resultado = $stmt->get_result();
                             echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
                             echo '<div class="grid grid-cols-4 gap-4 items-center">';
                             echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . $row['descricao'] . '</div>';
-                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . $row['data'] . '</div>';
+                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . $data_formatada . '</div>';
                             echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . $row['valor'] . '</div>';
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
                             echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
@@ -178,8 +196,6 @@ $resultado = $stmt->get_result();
                 ?>
             </div>
         </div>
-
-
 
         <!-- MODAL -->
 
