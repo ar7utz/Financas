@@ -12,10 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $valor = str_replace(',', '.', $_POST['valor']); //Substitui vírgula por ponto
     $valor = (float)$valor;
     $data = $_POST['data'];
+    $categoria_id = $_POST['categoria_id'];
 
     $tipo = $_POST['tipo']; //Obter o tipo de transação (positivo ou negativo)
 
-    if (empty($descricao) || empty($valor) || empty($data)) {
+    if (empty($descricao) || empty($valor) || empty($data) || empty($categoria_id)) {
         echo json_encode(['status' => 'erro', 'mensagem' => 'Todos os campos são obrigatórios.']);
         exit;
     }
@@ -28,9 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
-        $sql = "INSERT INTO transacoes (descricao, valor, data, tipo, usuario_id) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO transacoes (descricao, valor, data, tipo, usuario_id, categoria_id) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('sdsii', $descricao, $valor, $data, $tipo, $usuario_id);
+        $stmt->bind_param('sdsiii', $descricao, $valor, $data, $tipo, $usuario_id, $categoria_id);
         $stmt->execute();
         header("Location: ../dashboard/dashboard.php");
     } else {

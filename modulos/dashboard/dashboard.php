@@ -5,7 +5,7 @@ include_once('../../assets/bd/conexao.php');
 
 $base_url = "../../../Financas"; //url base
 
-$filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc'; 
+$filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc';
 $usuario_id = $_SESSION['user_id']; // Usuário logado
 
 $order_by = '';
@@ -132,22 +132,24 @@ $resultado = $stmt->get_result();
                 <div class="flex items-center mb-4">
                     <!--Filtro-->
                     <form id="filterForm" method="GET" action="" onchange="document.getElementById('filterForm').submit()">
-                    <label for="filter" class="mr-2 font-semibold">Filtrar por:</label>
-                    <select id="filter" name="filtro" class="border border-gray-300 rounded p-2">
-                        <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
-                        <option value="data-desc" <?php echo ($filtro == 'data-desc') ? 'selected' : ''; ?>>Data (Mais recentes)</option>
-                        <option value="valor-asc" <?php echo ($filtro == 'valor-asc') ? 'selected' : ''; ?>>Valor (Menor para maior)</option>
-                        <option value="valor-desc" <?php echo ($filtro == 'valor-desc') ? 'selected' : ''; ?>>Valor (Maior para menor)</option>
-                        <option value="valor-positivo"<?php echo ($filtro == 'valor-positivo') ? 'selected' : ''; ?>>Valor Positivo</option>
-                        <option value="valor-negativo"<?php echo ($filtro == 'valor-negativo') ? 'selected' : ''; ?>>Valor Negativo</option>
-                        <option value="descricao-asc" <?php echo ($filtro == 'descricao-asc') ? 'selected' : ''; ?>>Descrição (A-Z)</option>
-                        <option value="descricao-desc" <?php echo ($filtro == 'descricao-desc') ? 'selected' : ''; ?>>Descrição (Z-A)</option>
-                    </select>
-                </form>
-                        <div class="filtro-nav">
-                            <label for="filtroSearch"></label>
-                            <input type="text" placeholder="Procurar" class="ml-4 border border-gray-300 rounded p-2 w-full max-w-xs">
+                        <label for="filter" class="mr-2 font-semibold">Filtrar por:</label>
+                        <select id="filter" name="filtro" class="border border-gray-300 rounded p-2">
+                            <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
+                            <option value="data-desc" <?php echo ($filtro == 'data-desc') ? 'selected' : ''; ?>>Data (Mais recentes)</option>
+                            <option value="valor-asc" <?php echo ($filtro == 'valor-asc') ? 'selected' : ''; ?>>Valor (Menor para maior)</option>
+                            <option value="valor-desc" <?php echo ($filtro == 'valor-desc') ? 'selected' : ''; ?>>Valor (Maior para menor)</option>
+                            <option value="valor-positivo" <?php echo ($filtro == 'valor-positivo') ? 'selected' : ''; ?>>Valor Positivo</option>
+                            <option value="valor-negativo" <?php echo ($filtro == 'valor-negativo') ? 'selected' : ''; ?>>Valor Negativo</option>
+                            <option value="descricao-asc" <?php echo ($filtro == 'descricao-asc') ? 'selected' : ''; ?>>Descrição (A-Z)</option>
+                            <option value="descricao-desc" <?php echo ($filtro == 'descricao-desc') ? 'selected' : ''; ?>>Descrição (Z-A)</option>
+                        </select>
+                    </form>
+                        
+                        <div class="ml-4">
+                            <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" value="<?php echo isset($_GET['filtroSearch']) ? $_GET['filtroSearch'] : ''; ?>" class="border border-gray-300 rounded p-2 w-full max-w-xs">
                         </div>
+                        
+                        <button type="submit" class=" ml-4 bg-tollens text-white px-4 py-2 rounded hover:bg-purple-500">Filtrar</button>
                 </div>
 
                 <!-- Tabela de Transações -->
@@ -177,12 +179,9 @@ $resultado = $stmt->get_result();
                         while ($row = $resultado->fetch_assoc()) { //loop para tratar a data e formatar corretamente
                             $data_original = $row['data'];
 
-                            // Formate a data da transação dinamicamente
                             $data = DateTime::createFromFormat('Y-m-d', $data_original);
-                            
-                            // Verifique se a conversão da data foi bem-sucedida
+
                             if ($data !== false) {
-                                // Formatando a data para 'd/m/Y'
                                 $data_formatada = $data->format('d/m/Y');
                             } else {
                                 $data_formatada = "Data inválida";
@@ -194,7 +193,7 @@ $resultado = $stmt->get_result();
                             echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . $row['valor'] . '</div>';
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
                             echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
-                            echo '<a href="#" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>' ;
+                            echo '<a href="#" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
                             echo '</div>';
                             echo '</div>';
                             echo '</div>';
@@ -229,6 +228,23 @@ $resultado = $stmt->get_result();
                         <input type="text" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="text" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="date" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+
+                        <?php
+                            $sql = "SELECT id, nome_categoria FROM categoria";
+                            $result = $conn->query($sql);
+                        ?>
+                        <select name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                            <option value="" disabled selected>Selecionar Categoria</option>
+                                <?php
+                                if ($result->num_rows > 0) {
+                                    while($row = $result->fetch_assoc()) {
+                                        echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
+                                    }
+                                } else {
+                                    echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                                }
+                                ?>
+                        </select>
 
                         <input type="hidden" name="timezone" id="timezone">
 
@@ -287,6 +303,22 @@ $resultado = $stmt->get_result();
                         <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                        
+                        <select id="categoriaEditar" name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                            <option value="" disabled selected>Selecionar Categoria</option>
+                            <?php
+                                // Consultar categorias do banco de dados
+                                $sql = "SELECT id, nome_categoria FROM categoria";
+                                $result = $conn->query($sql);
+                                if ($result->num_rows > 0) {
+                                    while($row = $result->fetch_assoc()) {
+                                        echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
+                                    }
+                                } else {
+                                    echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                                }
+                            ?>
+                        </select>
 
                         <div class="flex justify-center space-x-4">
                             <button type="button" id="fecharModalEditar" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
@@ -300,7 +332,8 @@ $resultado = $stmt->get_result();
 
     </main>
 
-    <script>//Funções para abrir e fechar o modal de adicionar transação
+    <script>
+        //Funções para abrir e fechar o modal de adicionar transação
         document.getElementById('abrirModalAddTransacao').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.remove('hidden');
         });
@@ -310,17 +343,18 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script> //Funções para abrir e fechar o modal de edição
+    <script>
+        //Funções para abrir e fechar o modal de edição
         function abrirModalEditar(id, descricao, valor, data) {
             // Definindo os valores no modal de edição
             document.getElementById('idEditar').value = id;
             document.getElementById('descricaoEditar').value = descricao;
             document.getElementById('valorEditar').value = valor;
-        
+
             // Formatação da data no formato YYYY-MM-DD
             const dataFormatada = new Date(data).toISOString().split('T')[0];
             document.getElementById('dataEditar').value = dataFormatada;
-        
+
             // Abrir o modal de edição
             document.getElementById('modalEditarTransacao').classList.remove('hidden');
         }
@@ -329,8 +363,9 @@ $resultado = $stmt->get_result();
             document.getElementById('modalEditarTransacao').classList.add('hidden');
         });
     </script>
-    
-    <script> //Funções para abrir e fechar o modal de confirmação de exclusão
+
+    <script>
+        //Funções para abrir e fechar o modal de confirmação de exclusão
         function abrirModalExcluir(id) {
             document.getElementById('confirmarExcluirNota').onclick = function() {
                 window.location.href = `../transacoes/excluir_transacao.php?id=${id}`;
@@ -343,23 +378,25 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script> // Fechar modais clicando fora da caixa
+    <script>
+        // Fechar modais clicando fora da caixa
         window.addEventListener('click', function(event) {
-        const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
-        modais.forEach(function(modalId) {
-        const modal = document.getElementById(modalId);
-        if (event.target === modal) {
-        modal.classList.add('hidden');
+            const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
+            modais.forEach(function(modalId) {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
                 }
             });
         });
     </script>
 
-    <script>//Detecta o fuso horário local e preenche o campo oculto
+    <script>
+        //Detecta o fuso horário local e preenche o campo oculto
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     </script>
 
-    
+
 </body>
 
 </html>
