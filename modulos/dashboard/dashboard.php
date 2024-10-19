@@ -2,9 +2,6 @@
 session_start();
 include_once('../../assets/bd/conexao.php');
 
-$data_original = '2024/10/16';
-$data = DateTime::createFromFormat('Y/m/d', $data_original);
-$data_formatada = $data->format('d/m/Y');
 
 $base_url = "../../../Financas"; //url base
 
@@ -12,7 +9,7 @@ $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc';
 $usuario_id = $_SESSION['user_id']; // Usuário logado
 
 $order_by = '';
-// Defina a ordenação com base no filtro selecionado
+// Define a ordenação com base no filtro selecionado
 switch ($filtro) {
     case 'valor-positivo':
         $order_by = 'tipo = 1';
@@ -176,7 +173,20 @@ $resultado = $stmt->get_result();
                         echo '<div class="col-span-1 text-center font-bold">Ações</div>';
                         echo '</div>';
                         // Exibir as transações no histórico
-                        while ($row = $resultado->fetch_assoc()) {
+
+                        while ($row = $resultado->fetch_assoc()) { //loop para tratar a data e formatar corretamente
+                            $data_original = $row['data'];
+
+                            // Formate a data da transação dinamicamente
+                            $data = DateTime::createFromFormat('Y-m-d', $data_original);
+                            
+                            // Verifique se a conversão da data foi bem-sucedida
+                            if ($data !== false) {
+                                // Formatando a data para 'd/m/Y'
+                                $data_formatada = $data->format('d/m/Y');
+                            } else {
+                                $data_formatada = "Data inválida";
+                            }
                             echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
                             echo '<div class="grid grid-cols-4 gap-4 items-center">';
                             echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . $row['descricao'] . '</div>';
@@ -273,7 +283,7 @@ $resultado = $stmt->get_result();
 
                     <!-- Formulário de Edição -->
                     <form id="editarTransacaoForm" method="POST" action="../transacoes/editar_transacao.php">
-                        <input type="hidden" id="idEditar" name="id">
+                        <input type="hidden" id="idEditar" name="id" value="<?php echo $transacao_id; ?>">
                         <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
@@ -302,10 +312,16 @@ $resultado = $stmt->get_result();
 
     <script> //Funções para abrir e fechar o modal de edição
         function abrirModalEditar(id, descricao, valor, data) {
+            // Definindo os valores no modal de edição
             document.getElementById('idEditar').value = id;
             document.getElementById('descricaoEditar').value = descricao;
             document.getElementById('valorEditar').value = valor;
-            document.getElementById('dataEditar').value = data;
+        
+            // Formatação da data no formato YYYY-MM-DD
+            const dataFormatada = new Date(data).toISOString().split('T')[0];
+            document.getElementById('dataEditar').value = dataFormatada;
+        
+            // Abrir o modal de edição
             document.getElementById('modalEditarTransacao').classList.remove('hidden');
         }
 

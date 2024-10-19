@@ -2,23 +2,28 @@
 session_start();
 include ('../../assets/bd/conexao.php');
 
-if(isset($_GET['id'])) {
-    $transacao_id = $_GET['id'];
+// Verifica se o formulário foi enviado com os campos necessários
+if (isset($_POST['id']) && isset($_POST['descricao']) && isset($_POST['valor']) && isset($_POST['data'])) {
+    // Captura os dados enviados pelo formulário
+    $transacao_id = $_POST['id'];
+    $descricao = $_POST['descricao'];
+    $valor = $_POST['valor'];
+    $data = $_POST['data'];
 
-    $sql = "SELECT * FROM transacoes WHERE id = ?";
+    // Atualiza a transação no banco de dados
+    $sql = "UPDATE transacoes SET descricao = ?, valor = ?, data = ? WHERE id = ? AND usuario_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $transacao_id);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
+    $stmt->bind_param('sdssi', $descricao, $valor, $data, $transacao_id, $_SESSION['user_id']);
 
-    if($resultado->num_rows > 0) {
-        $transacao = $resultado->fetch_assoc();
-    } else {
-        echo "Transação não encontrada.";
+    if ($stmt->execute()) {
+        // Redireciona para a página de histórico ou exibe uma mensagem de sucesso
+        header("Location: ../dashboard/dashboard.php");
         exit;
+    } else {
+        echo "Erro ao atualizar transação.";
     }
 } else {
-    echo "ID da transação não especificado.";
+    echo "Campos obrigatórios não especificados.";
     exit;
 }
 ?>
