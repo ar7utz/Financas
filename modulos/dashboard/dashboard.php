@@ -57,7 +57,6 @@ $resultado = $stmt->get_result();
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
-    <script src="../../node_modules/@mariojgt/wind-notify/packages/index.js"></script>
     <title>Finstash - Gerenciamento de Finanças Pessoal</title>
 </head>
 
@@ -192,7 +191,7 @@ $resultado = $stmt->get_result();
                             echo '<div class="col-span-1 text-center truncate py-3 px-6">' . $data_formatada . '</div>';
                             echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . $row['valor'] . '</div>';
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
+                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\', \'' . $row['categoria_id'] .'\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
                             echo '<a href="#" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
                             echo '</div>';
                             echo '</div>';
@@ -329,11 +328,12 @@ $resultado = $stmt->get_result();
             </div>
         </form>
 
+        <button id="notifyBtn" class="bg-tollens text-white p-4 rounded">Mostrar Notificação</button>
+
 
     </main>
 
-    <script>
-        //Funções para abrir e fechar o modal de adicionar transação
+    <script>//Funções para abrir e fechar o modal de adicionar transação
         document.getElementById('abrirModalAddTransacao').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.remove('hidden');
         });
@@ -343,9 +343,8 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        //Funções para abrir e fechar o modal de edição
-        function abrirModalEditar(id, descricao, valor, data) {
+    <script>//Funções para abrir e fechar o modal de edição
+        function abrirModalEditar(id, descricao, valor, data, categoria_id) {
             // Definindo os valores no modal de edição
             document.getElementById('idEditar').value = id;
             document.getElementById('descricaoEditar').value = descricao;
@@ -354,6 +353,8 @@ $resultado = $stmt->get_result();
             // Formatação da data no formato YYYY-MM-DD
             const dataFormatada = new Date(data).toISOString().split('T')[0];
             document.getElementById('dataEditar').value = dataFormatada;
+
+            document.getElementById('categoriaEditar').value = categoria_id;
 
             // Abrir o modal de edição
             document.getElementById('modalEditarTransacao').classList.remove('hidden');
@@ -364,8 +365,7 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        //Funções para abrir e fechar o modal de confirmação de exclusão
+    <script>//Funções para abrir e fechar o modal de confirmação de exclusão
         function abrirModalExcluir(id) {
             document.getElementById('confirmarExcluirNota').onclick = function() {
                 window.location.href = `../transacoes/excluir_transacao.php?id=${id}`;
@@ -378,8 +378,7 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        // Fechar modais clicando fora da caixa
+    <script>//Fechar modais clicando fora da caixa
         window.addEventListener('click', function(event) {
             const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
             modais.forEach(function(modalId) {
@@ -391,9 +390,24 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        //Detecta o fuso horário local e preenche o campo oculto
+    <script> //Detecta o fuso horário local e preenche o campo oculto
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    </script>
+
+    <script>
+        import Toastify from 'toastify-js'
+        import "toastify-js/src/toastify.css"
+
+        document.getElementById('notifyBtn').addEventListener('click', function() {
+            Toastify({
+                text: "Esta é uma notificação com Toastify!",
+                duration: 3000, // duração em milissegundos
+                close: true, // botão de fechar
+                gravity: "top", // "top" ou "bottom"
+                position: "right", // "left", "right", ou "center"
+                backgroundColor: "#1133A6", // Cor personalizada
+            }).showToast();
+        });
     </script>
 
 
