@@ -79,6 +79,11 @@ $dados = obterDados($filtro);
                             }).showToast();
                             break;
                     }
+
+                    // Limpa a URL após exibir o Toastify
+                    const url = new URL(window.location);
+                    url.searchParams.delete('mensagem'); //Remove o parâmetro 'mensagem'
+                    window.history.replaceState(null, '', url); //Atualiza a URL sem recarregar a página
                 }
             </script>";
         }

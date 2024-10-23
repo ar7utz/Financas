@@ -2,13 +2,14 @@
 session_start();
 include_once('../../assets/bd/conexao.php');
 
-
 $base_url = "../../../Financas"; //url base
 
 $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc';
 $usuario_id = $_SESSION['user_id']; // Usuário logado
 
 $order_by = '';
+//$where_clause = '';
+
 // Define a ordenação com base no filtro selecionado
 switch ($filtro) {
     case 'valor-positivo':
@@ -135,12 +136,12 @@ $resultado = $stmt->get_result();
                     <form id="filterForm" method="GET" action="" onchange="document.getElementById('filterForm').submit()">
                         <label for="filter" class="mr-2 font-semibold">Filtrar por:</label>
                         <select id="filter" name="filtro" class="border border-gray-300 rounded p-2">
-                            <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
                             <option value="data-desc" <?php echo ($filtro == 'data-desc') ? 'selected' : ''; ?>>Data (Mais recentes)</option>
-                            <option value="valor-asc" <?php echo ($filtro == 'valor-asc') ? 'selected' : ''; ?>>Valor (Menor para maior)</option>
+                            <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
                             <option value="valor-desc" <?php echo ($filtro == 'valor-desc') ? 'selected' : ''; ?>>Valor (Maior para menor)</option>
-                            <option value="valor-positivo" <?php echo ($filtro == 'valor-positivo') ? 'selected' : ''; ?>>Valor Positivo</option>
-                            <option value="valor-negativo" <?php echo ($filtro == 'valor-negativo') ? 'selected' : ''; ?>>Valor Negativo</option>
+                            <option value="valor-asc" <?php echo ($filtro == 'valor-asc') ? 'selected' : ''; ?>>Valor (Menor para maior)</option>
+                            <option value="valor-positivo" <?php echo ($filtro == 'valor-positivo') ? 'selected' : ''; ?>>Apenas Entradas</option>
+                            <option value="valor-negativo" <?php echo ($filtro == 'valor-negativo') ? 'selected' : ''; ?>>Apenas Saídas</option>
                             <option value="descricao-asc" <?php echo ($filtro == 'descricao-asc') ? 'selected' : ''; ?>>Descrição (A-Z)</option>
                             <option value="descricao-desc" <?php echo ($filtro == 'descricao-desc') ? 'selected' : ''; ?>>Descrição (Z-A)</option>
                         </select>
@@ -260,6 +261,11 @@ $resultado = $stmt->get_result();
                                     }).showToast();
                                     break;
                             }
+                                    
+                    // Limpar a URL após exibir o Toastify
+                    const url = new URL(window.location);
+                    url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
+                    window.history.replaceState(null, '', url); // Atualiza a URL sem recarregar a página
                         }
                     </script>";
                 }
