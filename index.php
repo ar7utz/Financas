@@ -4,9 +4,42 @@
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./assets/css/output.css">
+
+    <link rel="stylesheet" href="./node_modules/toastify-js/src/toastify.css">
+    <script src="./node_modules/toastify-js/src/toastify.js"></script>
     <title>Index</title>
 </head>
 <body>
+    <?php
+        if (isset($_GET['mensagem'])) {
+            echo "<script>
+                window.onload = function() {
+                    switch ('" . $_GET['mensagem'] . "') {
+                        case 'Logout':
+                            Toastify({
+                                text: 'Logout efetuado com sucesso!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#28a745', // cor verde para sucesso
+                            }).showToast();
+                            break;
+                        default:
+                            Toastify({
+                                text: 'Ação desconhecida!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                            }).showToast();
+                            break;
+                    }
+                }
+            </script>";
+        }
+    ?>
     <main>
         <div id="navbar_1" class="flex flex-row w-full h-12 justify-center items-center bg-black">
             <div id="logo_nav" class="basis-6/12 items-center text-left ml-5 text-white">

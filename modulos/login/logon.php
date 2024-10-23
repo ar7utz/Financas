@@ -21,7 +21,7 @@ $usuario = $resultado->fetch_assoc();
 
 if ($usuario) {
     $_SESSION['user_id'] = $usuario['id'];
-    header("Location: ../dashboard/hp_login.php");
+    header("Location: ../dashboard/hp_login.php?mensagem=LoginSucesso");
 
     exit;
 } else {

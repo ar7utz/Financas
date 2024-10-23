@@ -17,7 +17,7 @@ if (isset($_POST['id']) && isset($_POST['descricao']) && isset($_POST['valor']) 
 
     if ($stmt->execute()) {
         //Redireciona para o dashboard
-        header("Location: ../dashboard/dashboard.php");
+        header("Location: ../dashboard/dashboard.php?mensagem=SuceEdit");
         exit;
     } else {
         echo "Erro ao atualizar transação.";

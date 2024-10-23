@@ -33,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('sdsiii', $descricao, $valor, $data, $tipo, $usuario_id, $categoria_id);
         $stmt->execute();
-        header("Location: ../dashboard/dashboard.php");
+        header("Location: ../dashboard/dashboard.php?mensagem=sucesso");
     } else {
-        echo json_encode(['status' => 'erro', 'mensagem' => 'ID do usuário não encontrado na sessão.']);
+        header("location: ../dashboard/dasboard.php?mensagem=erroTransacao");
         exit;
     }
     

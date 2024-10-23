@@ -19,5 +19,5 @@ if (isset($_GET['id'])) {
 } else {
     echo 'ID da transação não fornecido.';
 }
-header("Location: ../dashboard/dashboard.php");
+header("Location: ../dashboard/dashboard.php?mensagem=excluirTransacao");
 ?>

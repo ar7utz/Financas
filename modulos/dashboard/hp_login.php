@@ -44,11 +44,45 @@ $dados = obterDados($filtro);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
     <script src="../../node_modules/chart.js/dist/chart.umd.js"></script>
+
+    <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
+    <script src="../../node_modules/toastify-js/src/toastify.js"></script>
+    
     <title>Bem Vindo</title>
 </head>
 
 <body>
     <?php include_once('../../assets/templates/navbar.php') ?>
+    <?php
+        if (isset($_GET['mensagem'])) {
+            echo "<script>
+                window.onload = function() {
+                    switch ('" . $_GET['mensagem'] . "') {
+                        case 'LoginSucesso':
+                            Toastify({
+                                text: 'Login efetuado com sucesso!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#28a745', // cor verde para sucesso
+                            }).showToast();
+                            break;
+                        default:
+                            Toastify({
+                                text: 'Ação desconhecida!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                            }).showToast();
+                            break;
+                    }
+                }
+            </script>";
+        }
+    ?>
     <div class="flex w-full">
         <div class="justify-start">
             <p>climatempo</p>

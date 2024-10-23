@@ -57,6 +57,8 @@ $resultado = $stmt->get_result();
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
+    <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
+    <script src="../../node_modules/toastify-js/src/toastify.js"></script>
     <title>Finstash - Gerenciamento de Finanças Pessoal</title>
 </head>
 
@@ -200,6 +202,66 @@ $resultado = $stmt->get_result();
                     } else {
                         echo '<li>Nenhuma transação encontrada.</li>';
                     }
+                }
+                
+                //toastify para mensagem adicionada com sucesso
+                if (isset($_GET['mensagem'])) {
+                    echo "<script>
+                        window.onload = function() {
+                            switch ('" . $_GET['mensagem'] . "') {
+                                case 'sucesso':
+                                    Toastify({
+                                        text: 'Transação adicionada com sucesso!',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#28a745', // cor verde para sucesso
+                                    }).showToast();
+                                    break;
+                                case 'erroTransacao':
+                                    Toastify({
+                                        text: 'Erro ao adicionar a transação!',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#dc3545', // cor vermelha para erro
+                                    }).showToast();
+                                    break;
+                                case 'SuceEdit':
+                                    Toastify({
+                                        text: 'Sucesso ao editar o item',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#dc3545', // cor amarela para aviso
+                                    }).showToast();
+                                    break;
+                                case 'excluirTransacao':
+                                    Toastify({
+                                        text: 'Transação excluída com sucesso',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#dc3545', // cor amarela para aviso
+                                    }).showToast();
+                                break;
+                                default:
+                                    Toastify({
+                                        text: 'Ação desconhecida!',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                                    }).showToast();
+                                    break;
+                            }
+                        }
+                    </script>";
                 }
                 ?>
             </div>
@@ -395,9 +457,7 @@ $resultado = $stmt->get_result();
     </script>
 
     <script> //toastify
-        import Toastify from 'toastify-js'
-        import "toastify-js/src/toastify.css"
-
+        import Toastify from '../../node_modules/toastify-js/src/toastify.js';  
         document.getElementById('notifyBtn').addEventListener('click', function() {
             Toastify({
                 text: "Esta é uma notificação com Toastify!",
