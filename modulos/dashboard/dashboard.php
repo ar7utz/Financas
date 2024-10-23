@@ -310,7 +310,7 @@ $resultado = $stmt->get_result();
                                 $sql = "SELECT id, nome_categoria FROM categoria";
                                 $result = $conn->query($sql);
                                 if ($result->num_rows > 0) {
-                                    while($row = $result->fetch_assoc()) {
+                                    while ($row = $result->fetch_assoc()) {
                                         echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
                                     }
                                 } else {
@@ -394,7 +394,7 @@ $resultado = $stmt->get_result();
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     </script>
 
-    <script>
+    <script> //toastify
         import Toastify from 'toastify-js'
         import "toastify-js/src/toastify.css"
 
