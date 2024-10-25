@@ -146,12 +146,12 @@ $resultado = $stmt->get_result();
                             <option value="descricao-desc" <?php echo ($filtro == 'descricao-desc') ? 'selected' : ''; ?>>Descrição (Z-A)</option>
                         </select>
                     </form>
-                        
-                        <div class="ml-4">
-                            <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" value="<?php echo isset($_GET['filtroSearch']) ? $_GET['filtroSearch'] : ''; ?>" class="border border-gray-300 rounded p-2 w-full max-w-xs">
-                        </div>
-                        
-                        <button type="submit" class=" ml-4 bg-tollens text-white px-4 py-2 rounded hover:bg-purple-500">Filtrar</button>
+
+                    <div class="ml-4">
+                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" value="<?php echo isset($_GET['filtroSearch']) ? $_GET['filtroSearch'] : ''; ?>" class="border border-gray-300 rounded p-2 w-full max-w-xs">
+                    </div>
+
+                    <button type="submit" class=" ml-4 bg-tollens text-white px-4 py-2 rounded hover:bg-purple-500">Filtrar</button>
                 </div>
 
                 <!-- Tabela de Transações -->
@@ -194,7 +194,7 @@ $resultado = $stmt->get_result();
                             echo '<div class="col-span-1 text-center truncate py-3 px-6">' . $data_formatada . '</div>';
                             echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . $row['valor'] . '</div>';
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\', \'' . $row['categoria_id'] .'\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
+                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\', \'' . $row['categoria_id'] . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
                             echo '<a href="#" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
                             echo '</div>';
                             echo '</div>';
@@ -204,7 +204,7 @@ $resultado = $stmt->get_result();
                         echo '<li>Nenhuma transação encontrada.</li>';
                     }
                 }
-                
+
                 //toastify para mensagem adicionada com sucesso
                 if (isset($_GET['mensagem'])) {
                     echo "<script>
@@ -262,10 +262,10 @@ $resultado = $stmt->get_result();
                                     break;
                             }
                                     
-                    // Limpar a URL após exibir o Toastify
-                    const url = new URL(window.location);
-                    url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
-                    window.history.replaceState(null, '', url); // Atualiza a URL sem recarregar a página
+                            // Limpar a URL após exibir o Toastify
+                            const url = new URL(window.location);
+                            url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
+                            window.history.replaceState(null, '', url); // Atualiza a URL sem recarregar a página
                         }
                     </script>";
                 }
@@ -297,20 +297,20 @@ $resultado = $stmt->get_result();
                         <input type="date" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
 
                         <?php
-                            $sql = "SELECT id, nome_categoria FROM categoria";
-                            $result = $conn->query($sql);
+                        $sql = "SELECT id, nome_categoria FROM categoria";
+                        $result = $conn->query($sql);
                         ?>
                         <select name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                             <option value="" disabled selected>Selecionar Categoria</option>
-                                <?php
-                                if ($result->num_rows > 0) {
-                                    while($row = $result->fetch_assoc()) {
-                                        echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
-                                    }
-                                } else {
-                                    echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                            <?php
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
                                 }
-                                ?>
+                            } else {
+                                echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                            }
+                            ?>
                         </select>
 
                         <input type="hidden" name="timezone" id="timezone">
@@ -370,20 +370,21 @@ $resultado = $stmt->get_result();
                         <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                        
+
                         <select id="categoriaEditar" name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                            <option value="" disabled selected>Selecionar Categoria</option>
+                            <option value="" disabled>Selecionar Categoria</option>
                             <?php
-                                // Consultar categorias do banco de dados
-                                $sql = "SELECT id, nome_categoria FROM categoria";
-                                $result = $conn->query($sql);
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
-                                    }
-                                } else {
-                                    echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                            //Consultar categorias do banco de dados
+                            $sql = "SELECT id, nome_categoria FROM categoria";
+                            $result = $conn->query($sql);
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    $selected = ($row['id'] == $categoria_id) ? "selected" : "";
+                                    echo "<option value='" . $row['id'] . "' $selected>" . $row['nome_categoria'] . "</option>";
                                 }
+                            } else {
+                                echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                            }
                             ?>
                         </select>
 
@@ -401,7 +402,8 @@ $resultado = $stmt->get_result();
 
     </main>
 
-    <script>//Funções para abrir e fechar o modal de adicionar transação
+    <script>
+        //Funções para abrir e fechar o modal de adicionar transação
         document.getElementById('abrirModalAddTransacao').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.remove('hidden');
         });
@@ -411,7 +413,8 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>//Funções para abrir e fechar o modal de edição
+    <script>
+        //Funções para abrir e fechar o modal de edição
         function abrirModalEditar(id, descricao, valor, data, categoria_id) {
             // Definindo os valores no modal de edição
             document.getElementById('idEditar').value = id;
@@ -433,7 +436,8 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>//Funções para abrir e fechar o modal de confirmação de exclusão
+    <script>
+        //Funções para abrir e fechar o modal de confirmação de exclusão
         function abrirModalExcluir(id) {
             document.getElementById('confirmarExcluirNota').onclick = function() {
                 window.location.href = `../transacoes/excluir_transacao.php?id=${id}`;
@@ -446,7 +450,8 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>//Fechar modais clicando fora da caixa
+    <script>
+        //Fechar modais clicando fora da caixa
         window.addEventListener('click', function(event) {
             const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
             modais.forEach(function(modalId) {
@@ -458,24 +463,10 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script> //Detecta o fuso horário local e preenche o campo oculto
+    <script>
+        //Detecta o fuso horário local e preenche o campo oculto
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     </script>
-
-    <script> //toastify
-        import Toastify from '../../node_modules/toastify-js/src/toastify.js';  
-        document.getElementById('notifyBtn').addEventListener('click', function() {
-            Toastify({
-                text: "Esta é uma notificação com Toastify!",
-                duration: 3000, // duração em milissegundos
-                close: true, // botão de fechar
-                gravity: "top", // "top" ou "bottom"
-                position: "right", // "left", "right", ou "center"
-                backgroundColor: "#1133A6", // Cor personalizada
-            }).showToast();
-        });
-    </script>
-
 
 </body>
 
