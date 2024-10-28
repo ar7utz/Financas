@@ -1,3 +1,7 @@
+<?php
+    $base_url = "../../../Financas";
+?>
+
 <header class="bg-tollens p-4 flex justify-between items-center">
     <a href="javascript:window.history.back();">
         <button class="bg-gray-400 text-white py-2 px-4 rounded">Voltar</button>

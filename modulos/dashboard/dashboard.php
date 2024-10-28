@@ -2,9 +2,9 @@
 session_start();
 include_once('../../assets/bd/conexao.php');
 
-$base_url = "../../../Financas"; //url base
+$base_url = "../../../Financas"; //url base 
 
-$filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'data-desc';
+$filtro = isset($_POST['filtro']) ? $_POST['filtro'] : 'data-desc';
 $usuario_id = $_SESSION['user_id']; // Usuário logado
 
 $order_by = '';
@@ -133,7 +133,7 @@ $resultado = $stmt->get_result();
                 <h3 class="text-lg font-bold mb-4">Histórico</h3>
                 <div class="flex items-center mb-4">
                     <!--Filtro-->
-                    <form id="filterForm" method="GET" action="" onchange="document.getElementById('filterForm').submit()">
+                    <form id="filterForm" method="POST" action="" onchange="document.getElementById('filterForm').submit()">
                         <label for="filter" class="mr-2 font-semibold">Filtrar por:</label>
                         <select id="filter" name="filtro" class="border border-gray-300 rounded p-2">
                             <option value="data-desc" <?php echo ($filtro == 'data-desc') ? 'selected' : ''; ?>>Data (Mais recentes)</option>
