@@ -436,8 +436,7 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        //Funções para abrir e fechar o modal de confirmação de exclusão
+    <script>//Funções para abrir e fechar o modal de confirmação de exclusão 
         function abrirModalExcluir(id) {
             document.getElementById('confirmarExcluirNota').onclick = function() {
                 window.location.href = `../transacoes/excluir_transacao.php?id=${id}`;
@@ -450,8 +449,7 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        //Fechar modais clicando fora da caixa
+    <script>//Fechar modais clicando fora da caixa
         window.addEventListener('click', function(event) {
             const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
             modais.forEach(function(modalId) {
@@ -463,8 +461,7 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        //Detecta o fuso horário local e preenche o campo oculto
+    <script>//Detecta o fuso horário local e preenche o campo oculto
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     </script>
 
