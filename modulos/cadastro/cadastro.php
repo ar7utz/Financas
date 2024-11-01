@@ -76,8 +76,7 @@
 
 
 
-    <script>
-        /*máscara de telefone*/
+    <script> /*máscara de telefone*/
         function mascaraTelefone() {
             const input = document.getElementById('telefone');
             let value = input.value.replace(/\D/g, "");

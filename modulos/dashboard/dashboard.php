@@ -275,7 +275,6 @@ $resultado = $stmt->get_result();
 
         <!-- MODAL -->
 
-
         <form action="../transacoes/add_transacao.php" method="POST">
             <!-- Modal para adicionar nova transação -->
             <div id="AddTransacaoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
@@ -396,9 +395,6 @@ $resultado = $stmt->get_result();
                 </div>
             </div>
         </form>
-
-        <button id="notifyBtn" class="bg-tollens text-white p-4 rounded">Mostrar Notificação</button>
-
 
     </main>
 

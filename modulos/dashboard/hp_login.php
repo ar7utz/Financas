@@ -117,7 +117,7 @@ $dados = obterDados($filtro);
                 .catch(error => console.error('Erro ao buscar o horário:', error));
         }
 
-        // Atualizar o horário a cada segundo
+        //Atualizar o horário a cada segundo
         setInterval(atualizarHorario, 1000);
     </script>
 </body>
