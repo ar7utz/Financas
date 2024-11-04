@@ -26,7 +26,7 @@
         </div>
     </form>
 
-    <script>
+    <script> //script para verificar se as senhas são iguais
         function validarSenha() {
           senha = document.getElementsByName('nova_senha').value;
           senhaC = document.getElementsByName('confirm_nova_senha').value;
