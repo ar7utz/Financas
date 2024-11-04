@@ -19,9 +19,12 @@
             <input type="text" placeholder="Email ou usuário" name="login" autocomplete="off" required
                 class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-        <div class="mb-4">
+        <div class="mb-2">
             <input type="password" placeholder="Senha" name="senha" required
                 class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="mb-2">
+            <a href="../Recuperar_senha/esqueceu_senha.php">Esqueceu a senha?</a>
         </div>
         <div>
             <input type="submit" value="Login"
