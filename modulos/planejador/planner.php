@@ -22,9 +22,9 @@ include_once '../../assets/bd/conexao.php'
         document.getElementById('notifyBtn').addEventListener('click', function() {
             Toastify({
                 text: "Esta é uma notificação com Toastify!",
-                duration: 3000, // duração em milissegundos
-                close: true, // botão de fechar
-                gravity: "bottom", // "top" ou "bottom"
+                duration: 3000, //duração em milissegundos
+                close: true, //botão de fechar
+                gravity: "bottom", //"top" ou "bottom"
                 position: "right", 
                 backgroundColor: "#1133A6",
             }).showToast();

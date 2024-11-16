@@ -7,7 +7,9 @@
         <button class="bg-gray-400 text-white py-2 px-4 rounded">Voltar</button>
     </a>
     <div class="text-center justify-center items-center">
-        <h1 class="text-white text-2xl text-center font-bold">Finstash</h1>
+        <div class="text-white text-2xl text-center font-bold">
+            <img src="../logo/cube-logo.svg"> 
+        </div>
     </div>
     <div class="space-x-2">
         <a href="../usuario/perfil.php">

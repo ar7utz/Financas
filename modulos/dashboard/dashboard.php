@@ -262,10 +262,10 @@ $resultado = $stmt->get_result();
                                     break;
                             }
                                     
-                            // Limpar a URL após exibir o Toastify
+                            //Limpar a URL após exibir o Toastify
                             const url = new URL(window.location);
-                            url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
-                            window.history.replaceState(null, '', url); // Atualiza a URL sem recarregar a página
+                            url.searchParams.delete('mensagem'); //Remove o parâmetro 'mensagem'
+                            window.history.replaceState(null, '', url); //Atualiza a URL sem recarregar a página
                         }
                     </script>";
                 }
@@ -283,12 +283,12 @@ $resultado = $stmt->get_result();
 
                     <!-- Formulário de Nova Transação -->
                     <form id="novaTransacaoForm" method="POST" action="../transacoes/add_transacao.php">
-                        <fieldset class="mb-4">
+                        <fieldset class="flex flex-row justify-center mb-4 gap-4">
                             <label class="block mb-2 cursor-pointer">
-                                <input type="radio" name="tipo" value="positivo" required> Transação Positiva
+                                <input type="radio" name="tipo" value="positivo" required> Entrada
                             </label>
                             <label class="block cursor-pointer">
-                                <input type="radio" name="tipo" value="negativo" required> Transação Negativa
+                                <input type="radio" name="tipo" value="negativo" required> Saída
                             </label>
                         </fieldset>
                         <input type="text" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
@@ -302,13 +302,13 @@ $resultado = $stmt->get_result();
                         <select name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                             <option value="" disabled selected>Selecionar Categoria</option>
                             <?php
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
+                                if ($result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) {
+                                        echo "<option value='" . $row['id'] . "'>" . $row['nome_categoria'] . "</option>";
+                                    }
+                                } else {
+                                    echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
                                 }
-                            } else {
-                                echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
-                            }
                             ?>
                         </select>
 
@@ -355,43 +355,36 @@ $resultado = $stmt->get_result();
             }
         }
         ?>
-
-        <!-- Modal editar transação -->
-        <form action="../transacoes/editar_transacao.php" method="POST">
-            <!-- Modal Overlay -->
+           
+        <!-- Formulário de Edição -->
+        <form id="editarTransacaoForm" method="POST" action="../transacoes/editar_transacao.php">
             <div id="modalEditarTransacao" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
                 <div class="bg-white rounded-md shadow-lg p-8 text-center relative">
                     <h2 class="text-2xl mb-4">Editar transação</h2>
 
-                    <!-- Formulário de Edição -->
-                    <form id="editarTransacaoForm" method="POST" action="../transacoes/editar_transacao.php">
-                        <input type="hidden" id="idEditar" name="id" value="<?php echo $transacao_id; ?>">
-                        <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                        <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                        <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-
-                        <select id="categoriaEditar" name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                            <option value="" disabled>Selecionar Categoria</option>
-                            <?php
-                            //Consultar categorias do banco de dados
-                            $sql = "SELECT id, nome_categoria FROM categoria";
-                            $result = $conn->query($sql);
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    $selected = ($row['id'] == $categoria_id) ? "selected" : "";
-                                    echo "<option value='" . $row['id'] . "' $selected>" . $row['nome_categoria'] . "</option>";
+                    <input type="hidden" id="idEditar" name="id" value="<?php echo $transacao_id; ?>">
+                    <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                    <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                    <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                    <select id="categoriaEditar" name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+                        <option value="" disabled>Selecionar Categoria</option>
+                            <?php //Consultar categorias do banco de dados
+                                $sql = "SELECT id, nome_categoria FROM categoria";
+                                $result = $conn->query($sql);
+                                if ($result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) {
+                                        $selected = ($row['id'] == $categoria_id) ? "selected" : "";
+                                        echo "<option value='" . $row['id'] . "' $selected>" . htmlspecialchars($row['nome_categoria']) . "</option>";
+                                    }
+                                } else {
+                                    echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
                                 }
-                            } else {
-                                echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
-                            }
                             ?>
-                        </select>
-
-                        <div class="flex justify-center space-x-4">
-                            <button type="button" id="fecharModalEditar" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
-                            <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Salvar</button>
-                        </div>
-                    </form>
+                    </select>
+                    <div class="flex justify-center space-x-4">
+                        <button type="button" id="fecharModalEditar" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
+                        <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Salvar</button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -409,21 +402,22 @@ $resultado = $stmt->get_result();
         });
     </script>
 
-    <script>
-        //Funções para abrir e fechar o modal de edição
+    <script> //Funções para abrir e fechar o modal de edição
         function abrirModalEditar(id, descricao, valor, data, categoria_id) {
             // Definindo os valores no modal de edição
             document.getElementById('idEditar').value = id;
             document.getElementById('descricaoEditar').value = descricao;
             document.getElementById('valorEditar').value = valor;
 
-            // Formatação da data no formato YYYY-MM-DD
+            document.getElementById('categoriaEditar').value = categoria_id;
+            
+
+            //Formatação da data no formato YYYY-MM-DD
             const dataFormatada = new Date(data).toISOString().split('T')[0];
             document.getElementById('dataEditar').value = dataFormatada;
 
-            document.getElementById('categoriaEditar').value = categoria_id;
 
-            // Abrir o modal de edição
+            //Abrir o modal de edição
             document.getElementById('modalEditarTransacao').classList.remove('hidden');
         }
 
