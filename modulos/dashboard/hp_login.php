@@ -53,6 +53,7 @@ $dados = obterDados($filtro);
 
 <body>
     <?php include_once('../../assets/templates/navbar.php') ?>
+
     <?php
         if (isset($_GET['mensagem'])) {
             echo "<script>
@@ -89,15 +90,21 @@ $dados = obterDados($filtro);
         }
     ?>
 
-    <div class="flex w-full">
-        <div class="justify-start">
-            <p>climatempo</p>
+    <div class="flex w-full items-center justify-between p-4">
+        <!-- Clima -->
+        <div class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-2">
+            <p class="font-medium" id="weatherDescription">Carregando clima...</p>
+            <img id="weatherIcon" alt="Ícone do clima" style="width: 40px; height: 40px; margin-left: 10px;">
         </div>
-        <div class="justify-end" id="localTime">
-            00:00:00H
+        
+        <!-- Horário -->
+        <div class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-2">
+            <div class="font-medium" id="localTime">
+                00:00:00H
+            </div>
         </div>
     </div>
-    <?php include_once('../../assets/templates/navbar_lateral.php') ?>
+
 
     <div class="flex">
         <!-- Sidebar preta -->
@@ -116,28 +123,35 @@ $dados = obterDados($filtro);
 
     </script>
 
-    <script>//Função para buscar e exibir o horário local
+    <script> //Função para buscar e exibir o horário local
         function atualizarHorario() {
-            fetch('http://worldtimeapi.org/api/timezone/America/Sao_Paulo')
+            const apiKey = 'LQDWDPYI57PP'; // Substitua com sua chave da API
+            const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${apiKey}&format=json&by=zone&zone=America/Sao_Paulo`;
+        
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    const timeString = new Date(data.datetime).toLocaleTimeString();
-                    document.getElementById('localTime').innerText = timeString;
+                    if (data.status === 'OK') {
+                        const timeString = new Date(data.formatted).toLocaleTimeString();
+                        document.getElementById('localTime').innerText = timeString;
+                    } else {
+                        console.error('Erro ao buscar o horário:', data.message);
+                    }
                 })
                 .catch(error => console.error('Erro ao buscar o horário:', error));
         }
 
-        //Atualizar o horário a cada segundo
+        // Atualizar o horário a cada segundo
         setInterval(atualizarHorario, 1000);
+
+        window.onload = atualizarHorario;
     </script>
 
-    <script>
-        // Passar dados do PHP para o JavaScript
+    <script> // Passar dados do PHP para o JavaScript
         const dadosGrafico = <?php echo json_encode($dados); ?>;
     </script>
 
-    <script>
-        // Usando os dados passados pelo PHP
+    <script> // Usando os dados passados pelo PHP
         const ctx = document.getElementById('graficoPizza').getContext('2d');
         
         const data = {
@@ -177,6 +191,57 @@ $dados = obterDados($filtro);
         // Inicializar o gráfico
         const graficoPizza = new Chart(ctx, config);
     </script>
+
+    <script> //api de clima tempo
+        const apiKey = 'fa72d24f3537d09a7c4a3fe63b902d32';
+
+        // Função para buscar clima local
+        function buscarClima(lat, lon) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=pt_br&appid=${apiKey}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const descricao = data.weather[0].description; // Descrição do clima
+                    const icone = data.weather[0].icon; // Ícone do clima
+                    const temperatura = Math.round(data.main.temp); // Temperatura
+                    const umidade = data.main.humidity; // Umidade
+                    const vento = data.wind.speed; // Velocidade do vento
+
+                    // Função para deixar a primeira letra maiúscula
+                    const descricaoCapitalizada = descricao.charAt(0).toUpperCase() + descricao.slice(1);
+
+                    // Atualizar o HTML 
+                    //Outras propriedades - Umidade: ${umidade}% - Vento: ${vento} km/h
+                    document.getElementById('weatherDescription').textContent = `${descricaoCapitalizada} - ${temperatura}°C`;
+                    document.getElementById('weatherIcon').src = `https://openweathermap.org/img/wn/${icone}@2x.png`;
+                })
+                .catch(error => console.error('Erro ao buscar clima:', error));
+        }
+
+        // Função para obter a localização do usuário
+        function obterLocalizacao() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        buscarClima(latitude, longitude);
+                    },
+                    (error) => {
+                        console.error('Erro ao obter localização:', error);
+                        document.getElementById('weatherDescription').textContent = 'Localização indisponível';
+                    }
+                );
+            } else {
+                document.getElementById('weatherDescription').textContent = 'Geolocalização não suportada';
+            }
+        }
+
+        // Chamar a função para obter o clima ao carregar a página
+        window.onload = function () {
+            obterLocalizacao();
+        };
+    </script>
+
 </body>
 
 </html>
