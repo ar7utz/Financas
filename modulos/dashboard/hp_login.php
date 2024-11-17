@@ -88,6 +88,7 @@ $dados = obterDados($filtro);
             </script>";
         }
     ?>
+
     <div class="flex w-full">
         <div class="justify-start">
             <p>climatempo</p>
@@ -101,6 +102,15 @@ $dados = obterDados($filtro);
     <div class="flex">
         <!-- Sidebar preta -->
         <?php include_once('../../assets/templates/navbar_lateral.php') ?>
+    </div>
+
+    <div class=""> <!--graficos-->
+
+    </div>
+
+    <div>
+        <canvas id="graficoPizza"></canvas>
+    </div>
 
     <script>
 
@@ -119,6 +129,53 @@ $dados = obterDados($filtro);
 
         //Atualizar o horário a cada segundo
         setInterval(atualizarHorario, 1000);
+    </script>
+
+    <script>
+        // Passar dados do PHP para o JavaScript
+        const dadosGrafico = <?php echo json_encode($dados); ?>;
+    </script>
+
+    <script>
+        // Usando os dados passados pelo PHP
+        const ctx = document.getElementById('graficoPizza').getContext('2d');
+        
+        const data = {
+            labels: ['Entradas', 'Saídas'], // Rótulos do gráfico
+            datasets: [{
+                data: [dadosGrafico.entradas, dadosGrafico.saidas], // Valores dinâmicos do PHP
+                backgroundColor: ['#28a745', '#dc3545'], // Cores para entradas e saídas
+                borderColor: ['#1e7e34', '#a71d2a'], // Bordas (opcional)
+                borderWidth: 1 // Espessura das bordas
+            }]
+        };
+    
+        const config = {
+            type: 'pie', // Tipo de gráfico
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top', // Posição da legenda
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const valor = context.raw.toLocaleString('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL',
+                                });
+                                return `${context.label}: ${valor}`;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    
+        // Inicializar o gráfico
+        const graficoPizza = new Chart(ctx, config);
     </script>
 </body>
 
