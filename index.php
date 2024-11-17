@@ -25,6 +25,16 @@
                                 backgroundColor: '#28a745', // cor verde para sucesso
                             }).showToast();
                             break;
+                        case 'EmailRecSenhaSucesso':
+                            Toastify({
+                                text: 'E-mail enviado com sucesso!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#28a745',
+                            }).showToast();
+                            break;
                         default:
                             Toastify({
                                 text: 'Ação desconhecida!',

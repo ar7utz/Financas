@@ -1,3 +1,20 @@
+<?php
+require_once '../../assets/bd/conexao.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $user_email = $_POST['email'];
+    $new_password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+
+    // Atualizar a senha do usuário
+    $sql = "UPDATE user SET password = '$new_password' WHERE email = '$user_email'";
+    if ($conn->query($sql) === TRUE) {
+        echo "Senha alterada com sucesso!";
+    } else {
+        echo "Erro ao alterar senha: " . $conn->error;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
