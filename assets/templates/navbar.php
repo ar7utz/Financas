@@ -1,14 +1,17 @@
-<?php
-    $base_url = "../../../Financas";
+<?php $url_base = 'http://' . $_SERVER['HTTP_HOST'] . '/financas';
+
+// Captura a URL da página anterior
+$url_anterior = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $url_base;
+
 ?>
 
 <header class="bg-tollens p-4 flex justify-between items-center">
-    <a href="javascript:window.history.back();">
+    <a href="<?php echo $url_anterior; ?>">
         <button class="bg-gray-400 text-white py-2 px-4 rounded">Voltar</button>
     </a>
     <div class="text-center justify-center items-center">
         <div class="text-white text-2xl text-center font-bold">
-            <img src="../logo/cube-logo.svg"> 
+            <img src="../logo/cube-logo.svg" alt="Logo" > 
         </div>
     </div>
     <div class="space-x-2">
@@ -49,4 +52,10 @@
             modal.classList.add('hidden');
         }
     });
+</script>
+
+<script> //limpar o url
+    const url = new URL(window.location);
+    url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
+    window.history.replaceState(null, '', url); // Atualiza a URL sem recarregar a página
 </script>
