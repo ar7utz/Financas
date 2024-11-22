@@ -18,6 +18,9 @@ switch ($filtro) {
     case 'valor-negativo':
         $order_by = 'tipo = 2';
         break;
+    case 'categoria':
+        $order_by = 'categoria_id';
+        break;
     case 'data-asc':
         $order_by = 'data ASC';
         break;
@@ -140,6 +143,7 @@ $resultado = $stmt->get_result();
                             <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
                             <option value="valor-desc" <?php echo ($filtro == 'valor-desc') ? 'selected' : ''; ?>>Valor (Maior para menor)</option>
                             <option value="valor-asc" <?php echo ($filtro == 'valor-asc') ? 'selected' : ''; ?>>Valor (Menor para maior)</option>
+                            <option value="categoria" <?php echo ($filtro == 'categoria') ? 'selected' : ''; ?>> Categoria </option>
                             <option value="valor-positivo" <?php echo ($filtro == 'valor-positivo') ? 'selected' : ''; ?>>Apenas Entradas</option>
                             <option value="valor-negativo" <?php echo ($filtro == 'valor-negativo') ? 'selected' : ''; ?>>Apenas Saídas</option>
                             <option value="descricao-asc" <?php echo ($filtro == 'descricao-asc') ? 'selected' : ''; ?>>Descrição (A-Z)</option>
@@ -160,41 +164,44 @@ $resultado = $stmt->get_result();
 
                 if (isset($_SESSION['user_id'])) {
                     $usuario_id = $_SESSION['user_id'];
-
-                    $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY $order_by";
+                
+                    $sql = "
+                        SELECT t.*, c.nome_categoria AS categoria_nome
+                        FROM transacoes t
+                        LEFT JOIN categoria c ON t.categoria_id = c.id
+                        WHERE t.usuario_id = ?
+                        ORDER BY $order_by";
+                    
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param('i', $usuario_id);
                     $stmt->execute();
                     $resultado = $stmt->get_result();
-
+                
                     // Verifica se há transações
                     if ($resultado->num_rows > 0) {
-                        // Exibe um título das colunas
-                        echo '<div class="grid grid-cols-4 gap-4 items-center mb-2">';
+                        echo '<div class="grid grid-cols-5 gap-4 items-center mb-2">';
                         echo '<div class="col-span-1 text-center font-bold">Descrição</div>';
                         echo '<div class="col-span-1 text-center font-bold">Data</div>';
                         echo '<div class="col-span-1 text-center font-bold">Valor</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Categoria</div>';
                         echo '<div class="col-span-1 text-center font-bold">Ações</div>';
                         echo '</div>';
+                
                         // Exibir as transações no histórico
-
-                        while ($row = $resultado->fetch_assoc()) { //loop para tratar a data e formatar corretamente
+                        while ($row = $resultado->fetch_assoc()) {
+                            // Formata a data corretamente
                             $data_original = $row['data'];
-
                             $data = DateTime::createFromFormat('Y-m-d', $data_original);
-
-                            if ($data !== false) {
-                                $data_formatada = $data->format('d/m/Y');
-                            } else {
-                                $data_formatada = "Data inválida";
-                            }
+                            $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
+                
                             echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
-                            echo '<div class="grid grid-cols-4 gap-4 items-center">';
-                            echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . $row['descricao'] . '</div>';
-                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . $data_formatada . '</div>';
-                            echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . $row['valor'] . '</div>';
+                            echo '<div class="grid grid-cols-5 gap-4 items-center">';
+                            echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . htmlspecialchars($row['descricao']) . '</div>';
+                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($data_formatada) . '</div>';
+                            echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
+                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . $row['descricao'] . '\', \'' . $row['valor'] . '\', \'' . $row['data'] . '\', \'' . $row['tipo'] . '\', \'' . $row['categoria_id'] . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
+                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . htmlspecialchars($row['descricao']) . '\', \'' . htmlspecialchars($row['valor']) . '\', \'' . htmlspecialchars($row['data']) . '\', \'' . htmlspecialchars($row['tipo']) . '\', \'' . htmlspecialchars($row['categoria_id']) . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
                             echo '<a href="#" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
                             echo '</div>';
                             echo '</div>';
@@ -204,6 +211,7 @@ $resultado = $stmt->get_result();
                         echo '<li>Nenhuma transação encontrada.</li>';
                     }
                 }
+                
 
                 //toastify para mensagem adicionada com sucesso
                 if (isset($_GET['mensagem'])) {
