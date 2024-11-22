@@ -10,7 +10,7 @@
     <title>Index</title>
 </head>
 <body>
-    <?php
+    <?php // Notificações do Toastify
         if (isset($_GET['mensagem'])) {
             echo "<script>
                 window.onload = function() {
@@ -20,7 +20,7 @@
                                 text: 'Logout efetuado com sucesso!',
                                 duration: 3000,
                                 close: true,
-                                gravity: 'top',
+                                gravity: 'bottom',
                                 position: 'right',
                                 backgroundColor: '#28a745', // cor verde para sucesso
                             }).showToast();
@@ -55,6 +55,7 @@
             </script>";
         }
     ?>
+    
     <main>
         <div id="navbar_1" class="flex flex-row w-full h-12 justify-center items-center bg-black">
             <div id="logo_nav" class="basis-6/12 items-center text-left ml-5 text-white">
