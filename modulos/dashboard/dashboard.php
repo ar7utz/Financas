@@ -193,7 +193,7 @@ $resultado = $stmt->get_result();
                             $data_original = $row['data'];
                             $data = DateTime::createFromFormat('Y-m-d', $data_original);
                             $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
-                
+                            $categoria_id = $row['categoria_id'];
                             echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
                             echo '<div class="grid grid-cols-5 gap-4 items-center">';
                             echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . htmlspecialchars($row['descricao']) . '</div>';
@@ -201,8 +201,8 @@ $resultado = $stmt->get_result();
                             echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
                             echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
                             echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                            echo '<a href="#" onclick="abrirModalEditar(' . $row['id'] . ', \'' . htmlspecialchars($row['descricao']) . '\', \'' . htmlspecialchars($row['valor']) . '\', \'' . htmlspecialchars($row['data']) . '\', \'' . htmlspecialchars($row['tipo']) . '\', \'' . htmlspecialchars($row['categoria_id']) . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
-                            echo '<a href="#" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
+                            echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(' . $row['id'] . ', \'' . htmlspecialchars($row['descricao']) . '\', \'' . htmlspecialchars($row['valor']) . '\', \'' . htmlspecialchars($row['data']) . '\', \'' . htmlspecialchars($row['tipo']) . '\', \'' . htmlspecialchars($row['categoria_id']) . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
+                            echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
                             echo '</div>';
                             echo '</div>';
                             echo '</div>';
@@ -349,7 +349,8 @@ $resultado = $stmt->get_result();
             $id = $_GET['id'];
 
             // Query para buscar os dados da transação
-            $query = "SELECT * FROM transacoes WHERE id = ?";
+            $query = "SELECT t.*, c.nome_categoria AS categoria_nome FROM transacoes t
+                        LEFT JOIN categoria c ON t.categoria_id = c.id WHERE t.id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
             $stmt->execute();
@@ -376,18 +377,17 @@ $resultado = $stmt->get_result();
                     <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                     <select id="categoriaEditar" name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                         <option value="" disabled>Selecionar Categoria</option>
-                            <?php //Consultar categorias do banco de dados
-                                $sql = "SELECT id, nome_categoria FROM categoria";
-                                $result = $conn->query($sql);
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        $selected = ($row['id'] == $categoria_id) ? "selected" : "";
-                                        echo "<option value='" . $row['id'] . "' $selected>" . htmlspecialchars($row['nome_categoria']) . "</option>";
-                                    }
-                                } else {
-                                    echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                        <?php 
+                            $sql = "SELECT id, nome_categoria FROM categoria";
+                            $result = $conn->query($sql);
+                            if ($result->num_rows > 0) {
+                                while ($rowCat = $result->fetch_assoc()) {
+                                    echo "<option value='" . $rowCat['id'] . "'>" . htmlspecialchars($rowCat['nome_categoria']) . "</option>";
                                 }
-                            ?>
+                            } else {
+                                echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
+                            }
+                        ?>
                     </select>
                     <div class="flex justify-center space-x-4">
                         <button type="button" id="fecharModalEditar" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
@@ -417,13 +417,12 @@ $resultado = $stmt->get_result();
             document.getElementById('descricaoEditar').value = descricao;
             document.getElementById('valorEditar').value = valor;
 
-            document.getElementById('categoriaEditar').value = categoria_id;
+            const selectCategoria = document.getElementById('categoriaEditar');
+            selectCategoria.value = categoria_id;
             
-
             //Formatação da data no formato YYYY-MM-DD
             const dataFormatada = new Date(data).toISOString().split('T')[0];
             document.getElementById('dataEditar').value = dataFormatada;
-
 
             //Abrir o modal de edição
             document.getElementById('modalEditarTransacao').classList.remove('hidden');

@@ -20,7 +20,7 @@ $esconder_botao_voltar = ($pagina_atual == 'hp_login.php');
         </div>
     </div>
     <div class="space-x-2">
-        <a href="<?php $url_base ?>../usuario/perfil.php">
+        <a href="<?php $url_base ?>../usuario/perfil.php" rel="noopener noreferrer">
             <button class="bg-gray-400 text-white py-2 px-4 rounded">Meu Perfil</button>
         </a>
         <button id="abrirModal" class="bg-gray-400 text-white py-2 px-4 rounded">Sair</button>
@@ -30,7 +30,7 @@ $esconder_botao_voltar = ($pagina_atual == 'hp_login.php');
         <div class="bg-white p-6 rounded-md text-center">
             <p class="mb-4">Tem certeza de que deseja sair?</p>
             <div class="flex justify-center space-x-4">
-                <a href="<?php $url_base ?>../login/logout.php">
+                <a href="<?php $url_base ?>../login/logout.php" rel="noopener noreferrer">
                     <button id="confirmarLogout" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Confirmar</button>
                 </a>
                 <button id="cancelarLogout" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>

@@ -63,10 +63,10 @@
             </div>
             <div id="btns_login" class="flex basis-6/12 justify-end bg-black text-white">
                 <div id="btn_login" class="mr-5">
-                    <a href="modulos/login/login.php"><button>Login</button></a>
+                    <a href="modulos/login/login.php"  rel="noopener noreferrer"><button>Login</button></a>
                 </div>
                 <div id="btn_cadastro" class="mr-5 hover:bg-slate-50">
-                    <a href="modulos/cadastro/cadastro.php"><button>Cadastre-se</button></a>
+                    <a href="modulos/cadastro/cadastro.php"  rel="noopener noreferrer"><button>Cadastre-se</button></a>
                 </div>
             </div>
         </div>
