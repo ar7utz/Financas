@@ -7,7 +7,7 @@
             </button>
         </a>
 
-        <a href="../../modulos/planejador/planner.php">
+        <a href="../../modulos/planejador/page.php">
             <button id="cardbtn2teste" class="w-48 h-14 text-center mt-8 bg-slate-400 rounded-md">
                 Planejador
             </button>
