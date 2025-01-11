@@ -9,9 +9,11 @@ $esconder_botao_menu = ($pagina_atual == 'hp_login.php');
 
 <header class="bg-tollens p-4 flex items-center relative">
 
-    <button id="btnMenu" class="bg-blue-500 text-white py-2 px-4 rounded">
-        <img src="../../assets/img/icone_menu.png" alt="Menu" width="20px" height="20px">
-    </button>
+    <?php if (!$esconder_botao_menu): ?>
+        <button id="btnMenu" class="bg-blue-500 text-white py-2 px-4 rounded">
+            <img src="../../assets/img/icone_menu.png" alt="Menu" width="20px" height="20px">
+        </button>
+    <?php endif; ?>
 
     <div id="menuLateral" class="fixed top-0 left-0 h-screen w-64 bg-gray-800 text-white transform -translate-x-full transition-transform duration-300 z-50" >
         <div class="p-4">

@@ -109,7 +109,9 @@ $dados = obterDados($filtro);
     <div class="flex">
         <!-- Sidebar preta -->
         <?php include_once('../../assets/templates/navbar_lateral.php') ?>
-        <?php include_once('../../assets/templates/graficos/grafico_pizza.php') ?>
+        <div class="flex justify-center w-4/6">
+            <?php include_once('../../assets/templates/graficos/grafico_pizza.php') ?>
+        </div>
     </div>
 
 
