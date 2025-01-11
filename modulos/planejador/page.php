@@ -21,6 +21,10 @@ $result = $stmt->get_result();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
+
+    <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
+    <script src="../../node_modules/toastify-js/src/toastify.js"></script>
+
     <title>Planejador</title>
 </head>
 
@@ -30,7 +34,7 @@ $result = $stmt->get_result();
 
     <div class="container mx-auto p-4">
         <h1 class="text-3xl font-bold text-center mb-8">Meus Planejamentos/Metas</h1>
-        <a href="../planejador/planner.php"><button>Criar um </button></a>
+        <a href="../planejador/planner.php"><button class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500">+ Criar um </button></a>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
             <?php if ($result->num_rows > 0): ?>
@@ -60,6 +64,62 @@ $result = $stmt->get_result();
                 <p class="text-gray-700 text-center col-span-3">Você ainda não criou nenhum planejamento.</p>
             <?php endif; ?>
         </div>
+
+        <?php // Notificações do Toastify
+        if (isset($_GET['mensagem'])) {
+            echo "<script>
+                window.onload = function() {
+                    switch ('" . $_GET['mensagem'] . "') {
+                        case 'MetaCriadoSucesso':
+                            Toastify({
+                                text: 'Meta criada com sucesso!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'bottom',
+                                position: 'right',
+                                backgroundColor: '#28a745', // cor verde para sucesso
+                            }).showToast();
+                            break;
+                        case 'ErroMeta':
+                            Toastify({
+                                text: 'Erro ao criar a meta',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#28a745',
+                            }).showToast();
+                            break;
+                        case 'MesmoNomeMeta':
+                        Toastify({
+                            text: 'Já existe uma meta com esse nome!',
+                            duration: 3000,
+                            close: true,
+                            gravity: 'top',
+                            position: 'right',
+                            backgroundColor: '#28a745',
+                        }).showToast();
+                        break;
+                        default:
+                            Toastify({
+                                text: 'Ação desconhecida!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                            }).showToast();
+                            break;
+                    }
+                            
+                    // Limpar a URL após exibir o Toastify
+                    const url = new URL(window.location);
+                    url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
+                    window.history.replaceState(null, '', url); // Atualiza a URL sem recarregar a página
+                }
+            </script>";
+            }
+        ?>
     </div>
 </body>
 </html>

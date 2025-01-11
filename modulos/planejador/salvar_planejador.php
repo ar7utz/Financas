@@ -17,31 +17,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $capital = $_POST['capital'];
     $quanto_tempo_quero_pagar = $_POST['quanto_tempo_quero_pagar'];
     $quanto_quero_pagar_mes = $_POST['quanto_quero_pagar_mes'];
-    $criado_em = date('Y-m-d H:i:s');
+    $criado_em = date('Y-m-d');
+    $horario_criado = date('H:i:s');
 
     $stmt = $conn->prepare('SELECT * FROM planejador WHERE razao = ? AND usuario_id = ?');
-    $stmt->bind_param('si', $razao, $id_usuario);
+    $stmt->bind_param('si', $razao, $usuario_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
-        $sql = "INSERT INTO planejador (usuario_id, razao, preco_meta, capital, quanto_tempo_quero_pagar, quanto_quero_pagar_mes, criado_em) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO planejador (usuario_id, razao, preco_meta, capital, quanto_tempo_quero_pagar, quanto_quero_pagar_mes, criado_em, horario_criado) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('isdidss', $usuario_id, $razao, $preco_meta, $capital, $quanto_tempo_quero_pagar, $quanto_quero_pagar_mes, $criado_em);
+        $stmt->bind_param('isdidsss', $usuario_id, $razao, $preco_meta, $capital, $quanto_tempo_quero_pagar, $quanto_quero_pagar_mes, $criado_em, $horario_criado);
 
         if ($stmt->execute()) {
             $_SESSION['status_cadastro'] = true;
-            header('Location: ../dashboard/dashboard.php');
+            header("Location: ../planejador/page.php?mensagem=MetaCriadoSucesso");
             exit;
         } else {
             $_SESSION['status_cadastro'] = false;
-            $_SESSION['erro'] = "Erro ao salvar planejamento: " . $conn->error;
+            header("Location: ../planejador/page.php?mensagem=ErroMeta");
         }
     } else {
         $_SESSION['status_cadastro'] = false;
-        $_SESSION['erro'] = "Já existe uma meta com este nome.";
+        header("Location: ../planejador/page.php?mensagem=MesmoNomeMeta");
     }
 }
 

@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="../css/output.css">
-<div class="w-80 h-screen rounded-br-3xl bg-black">
+<div class="w-80 h-screen rounded-br-3xl">
     <div class="bg-red items-center justify-center text-center">
         <a href="../../modulos/dashboard/dashboard.php">
             <button id="cardbtn1teste" class="w-48 h-14 text-center mt-14 bg-slate-500 rounded-md">
