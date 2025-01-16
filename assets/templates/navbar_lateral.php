@@ -13,7 +13,7 @@
             </button>
         </a>
 
-        <a href="../../modulos/planilha/planilha.php">
+        <a href="../../modulos/planilha/pagePS.php">
             <button id="cardbtn2teste" class="w-48 h-14 text-center mt-8 bg-slate-400 rounded-md">
                 Planilha financeira
             </button>

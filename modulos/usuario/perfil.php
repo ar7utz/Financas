@@ -43,18 +43,17 @@ if ($resultado->num_rows > 0) {
 </head>
 
 <body>
-    <?php
-    include_once('../../assets/templates/navbar.php')
-    ?>
+    <?php include_once('../../assets/templates/navbar.php') ?>
+
     <div class="w-4/5 mx-auto">
         <div class="flex flex-row mt-8">
             <!-- Div da foto - lado esquerdo -->
             <div class="w-4/12 flex flex-col items-center">
-                <img src="<?php ?>" alt="Foto de perfil" class=" w-32 h-32 rounded-full object-cover">
-                <button class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Alterar Foto</button>
+            <img src="../../assets/uploads/<?php echo $usuario['foto'] ? htmlspecialchars($usuario['foto']) : '../../assets/uploads/foto_default.png'; ?>" alt="Foto de perfil" class=" w-32 h-32 rounded-full object-cover">
+                <label class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Foto de perfil</label>
             </div>
             <!-- Div das informações - lado direito -->
-            <div class="w-8/12 flex flex-col justify-center border ">
+            <div class="w-8/12 flex flex-col justify-center">
                 <div class="">
                     <label for="nome">Nome:</label>
                     <input type="text" value="<?php echo htmlspecialchars($nome);?>" class="border p-2 w-full rounded-md" disabled>
@@ -72,8 +71,8 @@ if ($resultado->num_rows > 0) {
                     <input type="text" value="<?php echo htmlspecialchars($email);?>" class="border p-2 w-full rounded-md" disabled>
                 </div>  
 
-                <div class="mt-2">
-                    <a href="./editar_usuario.php"><button class=" w-24 h-8 rounded-md bg-slate-500">Editar</button></a>
+                <div class="fixed bottom-0 left-1/2 transform -translate-x-1/2 mb-4 mt-2">
+                    <a href="./editar_usuario.php"><button class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Editar Informações</button></a>
                 </div>
             </div>
         </div>

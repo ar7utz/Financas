@@ -1,33 +1,45 @@
 <?php
 session_start();
+require_once('../../assets/bd/conexao.php');
 
-include ('../../assets/bd/conexao.php');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $login = $_POST['login']; // Pode ser email ou username
+    $senha = $_POST['senha'];
 
-if (empty($_POST['login']) || empty($_POST['senha'])) {
-    header('Location: ../index.php');
-    exit;
+    if (empty($login) || empty($senha)) {
+        $_SESSION['erro_login'] = "<span class='text-center text-red-600'> Login e senha são obrigatórios! </span>";
+        header('Location: ../login/login.php');
+        exit;
+    }
+
+    // Buscar o usuário pelo email ou username
+    $sql = "SELECT id, senha FROM user WHERE email = ? OR username = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $login, $login);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
+
+        // Verificar se a senha está correta
+        if (password_verify($senha, $user['senha'])) {
+            // Login bem-sucedido
+            $_SESSION['user_id'] = $user['id'];
+            header("Location: ../dashboard/hp_login.php?mensagem=LoginSucesso");
+            exit;
+        } else {
+            $_SESSION['erro_login'] = "<span class='text-center text-red-600'> E-mail ou senha incorretos! </span>";
+            header('Location: ../login/login.php');
+            exit;
+        }
+    } else {
+        $_SESSION['erro_login'] = "<span class='text-center text-red-600'> Usuário não encontrado! </span>";
+        header('Location: ../login/login.php');
+        exit;
+    }
+
+    $stmt->close();
+    $conn->close();
 }
-
-$login = $_POST['login']; //Pode realizar a entrada com o email ou com o nome de usuário
-$senha = $_POST['senha'];
-
-$sql = "SELECT id FROM user WHERE (email = ? OR username = ?) and senha = ?";
-$preparacao = $conn->prepare($sql);
-$preparacao->bind_param('sss', $login, $login, $senha);
-$preparacao->execute();
-$resultado = $preparacao->get_result();
-
-$usuario = $resultado->fetch_assoc();
-
-if ($usuario) {
-    $_SESSION['user_id'] = $usuario['id'];
-    header("Location: ../dashboard/hp_login.php?mensagem=LoginSucesso");
-
-    exit;
-} else {
-    $_SESSION['erro_login'] = "<span class='text-center text-red-600'> E-mail ou senha incorretos! </span>";
-    header('Location: ../login/login.php');
-    exit;
-}
-
 ?>
