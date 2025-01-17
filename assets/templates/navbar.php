@@ -1,4 +1,9 @@
 <?php
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $url_base = 'http://' . $_SERVER['HTTP_HOST'] . '/financas';
 
 // Captura a URL da página anterior
