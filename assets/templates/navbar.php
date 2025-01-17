@@ -1,10 +1,14 @@
-<?php $url_base = 'http://' . $_SERVER['HTTP_HOST'] . '/financas';
+<?php
+$url_base = 'http://' . $_SERVER['HTTP_HOST'] . '/financas';
 
 // Captura a URL da página anterior
 $url_anterior = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $url_base;
 $pagina_atual = basename($_SERVER['PHP_SELF']);
 
 $esconder_botao_menu = ($pagina_atual == 'hp_login.php');
+
+$nome = isset($_SESSION['nome']) ? $_SESSION['nome'] : 'Usuário';
+$foto = isset($_SESSION['foto']) && $_SESSION['foto'] !== '' ? htmlspecialchars($_SESSION['foto']) : 'foto_default.png';
 ?>
 
 <header class="bg-tollens p-4 flex items-center relative">
@@ -38,18 +42,30 @@ $esconder_botao_menu = ($pagina_atual == 'hp_login.php');
         <img src="../../assets/logo/cube-logo.svg" alt="Logo" class="w-14 h-14">
     </div>
 
-    <div class="ml-auto space-x-2">
-        <a href="<?php $url_base ?>../usuario/perfil.php" rel="noopener noreferrer">
-            <button class="bg-gray-400 text-white py-2 px-4 rounded">Meu Perfil</button>
-        </a>
-        <button id="abrirModal" class="bg-gray-400 text-white py-2 px-4 rounded">Sair</button>
+    <div class="ml-auto relative">
+        <!-- Ícone da foto do usuário -->
+        <button id="dropdownToggle" class="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded focus:outline-none relative">
+            <img src="../../assets/uploads/<?php echo $foto; ?>" alt="Foto do Usuário" class="w-8 h-8 rounded-full object-cover"
+            />
+            <span class="font-medium"><?php echo htmlspecialchars($nome); ?></span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+
+        <!-- Dropdown -->
+        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+            <a href="<?php echo $url_base; ?>./modulos/usuario/perfil.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Meu Perfil</a>
+            <button id="abrirModalLogout" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Sair</button>
+        </div>
     </div>
+
 
     <div id="modalConfirmarLogout" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
         <div class="bg-white p-6 rounded-md text-center">
             <p class="mb-4">Tem certeza de que deseja sair?</p>
             <div class="flex justify-center space-x-4">
-                <a href="<?php $url_base ?>../login/logout.php" rel="noopener noreferrer">
+                <a href="<?php echo $url_base; ?>../modulos/login/logout.php" rel="noopener noreferrer">
                     <button id="confirmarLogout" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Confirmar</button>
                 </a>
                 <button id="cancelarLogout" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
@@ -58,26 +74,6 @@ $esconder_botao_menu = ($pagina_atual == 'hp_login.php');
     </div>
 </header>
 
-<script>
-    // Função para abrir o modal ao clicar no botão de sair
-    document.getElementById('abrirModal').addEventListener('click', function() {
-        document.getElementById('modalConfirmarLogout').classList.remove('hidden');
-    });
-
-    // Função para fechar o modal ao clicar no botão cancelar
-    document.getElementById('cancelarLogout').addEventListener('click', function() {
-        document.getElementById('modalConfirmarLogout').classList.add('hidden');
-    });
-
-    // Fechar modal clicando fora da caixa
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('modalConfirmarLogout');
-        if (event.target === modal) {
-            modal.classList.add('hidden');
-        }
-    });
-</script>
-
 <script> //limpar o url
     const url = new URL(window.location);
     url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
@@ -85,26 +81,56 @@ $esconder_botao_menu = ($pagina_atual == 'hp_login.php');
 </script>
 
 <script> //script menu
-        const btnMenu = document.getElementById('btnMenu');
-        const btnFechar = document.getElementById('btnFechar');
-        const menuLateral = document.getElementById('menuLateral');
-        const menuOverlay = document.getElementById('menuOverlay');
+    const btnMenu = document.getElementById('btnMenu');
+    const btnFechar = document.getElementById('btnFechar');
+    const menuLateral = document.getElementById('menuLateral');
+    const menuOverlay = document.getElementById('menuOverlay');
+    // Função para abrir o menu
+    btnMenu.addEventListener('click', () => {
+        menuLateral.classList.remove('-translate-x-full');
+        menuOverlay.classList.remove('hidden');
+    });
+    // Função para fechar o menu
+    btnFechar.addEventListener('click', () => {
+        menuLateral.classList.add('-translate-x-full');
+        menuOverlay.classList.add('hidden');
+    });
+    // Fechar o menu ao clicar no overlay
+    menuOverlay.addEventListener('click', () => {
+        menuLateral.classList.add('-translate-x-full');
+        menuOverlay.classList.add('hidden');
+    });
+</script>
 
-        // Função para abrir o menu
-        btnMenu.addEventListener('click', () => {
-            menuLateral.classList.remove('-translate-x-full');
-            menuOverlay.classList.remove('hidden');
-        });
-
-        // Função para fechar o menu
-        btnFechar.addEventListener('click', () => {
-            menuLateral.classList.add('-translate-x-full');
-            menuOverlay.classList.add('hidden');
-        });
-
-        // Fechar o menu ao clicar no overlay
-        menuOverlay.addEventListener('click', () => {
-            menuLateral.classList.add('-translate-x-full');
-            menuOverlay.classList.add('hidden');
-        });
-    </script>
+<script>
+    const dropdownToggle = document.getElementById('dropdownToggle');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const abrirModalLogout = document.getElementById('abrirModalLogout');
+    const modalConfirmarLogout = document.getElementById('modalConfirmarLogout');
+    const cancelarLogout = document.getElementById('cancelarLogout');
+    // Alternar visibilidade do dropdown
+    dropdownToggle.addEventListener('click', () => {
+        dropdownMenu.classList.toggle('hidden');
+    });
+    // Abrir o modal de logout
+    abrirModalLogout.addEventListener('click', () => {
+        modalConfirmarLogout.classList.remove('hidden');
+        dropdownMenu.classList.add('hidden'); // Fecha o dropdown ao abrir o modal
+    });
+    // Fechar o modal de logout
+    cancelarLogout.addEventListener('click', () => {
+        modalConfirmarLogout.classList.add('hidden');
+    });
+    // Fechar o dropdown ao clicar fora dele
+    window.addEventListener('click', (e) => {
+        if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.add('hidden');
+        }
+    });
+    // Fechar o modal ao clicar fora dele
+    window.addEventListener('click', (e) => {
+        if (e.target === modalConfirmarLogout) {
+            modalConfirmarLogout.classList.add('hidden');
+        }
+    });
+</script>
