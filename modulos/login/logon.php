@@ -30,12 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         } else {
             $_SESSION['erro_login'] = "<span class='text-center text-red-600'> E-mail ou senha incorretos! </span>";
-            header('Location: ../login/login.php');
+            header('Location: ../login/login.php?mensagem=ErroLogin');
             exit;
         }
     } else {
         $_SESSION['erro_login'] = "<span class='text-center text-red-600'> Usuário não encontrado! </span>";
-        header('Location: ../login/login.php');
+        header('Location: ../login/login.php?mensagem=UserNotFound');
         exit;
     }
 

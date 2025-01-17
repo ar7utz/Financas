@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
+
+    <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
+    <script src="../../node_modules/toastify-js/src/toastify.js"></script>
+
     <title>LOGIN</title>
 </head>
 <body class="flex items-center justify-center min-h-screen bg-gray-100">
@@ -33,3 +37,49 @@
     </form>
 </body>
 </html>
+
+    <?php // Notificações do Toastify
+        if (isset($_GET['mensagem'])) {
+            echo "<script>
+                window.onload = function() {
+                    switch ('" . $_GET['mensagem'] . "') {
+                        case 'ErroLogin':
+                            Toastify({
+                                text: 'E-mail ou senha incorretos!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'bottom',
+                                position: 'right',
+                                backgroundColor: '#28a745', // cor verde para sucesso
+                            }).showToast();
+                            break;
+                        case 'UserNotFound':
+                            Toastify({
+                                text: 'Usuário não encontrado!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#28a745',
+                            }).showToast();
+                            break;
+                        default:
+                            Toastify({
+                                text: 'Ação desconhecida!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                            }).showToast();
+                            break;
+                    }
+                            
+                    // Limpar a URL após exibir o Toastify
+                    const url = new URL(window.location);
+                    url.searchParams.delete('mensagem'); // Remove o parâmetro 'mensagem'
+                    window.history.replaceState(null, '', url); // Atualiza a URL sem recarregar a página
+                }
+            </script>";
+        }
+    ?>

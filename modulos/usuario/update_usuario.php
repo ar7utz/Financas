@@ -1,4 +1,4 @@
-<?php //testar o funcionamento desse arquivo
+<?php
 session_start();
 require_once('../../assets/bd/conexao.php');
 
@@ -8,8 +8,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_SPECIAL_CHARS);
     $telefone = filter_input(INPUT_POST, 'telefone', FILTER_SANITIZE_SPECIAL_CHARS);
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-    $foto_antiga = $_POST['foto_antiga']; // Nome da foto antiga
+    $nova_senha = $_POST['senha']; // Nova senha opcional
+    $foto_antiga = $_POST['foto_antiga'];
     $foto_nova = null;
+
+    // Verificar se foi enviada uma nova senha
+    if (!empty($nova_senha)) {
+        $nova_senha = password_hash($nova_senha, PASSWORD_DEFAULT); // Criptografa a nova senha
+    } else {
+        // Se a senha não foi alterada, mantém a senha antiga
+        $stmt = $conn->prepare("SELECT senha FROM user WHERE id = ?");
+        $stmt->bind_param('i', $usuario_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $usuario = $result->fetch_assoc();
+        $nova_senha = $usuario['senha'];
+    }
 
     // Verificar se foi enviada uma nova foto
     if (!empty($_FILES['foto_perfil']['name']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
@@ -25,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $novo_nome = uniqid('foto_', true) . '.' . $extensao;
         $destino = '../../assets/uploads/' . $novo_nome;
 
-        // Mover o arquivo para a pasta de uploads
         if (move_uploaded_file($_FILES['foto_perfil']['tmp_name'], $destino)) {
             $foto_nova = $novo_nome;
 
@@ -43,16 +56,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Atualizar os dados no banco
-    $sql = "UPDATE user SET nome = ?, username = ?, telefone = ?, email = ?, foto = ? WHERE id = ?";
+    $sql = "UPDATE user SET nome = ?, username = ?, telefone = ?, email = ?, senha = ?, foto = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sssssi', $nome, $username, $telefone, $email, $foto_nova, $usuario_id);
+    $stmt->bind_param('ssssssi', $nome, $username, $telefone, $email, $nova_senha, $foto_nova, $usuario_id);
 
     if ($stmt->execute()) {
         $_SESSION['sucesso'] = "Perfil atualizado com sucesso.";
-        header('Location: perfil_usuario.php');
+        header('Location: perfil.php');
     } else {
         $_SESSION['erro'] = "Erro ao atualizar o perfil.";
-        header('Location: editar_usuario.php');
+        header('Location: perfil.php');
     }
 
     $stmt->close();
