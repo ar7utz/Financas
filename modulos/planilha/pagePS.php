@@ -13,24 +13,24 @@ if (!isset($_SESSION['user_id'])) {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 
 // ID do usuário logado
-$usuario_id = $_SESSION['user_id'];
-
-// Consulta para buscar as planilhas do usuário
-$sql = "SELECT id, titulo, data_criacao FROM planilhas WHERE usuario_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $usuario_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Verifica se existem planilhas
-$planilhas = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $planilhas[] = $row;
-    }
-} else {
-    $planilhas = null;
-}
+//$usuario_id = $_SESSION['user_id'];
+//
+//// Consulta para buscar as planilhas do usuário
+//$sql = "SELECT id, titulo, data_criacao FROM planilhas WHERE usuario_id = ?";
+//$stmt = $conn->prepare($sql);
+//$stmt->bind_param('i', $usuario_id);
+//$stmt->execute();
+//$result = $stmt->get_result();
+//
+//// Verifica se existem planilhas
+//$planilhas = [];
+//if ($result->num_rows > 0) {
+//    while ($row = $result->fetch_assoc()) {
+//        $planilhas[] = $row;
+//    }
+//} else {
+//    $planilhas = null;
+//}
 ?>
 
 <!DOCTYPE html>

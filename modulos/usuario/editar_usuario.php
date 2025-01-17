@@ -69,7 +69,7 @@ if ($resultado->num_rows > 0) {
                     </div>
                     <div class="mb-4">
                         <label for="telefone">Telefone:</label>
-                        <input type="text" name="telefone" id="telefone" value="<?php echo htmlspecialchars($telefone); ?>" class="border p-2 w-full rounded-md">
+                        <input type="text" name="telefone" id="telefone" value="<?php echo htmlspecialchars($telefone); ?>" class="border p-2 w-full rounded-md"  oninput="mascaraTelefone(); if(this.value.length > 15) this.value = this.value.slice(0, 15)">
                     </div>
                     <div class="mb-4">
                         <label for="email">Email:</label>
@@ -134,6 +134,17 @@ if ($resultado->num_rows > 0) {
                 iconeSenha.alt = 'Exibir senha';
             }
         });
+    </script>
+
+    <script> /*máscara de telefone*/
+        function mascaraTelefone() {
+            const input = document.getElementById('telefone');
+            let value = input.value.replace(/\D/g, "");
+            if (value.length > 11) value = value.slice(0, 11);
+            value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+            value = value.replace(/(\d{5})(\d)/, "$1-$2");
+            input.value = value;
+        }
     </script>
 </body>
 </html>
