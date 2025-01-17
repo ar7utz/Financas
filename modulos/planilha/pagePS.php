@@ -1,6 +1,36 @@
 <?php
-require_once '../../assets/bd/conexao.php';
 session_start();
+require_once '../../assets/bd/conexao.php';
+
+// Verifica se o usuário está logado
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login/login.php');
+    exit;
+}
+
+
+// CRIAR A BASE DE DADOS PARA SALVAR AS PLANILHAS //
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
+
+// ID do usuário logado
+$usuario_id = $_SESSION['user_id'];
+
+// Consulta para buscar as planilhas do usuário
+$sql = "SELECT id, titulo, data_criacao FROM planilhas WHERE usuario_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('i', $usuario_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Verifica se existem planilhas
+$planilhas = [];
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $planilhas[] = $row;
+    }
+} else {
+    $planilhas = null;
+}
 ?>
 
 <!DOCTYPE html>
@@ -28,6 +58,7 @@ session_start();
         </div>
 
         <!-- Seção de Modelos de Planilhas -->
+        <h1 class="text-2xl font-bold">Modelo de planilhas</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Card 1: Orçamento Mensal -->
             <div class="bg-white rounded-lg shadow-lg p-6">
