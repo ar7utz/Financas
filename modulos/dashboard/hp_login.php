@@ -100,7 +100,7 @@ $dados = obterDados($filtro);
         <!-- Horário -->
         <div class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-2">
             <div class="font-medium" id="localTime">
-                00:00:00H
+                00:00H
             </div>
         </div>
     </div>
@@ -118,7 +118,7 @@ $dados = obterDados($filtro);
 
     <script> //Função para buscar e exibir o horário local
         function atualizarHorario() {
-            const apiKey = 'LQDWDPYI57PP'; // Substitua com sua chave da API
+            const apiKey = 'LQDWDPYI57PP';
             const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${apiKey}&format=json&by=zone&zone=America/Sao_Paulo`;
         
             fetch(url)

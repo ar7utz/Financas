@@ -78,7 +78,8 @@ $nomeExibido = formatarNome($nome);
     </div>
 
     <div id="menuOverlay" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 hidden z-40"></div>
-
+    
+    <!--logo-->
     <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
         <img src="../../assets/logo/cube-logo.svg" alt="Logo" class="w-14 h-14">
     </div>
