@@ -163,17 +163,32 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <button type="submit" class=" ml-4 bg-tollens text-white px-4 py-2 rounded hover:bg-purple-500">Filtrar</button>
-                </div>
 
-                <!-- Combobox de Meses -->
-                <div class="flex items-center mb-4">
-                    <label for="mes" class="mr-2 font-semibold">Filtrar por Mês:</label>
-                    <select id="mes" name="mes" class="border border-gray-300 rounded p-2" <?php echo empty($meses) ? 'disabled' : ''; ?>>
-                        <option value="">Selecionar Mês</option>
-                        <?php foreach ($meses as $mes): ?>
-                            <option value="<?php echo $mes['mes']; ?>"><?php echo date('F Y', strtotime($mes['mes'] . '-01')); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <!-- Combobox de Anos -->
+                    <div class="flex items-center mb-4">
+                        <label for="ano" class="mr-2 font-semibold">Filtrar por Ano:</label>
+                        <select id="ano" name="ano" class="border border-gray-300 rounded p-2">
+                            <option value="">Selecionar Ano</option>
+                            <?php 
+                            $sql_anos = "SELECT DISTINCT YEAR(data) AS ano FROM transacoes WHERE usuario_id = ? ORDER BY ano DESC";
+                            $stmt_anos = $conn->prepare($sql_anos);
+                            $stmt_anos->bind_param('i', $usuario_id);
+                            $stmt_anos->execute();
+                            $resultado_anos = $stmt_anos->get_result();
+                            $anos = $resultado_anos->fetch_all(MYSQLI_ASSOC);
+                            foreach ($anos as $ano): ?>
+                                <option value="<?php echo $ano['ano']; ?>"><?php echo $ano['ano']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                            
+                    <!-- Combobox de Meses -->
+                    <div class="flex items-center mb-4">
+                        <label for="mes" class="mr-2 font-semibold">Filtrar por Mês:</label>
+                        <select id="mes" name="mes" class="border border-gray-300 rounded p-2" disabled>
+                            <option value="">Selecionar Mês</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Tabela de Transações -->
@@ -390,8 +405,8 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             <div id="modalEditarTransacao" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
                 <div class="bg-white rounded-md shadow-lg p-8 text-center relative">
                     <h2 class="text-2xl mb-4">Editar transação</h2>
-
-                    <input type="hidden" id="idEditar" name="id" value="<?php echo $transacao_id; ?>">
+            
+                    <input type="hidden" id="idEditar" name="id">
                     <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                     <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
                     <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
@@ -439,6 +454,14 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
             const selectCategoria = document.getElementById('categoriaEditar');
             selectCategoria.value = categoria_id;
+
+            // Verificar se a categoria está no select, caso contrário, adicionar
+            if (!selectCategoria.querySelector(`option[value="${categoria_id}"]`)) {
+                const option = document.createElement('option');
+                option.value = categoria_id;
+                option.text = 'Categoria não encontrada';
+                selectCategoria.add(option);
+            }
             
             //Formatação da data no formato YYYY-MM-DD
             const dataFormatada = new Date(data).toISOString().split('T')[0];
@@ -466,7 +489,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         });
     </script>
 
-    <script>
+    <script> //script filtro mes
         document.getElementById('mes').addEventListener('change', function() {
             const mesSelecionado = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
@@ -512,6 +535,54 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     .catch(error => console.error('Erro ao buscar transações:', error));
                 }
             });
+    </script>
+
+    <script> //script filtro ano
+        document.getElementById('ano').addEventListener('change', function() {
+            const anoSelecionado = this.value;
+            const usuarioId = <?php echo $_SESSION['user_id']; ?>;
+
+            if (anoSelecionado) {
+                fetch(`../transacoes/filtro_ano.php?ano=${anoSelecionado}&usuario_id=${usuarioId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const transacoesContainer = document.getElementById('transacoesContainer');
+                        transacoesContainer.innerHTML = '';
+
+                        if (data.length > 0) {
+                            data.forEach(transacao => {
+                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                });
+
+                                transacoesContainer.innerHTML += `
+                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
+                                        <div class="grid grid-cols-5 gap-4 items-center">
+                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
+                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
+                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
+                                                </a>
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
+                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            transacoesContainer.innerHTML = '<li>Nenhuma transação encontrada.</li>';
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar transações:', error));
+            }
+        });
     </script>
 
     <script>//Fechar modais clicando fora da caixa
