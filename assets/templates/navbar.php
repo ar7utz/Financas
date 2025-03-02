@@ -50,7 +50,7 @@ $foto = isset($_SESSION['foto']) && $_SESSION['foto'] !== '' ? htmlspecialchars(
     <div class="ml-auto relative">
         <!-- Ícone da foto do usuário -->
         <button id="dropdownToggle" class="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded focus:outline-none relative">
-            <img src="../../assets/uploads/<?php echo $foto; ?>" alt="Foto do Usuário" class="w-8 h-8 rounded-full object-cover"
+            <img src="<?php echo '../../assets/uploads/' . $foto; ?>" alt="Foto do Usuário" class="w-8 h-8 rounded-full object-cover"
             />
             <span class="font-medium"><?php echo htmlspecialchars($nome); ?></span>
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

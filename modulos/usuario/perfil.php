@@ -26,6 +26,7 @@ if ($resultado->num_rows > 0) {
     $username = $usuario['username'];
     $telefone = $usuario['telefone'];
     $email = $usuario['email'];
+    $foto = $usuario['foto'];
 } else {
     echo "Utilizador não encontrado.";
     exit;

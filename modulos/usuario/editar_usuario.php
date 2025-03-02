@@ -42,7 +42,8 @@ if ($resultado->num_rows > 0) {
     <title>Finstash - Editar Perfil</title>
 </head>
 <body>
-    <?php include_once('../../assets/templates/navbar.php')?>
+    
+    <?php include_once('../../assets/templates/navbar.php'); ?>
 
     <form action="update_usuario.php" method="POST" enctype="multipart/form-data" class="w-4/5 mx-auto">
         <div class="w-4/5 mx-auto">
