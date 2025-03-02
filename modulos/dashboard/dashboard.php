@@ -51,6 +51,13 @@ $stmt->bind_param('i', $usuario_id);
 $stmt->execute();
 $resultado = $stmt->get_result();
 
+// Obter os meses das transações
+$sql_meses = "SELECT DISTINCT DATE_FORMAT(data, '%Y-%m') AS mes FROM transacoes WHERE usuario_id = ? ORDER BY mes DESC";
+$stmt_meses = $conn->prepare($sql_meses);
+$stmt_meses->bind_param('i', $usuario_id);
+$stmt_meses->execute();
+$resultado_meses = $stmt_meses->get_result();
+$meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -158,126 +165,139 @@ $resultado = $stmt->get_result();
                     <button type="submit" class=" ml-4 bg-tollens text-white px-4 py-2 rounded hover:bg-purple-500">Filtrar</button>
                 </div>
 
+                <!-- Combobox de Meses -->
+                <div class="flex items-center mb-4">
+                    <label for="mes" class="mr-2 font-semibold">Filtrar por Mês:</label>
+                    <select id="mes" name="mes" class="border border-gray-300 rounded p-2" <?php echo empty($meses) ? 'disabled' : ''; ?>>
+                        <option value="">Selecionar Mês</option>
+                        <?php foreach ($meses as $mes): ?>
+                            <option value="<?php echo $mes['mes']; ?>"><?php echo date('F Y', strtotime($mes['mes'] . '-01')); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
                 <!-- Tabela de Transações -->
-                <?php
-                include('../../assets/bd/conexao.php');
+                <div id="transacoesContainer">
+                    <?php
+                    include('../../assets/bd/conexao.php');
 
-                if (isset($_SESSION['user_id'])) {
-                    $usuario_id = $_SESSION['user_id'];
-                
-                    $sql = "
-                        SELECT t.*, c.nome_categoria AS categoria_nome
-                        FROM transacoes t
-                        LEFT JOIN categoria c ON t.categoria_id = c.id
-                        WHERE t.usuario_id = ?
-                        ORDER BY $order_by";
+                    if (isset($_SESSION['user_id'])) {
+                        $usuario_id = $_SESSION['user_id'];
                     
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param('i', $usuario_id);
-                    $stmt->execute();
-                    $resultado = $stmt->get_result();
-                
-                    // Verifica se há transações
-                    if ($resultado->num_rows > 0) {
-                        echo '<div class="grid grid-cols-5 gap-4 items-center mb-2">';
-                        echo '<div class="col-span-1 text-center font-bold">Descrição</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Data</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Valor</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Categoria</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Ações</div>';
-                        echo '</div>';
-                
-                        // Exibir as transações no histórico
-                        while ($row = $resultado->fetch_assoc()) {
-                            // Formata a data corretamente
-                            $data_original = $row['data'];
-                            $data = DateTime::createFromFormat('Y-m-d', $data_original);
-                            $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
-                            $categoria_id = $row['categoria_id'];
-                            echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
-                            echo '<div class="grid grid-cols-5 gap-4 items-center">';
-                            echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . htmlspecialchars($row['descricao']) . '</div>';
-                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($data_formatada) . '</div>';
-                            echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
-                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
-                            echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                            echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(' . $row['id'] . ', \'' . htmlspecialchars($row['descricao']) . '\', \'' . htmlspecialchars($row['valor']) . '\', \'' . htmlspecialchars($row['data']) . '\', \'' . htmlspecialchars($row['tipo']) . '\', \'' . htmlspecialchars($row['categoria_id']) . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
-                            echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
-                            echo '</div>';
-                            echo '</div>';
-                            echo '</div>';
-                        }
-                    } else {
-                        echo '<li>Nenhuma transação encontrada.</li>';
-                    }
-                }
-                
+                        $sql = "
+                            SELECT t.*, c.nome_categoria AS categoria_nome
+                            FROM transacoes t
+                            LEFT JOIN categoria c ON t.categoria_id = c.id
+                            WHERE t.usuario_id = ?
+                            ORDER BY $order_by";
 
-                //toastify para mensagem adicionada com sucesso
-                if (isset($_GET['mensagem'])) {
-                    echo "<script>
-                        window.onload = function() {
-                            switch ('" . $_GET['mensagem'] . "') {
-                                case 'sucesso':
-                                    Toastify({
-                                        text: 'Transação adicionada com sucesso!',
-                                        duration: 3000,
-                                        close: true,
-                                        gravity: 'top',
-                                        position: 'right',
-                                        backgroundColor: '#28a745', // cor verde para sucesso
-                                    }).showToast();
-                                    break;
-                                case 'erroTransacao':
-                                    Toastify({
-                                        text: 'Erro ao adicionar a transação!',
-                                        duration: 3000,
-                                        close: true,
-                                        gravity: 'top',
-                                        position: 'right',
-                                        backgroundColor: '#dc3545', // cor vermelha para erro
-                                    }).showToast();
-                                    break;
-                                case 'SuceEdit':
-                                    Toastify({
-                                        text: 'Sucesso ao editar o item',
-                                        duration: 3000,
-                                        close: true,
-                                        gravity: 'top',
-                                        position: 'right',
-                                        backgroundColor: '#dc3545', // cor amarela para aviso
-                                    }).showToast();
-                                    break;
-                                case 'excluirTransacao':
-                                    Toastify({
-                                        text: 'Transação excluída com sucesso',
-                                        duration: 3000,
-                                        close: true,
-                                        gravity: 'top',
-                                        position: 'right',
-                                        backgroundColor: '#dc3545', // cor amarela para aviso
-                                    }).showToast();
-                                break;
-                                default:
-                                    Toastify({
-                                        text: 'Ação desconhecida!',
-                                        duration: 3000,
-                                        close: true,
-                                        gravity: 'top',
-                                        position: 'right',
-                                        backgroundColor: '#6c757d', // cor cinza para ação desconhecida
-                                    }).showToast();
-                                    break;
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param('i', $usuario_id);
+                        $stmt->execute();
+                        $resultado = $stmt->get_result();
+                    
+                        // Verifica se há transações
+                        if ($resultado->num_rows > 0) {
+                            echo '<div class="grid grid-cols-5 gap-4 items-center mb-2">';
+                            echo '<div class="col-span-1 text-center font-bold">Descrição</div>';
+                            echo '<div class="col-span-1 text-center font-bold">Data</div>';
+                            echo '<div class="col-span-1 text-center font-bold">Valor</div>';
+                            echo '<div class="col-span-1 text-center font-bold">Categoria</div>';
+                            echo '<div class="col-span-1 text-center font-bold">Ações</div>';
+                            echo '</div>';
+                        
+                            // Exibir as transações no histórico
+                            while ($row = $resultado->fetch_assoc()) {
+                                // Formata a data corretamente
+                                $data_original = $row['data'];
+                                $data = DateTime::createFromFormat('Y-m-d', $data_original);
+                                $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
+                                $categoria_id = $row['categoria_id'];
+                                echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
+                                echo '<div class="grid grid-cols-5 gap-4 items-center">';
+                                echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . htmlspecialchars($row['descricao']) . '</div>';
+                                echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($data_formatada) . '</div>';
+                                echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
+                                echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
+                                echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
+                                echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(' . $row['id'] . ', \'' . htmlspecialchars($row['descricao']) . '\', \'' . htmlspecialchars($row['valor']) . '\', \'' . htmlspecialchars($row['data']) . '\', \'' . htmlspecialchars($row['tipo']) . '\', \'' . htmlspecialchars($row['categoria_id']) . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
+                                echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
+                                echo '</div>';
+                                echo '</div>';
+                                echo '</div>';
                             }
-                                    
-                            //Limpar a URL após exibir o Toastify
-                            const url = new URL(window.location);
-                            url.searchParams.delete('mensagem'); //Remove o parâmetro 'mensagem'
-                            window.history.replaceState(null, '', url); //Atualiza a URL sem recarregar a página
+                        } else {
+                            echo '<li>Nenhuma transação encontrada.</li>';
                         }
-                    </script>";
-                }
-                ?>
+                    }
+
+
+                    //toastify para mensagem adicionada com sucesso
+                    if (isset($_GET['mensagem'])) {
+                        echo "<script>
+                            window.onload = function() {
+                                switch ('" . $_GET['mensagem'] . "') {
+                                    case 'sucesso':
+                                        Toastify({
+                                            text: 'Transação adicionada com sucesso!',
+                                            duration: 3000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'right',
+                                            backgroundColor: '#28a745', // cor verde para sucesso
+                                        }).showToast();
+                                        break;
+                                    case 'erroTransacao':
+                                        Toastify({
+                                            text: 'Erro ao adicionar a transação!',
+                                            duration: 3000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'right',
+                                            backgroundColor: '#dc3545', // cor vermelha para erro
+                                        }).showToast();
+                                        break;
+                                    case 'SuceEdit':
+                                        Toastify({
+                                            text: 'Sucesso ao editar o item',
+                                            duration: 3000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'right',
+                                            backgroundColor: '#dc3545', // cor amarela para aviso
+                                        }).showToast();
+                                        break;
+                                    case 'excluirTransacao':
+                                        Toastify({
+                                            text: 'Transação excluída com sucesso',
+                                            duration: 3000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'right',
+                                            backgroundColor: '#dc3545', // cor amarela para aviso
+                                        }).showToast();
+                                    break;
+                                    default:
+                                        Toastify({
+                                            text: 'Ação desconhecida!',
+                                            duration: 3000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'right',
+                                            backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                                        }).showToast();
+                                        break;
+                                }
+
+                                //Limpar a URL após exibir o Toastify
+                                const url = new URL(window.location);
+                                url.searchParams.delete('mensagem'); //Remove o parâmetro 'mensagem'
+                                window.history.replaceState(null, '', url); //Atualiza a URL sem recarregar a página
+                            }
+                        </script>";
+                    }
+                    ?>
+                </div>
             </div>
         </div>
 
@@ -444,6 +464,54 @@ $resultado = $stmt->get_result();
         document.getElementById('cancelarExcluirNota').addEventListener('click', function() {
             document.getElementById('modalConfirmarExclusao').classList.add('hidden');
         });
+    </script>
+
+    <script>
+        document.getElementById('mes').addEventListener('change', function() {
+            const mesSelecionado = this.value;
+            const usuarioId = <?php echo $_SESSION['user_id']; ?>;
+
+            if (mesSelecionado) {
+                fetch(`../transacoes/filtro_mes.php?mes=${mesSelecionado}&usuario_id=${usuarioId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const transacoesContainer = document.getElementById('transacoesContainer');
+                        transacoesContainer.innerHTML = '';
+
+                        if (data.length > 0) {
+                            data.forEach(transacao => {
+                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                });
+
+                                transacoesContainer.innerHTML += `
+                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
+                                        <div class="grid grid-cols-5 gap-4 items-center">
+                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
+                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
+                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
+                                                </a>
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
+                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            transacoesContainer.innerHTML = '<li>Nenhuma transação encontrada.</li>';
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar transações:', error));
+                }
+            });
     </script>
 
     <script>//Fechar modais clicando fora da caixa
