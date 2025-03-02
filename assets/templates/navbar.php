@@ -4,6 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once('../../assets/bd/conexao.php');
+
 $url_base = 'http://' . $_SERVER['HTTP_HOST'] . '/financas';
 
 // Captura a URL da página anterior
@@ -12,8 +14,42 @@ $pagina_atual = basename($_SERVER['PHP_SELF']);
 
 $esconder_botao_menu = ($pagina_atual == 'hp_login.php');
 
-$nome = isset($_SESSION['nome']) ? $_SESSION['nome'] : 'Usuário';
-$foto = isset($_SESSION['foto']) && $_SESSION['foto'] !== '' ? htmlspecialchars($_SESSION['foto']) : 'foto_default.png';
+$nome = 'Usuário';
+$foto = 'foto_default.png';
+
+// Verifica se o usuário está logado
+if (isset($_SESSION['user_id'])) {
+    $usuario_id = $_SESSION['user_id'];
+
+    // Buscar nome e foto do usuário no banco
+    $sql_usuario = "SELECT nome, foto FROM user WHERE id = ?";
+    $stmt_usuario = $conn->prepare($sql_usuario);
+    $stmt_usuario->bind_param('i', $usuario_id);
+    $stmt_usuario->execute();
+    $result_usuario = $stmt_usuario->get_result();
+
+    if ($result_usuario->num_rows > 0) {
+        $usuario = $result_usuario->fetch_assoc();
+        $nome = htmlspecialchars($usuario['nome']);
+        $foto = !empty($usuario['foto']) ? htmlspecialchars($usuario['foto']) : 'foto_default.png';
+
+        // Armazena os dados na sessão
+        $_SESSION['nome'] = $nome;
+        $_SESSION['foto'] = $foto;
+    }
+    $stmt_usuario->close();
+}
+
+function formatarNome($nomeCompleto) {
+    $partes = explode(' ', trim($nomeCompleto)); // Divide o nome em partes
+    if (count($partes) > 1) {
+        return $partes[0] . ' ' . $partes[1]; // Retorna os dois primeiros nomes
+    }
+    return $partes[0]; // Retorna apenas o primeiro nome se houver apenas um
+}
+
+$nomeExibido = formatarNome($nome);
+
 ?>
 
 <header class="bg-tollens p-4 flex items-center relative">
@@ -52,7 +88,7 @@ $foto = isset($_SESSION['foto']) && $_SESSION['foto'] !== '' ? htmlspecialchars(
         <button id="dropdownToggle" class="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded focus:outline-none relative">
             <img src="<?php echo '../../assets/uploads/' . $foto; ?>" alt="Foto do Usuário" class="w-8 h-8 rounded-full object-cover"
             />
-            <span class="font-medium"><?php echo htmlspecialchars($nome); ?></span>
+            <span class="font-medium"><?php echo htmlspecialchars($nomeExibido); ?></span>
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
