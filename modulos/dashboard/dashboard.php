@@ -138,7 +138,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
 
             <!-- Histórico -->
-
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h3 class="text-lg font-bold mb-4">Histórico</h3>
                 <div class="flex items-center mb-4">
@@ -378,8 +377,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         </div>
     </main>
 
-    <script>
-        //Funções para abrir e fechar o modal de adicionar transação
+    <script> //Funções para abrir e fechar o modal de adicionar transação
         document.getElementById('abrirModalAddTransacao').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.remove('hidden');
         });
