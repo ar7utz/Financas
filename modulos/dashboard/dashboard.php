@@ -235,7 +235,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                 echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
                                 echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
                                 echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                                echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(' . $row['id'] . ', \'' . htmlspecialchars($row['descricao']) . '\', \'' . htmlspecialchars($row['valor']) . '\', \'' . htmlspecialchars($row['data']) . '\', \'' . htmlspecialchars($row['tipo']) . '\', \'' . htmlspecialchars($row['categoria_id']) . '\')"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
+                                echo '<a href="../transacoes/page_editar.php?id=' . $row['id'] . '" rel="noopener noreferrer"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
                                 echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
                                 echo '</div>';
                                 echo '</div>';
@@ -376,62 +376,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                 </div>
             </div>
         </div>
-
-        <?php
-        include_once '../../assets/bd/conexao.php';
-
-        if (isset($_GET['id'])) {
-            $id = $_GET['id'];
-
-            // Query para buscar os dados da transação
-            $query = "SELECT t.*, c.nome_categoria AS categoria_nome FROM transacoes t
-                        LEFT JOIN categoria c ON t.categoria_id = c.id WHERE t.id = ?";
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            if ($result->num_rows > 0) {
-                $transacao = $result->fetch_assoc();
-                echo json_encode($transacao);
-            } else {
-                echo json_encode(['error' => 'Transação não encontrada']);
-            }
-        }
-        ?>
-           
-        <!-- Formulário de Edição -->
-        <form id="editarTransacaoForm" method="POST" action="../transacoes/editar_transacao.php">
-            <div id="modalEditarTransacao" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-                <div class="bg-white rounded-md shadow-lg p-8 text-center relative">
-                    <h2 class="text-2xl mb-4">Editar transação</h2>
-            
-                    <input type="hidden" id="idEditar" name="id">
-                    <input type="text" id="descricaoEditar" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                    <input type="text" id="valorEditar" name="valor" placeholder="Valor" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                    <input type="date" id="dataEditar" name="data" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                    <select id="categoriaEditar" name="categoria_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                        <option value="" disabled>Selecionar Categoria</option>
-                        <?php 
-                            $sql = "SELECT id, nome_categoria FROM categoria";
-                            $result = $conn->query($sql);
-                            if ($result->num_rows > 0) {
-                                while ($rowCat = $result->fetch_assoc()) {
-                                    echo "<option value='" . $rowCat['id'] . "'>" . htmlspecialchars($rowCat['nome_categoria']) . "</option>";
-                                }
-                            } else {
-                                echo "<option value='' disabled>Nenhuma categoria encontrada</option>";
-                            }
-                        ?>
-                    </select>
-                    <div class="flex justify-center space-x-4">
-                        <button type="button" id="fecharModalEditar" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-500">Cancelar</button>
-                        <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Salvar</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-
     </main>
 
     <script>
@@ -442,37 +386,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
         document.getElementById('fecharModalAdd').addEventListener('click', function() {
             document.getElementById('AddTransacaoModal').classList.add('hidden');
-        });
-    </script>
-
-    <script> //Funções para abrir e fechar o modal de edição
-        function abrirModalEditar(id, descricao, valor, data, categoria_id) {
-            // Definindo os valores no modal de edição
-            document.getElementById('idEditar').value = id;
-            document.getElementById('descricaoEditar').value = descricao;
-            document.getElementById('valorEditar').value = valor;
-
-            const selectCategoria = document.getElementById('categoriaEditar');
-            selectCategoria.value = categoria_id;
-
-            // Verificar se a categoria está no select, caso contrário, adicionar
-            if (!selectCategoria.querySelector(`option[value="${categoria_id}"]`)) {
-                const option = document.createElement('option');
-                option.value = categoria_id;
-                option.text = 'Categoria não encontrada';
-                selectCategoria.add(option);
-            }
-            
-            //Formatação da data no formato YYYY-MM-DD
-            const dataFormatada = new Date(data).toISOString().split('T')[0];
-            document.getElementById('dataEditar').value = dataFormatada;
-
-            //Abrir o modal de edição
-            document.getElementById('modalEditarTransacao').classList.remove('hidden');
-        }
-
-        document.getElementById('fecharModalEditar').addEventListener('click', function() {
-            document.getElementById('modalEditarTransacao').classList.add('hidden');
         });
     </script>
 
@@ -495,7 +408,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
 
             if (mesSelecionado) {
-                fetch(`../transacoes/filtro_mes.php?mes=${mesSelecionado}&usuario_id=${usuarioId}`)
+                fetch(`../transacoes/filtros/filtro_mes.php?mes=${mesSelecionado}&usuario_id=${usuarioId}`)
                     .then(response => response.json())
                     .then(data => {
                         const transacoesContainer = document.getElementById('transacoesContainer');
@@ -543,7 +456,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
 
             if (anoSelecionado) {
-                fetch(`../transacoes/filtro_ano.php?ano=${anoSelecionado}&usuario_id=${usuarioId}`)
+                fetch(`../transacoes/filtros/filtro_ano.php?ano=${anoSelecionado}&usuario_id=${usuarioId}`)
                     .then(response => response.json())
                     .then(data => {
                         const transacoesContainer = document.getElementById('transacoesContainer');
