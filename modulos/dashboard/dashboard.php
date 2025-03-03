@@ -189,6 +189,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                             <option value="">Selecionar Mês</option>
                         </select>
                     </div>
+
                 </div>
 
                 <!-- Tabela de Transações -->
@@ -317,7 +318,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         </div>
 
         <!-- MODAL -->
-
         <form action="../transacoes/add_transacao.php" method="POST">
             <!-- Modal para adicionar nova transação -->
             <div id="AddTransacaoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
@@ -402,66 +402,47 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         });
     </script>
 
-    <script> //script filtro mes
-        document.getElementById('mes').addEventListener('change', function() {
-            const mesSelecionado = this.value;
-            const usuarioId = <?php echo $_SESSION['user_id']; ?>;
-
-            if (mesSelecionado) {
-                fetch(`../transacoes/filtros/filtro_mes.php?mes=${mesSelecionado}&usuario_id=${usuarioId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const transacoesContainer = document.getElementById('transacoesContainer');
-                        transacoesContainer.innerHTML = '';
-
-                        if (data.length > 0) {
-                            data.forEach(transacao => {
-                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                });
-
-                                transacoesContainer.innerHTML += `
-                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
-                                        <div class="grid grid-cols-5 gap-4 items-center">
-                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
-                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
-                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
-                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
-                                                </a>
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
-                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            transacoesContainer.innerHTML = '<li>Nenhuma transação encontrada.</li>';
-                        }
-                    })
-                    .catch(error => console.error('Erro ao buscar transações:', error));
-                }
-            });
-    </script>
-
-    <script> //script filtro ano
+    <script> //filtro ano/mes
         document.getElementById('ano').addEventListener('change', function() {
             const anoSelecionado = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
-
+            const mesSelect = document.getElementById('mes');
+        
             if (anoSelecionado) {
-                fetch(`../transacoes/filtros/filtro_ano.php?ano=${anoSelecionado}&usuario_id=${usuarioId}`)
+                fetch(`../transacoes/filtro_mes.php?ano=${anoSelecionado}&usuario_id=${usuarioId}`)
                     .then(response => response.json())
                     .then(data => {
-                        const transacoesContainer = document.getElementById('transacoesContainer');
-                        transacoesContainer.innerHTML = '';
+                        mesSelect.innerHTML = '<option value="">Selecionar Mês</option>';
+                    
+                        if (data.length > 0) {
+                            data.forEach(mes => {
+                                let anoMes = `${anoSelecionado}-${mes.mes}`;
+                                mesSelect.innerHTML += `<option value="${anoMes}">${new Date(anoSelecionado, parseInt(mes.mes) - 1).toLocaleDateString('pt-BR', { month: 'long' })}</option>`;
+                            });
+                            mesSelect.disabled = false;
+                        } else {
+                            mesSelect.disabled = true;
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar meses:', error));
+            } else {
+                mesSelect.innerHTML = '<option value="">Selecionar Mês</option>';
+                mesSelect.disabled = true;
+            }
+        });
 
+        // Carregar as transações ao selecionar o mês
+        document.getElementById('mes').addEventListener('change', function() {
+            const mesSelecionado = this.value;
+            const usuarioId = <?php echo $_SESSION['user_id']; ?>;
+            const transacoesContainer = document.getElementById('transacoesContainer');
+        
+            if (mesSelecionado) {
+                fetch(`../transacoes/filtro_mes.php?mes=${mesSelecionado}&usuario_id=${usuarioId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        transacoesContainer.innerHTML = '';
+                    
                         if (data.length > 0) {
                             data.forEach(transacao => {
                                 const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
@@ -469,7 +450,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                     month: '2-digit',
                                     year: 'numeric'
                                 });
-
+                            
                                 transacoesContainer.innerHTML += `
                                     <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
                                         <div class="grid grid-cols-5 gap-4 items-center">
@@ -490,12 +471,13 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                 `;
                             });
                         } else {
-                            transacoesContainer.innerHTML = '<li>Nenhuma transação encontrada.</li>';
+                            transacoesContainer.innerHTML = '<p class="text-center text-gray-500">Nenhuma transação encontrada.</p>';
                         }
                     })
                     .catch(error => console.error('Erro ao buscar transações:', error));
             }
         });
+
     </script>
 
     <script>//Fechar modais clicando fora da caixa
