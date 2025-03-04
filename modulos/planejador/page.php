@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $usuario_id = $_SESSION['user_id'];
 
 // Buscar todas as metas do usuário
-$sql = "SELECT * FROM planejador WHERE usuario_id = ?";
+$sql = "SELECT * FROM planejador WHERE usuario_id = ? ORDER BY criado_em DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('i', $usuario_id);
 $stmt->execute();
@@ -33,10 +33,14 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
 
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-4">Suas Metas Financeiras</h1>
+
+        <a href="./planner.php">
+            <button class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Criar +</button>
+        </a>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <?php foreach ($metas as $meta): ?>
-                <div class="bg-white p-4 rounded shadow">
+                <div class="bg-white p-4 rounded shadow transition-transform transform hover:-translate-y-3 hover:shadow-lg hover:shadow-gray-500/50 cursor-help">
                     <h2 class="text-lg font-bold"> <?php echo htmlspecialchars($meta['razao']); ?> </h2>
                     <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($meta['preco_meta'], 2, ',', '.'); ?></p>
                     <p><strong>Valor Atual:</strong> R$ <?php echo number_format($meta['capital'], 2, ',', '.'); ?></p>

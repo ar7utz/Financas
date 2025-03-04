@@ -63,16 +63,18 @@ $investimentos = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
-    <title>Meta</title>
+    <title>Meta <?php echo htmlspecialchars ($capital) ?></title> <!--ajustar para colocar o objetivo da meta-->
 </head>
 <body>
     <?php require_once '../../assets/templates/navbar.php'; ?>
 
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-4">Sua Meta Financeira</h1>
+        
         <div class="">
             <h1> <?php echo $nome ?> </h1>
         </div>
+
         <p><strong>Objetivo:</strong> <?php echo htmlspecialchars($meta['razao']); ?></p>
         <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></p>
         <p><strong>Valor Atual:</strong> R$ <?php echo number_format($capital, 2, ',', '.'); ?></p>
