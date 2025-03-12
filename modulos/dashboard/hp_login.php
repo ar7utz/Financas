@@ -51,7 +51,7 @@ $dados = obterDados($filtro);
     <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
     <script src="../../node_modules/toastify-js/src/toastify.js"></script>
     
-    <title>Bem Vindo</title>
+    <title>Finstash - Bem Vindo</title>
 </head>
 
 <body>

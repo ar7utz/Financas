@@ -63,7 +63,7 @@ $investimentos = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
-    <title>Meta <?php echo htmlspecialchars ($capital) ?></title> <!--ajustar para colocar o objetivo da meta-->
+    <title>Finstash - Meta <?php echo htmlspecialchars ($capital) ?></title> <!--ajustar para colocar o objetivo da meta-->
 </head>
 <body>
     <?php require_once '../../assets/templates/navbar.php'; ?>

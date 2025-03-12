@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
     <script src="../../node_modules/toastify-js/src/toastify.js"></script>
 
-    <title>Cadastro de Usuário</title>
+    <title>Finstash - Cadastro de Usuário</title>
 
     <style>
         /*remove o text decoration do type number*/

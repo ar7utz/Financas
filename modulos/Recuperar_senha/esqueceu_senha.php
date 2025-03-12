@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
-    <title>Recuperação de senha</title>
+    <title>Finstash - Recuperação de senha</title>
 </head>
 <body class="flex items-center justify-center min-h-screen bg-gray-100">
 

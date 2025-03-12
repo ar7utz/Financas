@@ -10,7 +10,7 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
-    <title>Planilha Financeira - Finstash</title>
+    <title>Finstash - Planilha Financeira</title>
 </head>
 <body>
     <?php include_once '../../assets/templates/navbar.php'; ?>

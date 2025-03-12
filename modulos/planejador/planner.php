@@ -11,7 +11,7 @@ include_once '../../assets/bd/conexao.php'
     <link rel="stylesheet" href="../../assets/css/output.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     
-    <title>Planejador</title>
+    <title>Finstash - Planejador</title>
 
 </head>
 <body class="min-h-screen overflow-hidden">

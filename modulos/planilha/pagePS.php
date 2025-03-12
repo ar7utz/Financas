@@ -46,11 +46,13 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
-    <link rel="shortcut icon" href="../../assets/logo/cube-logo.ico" type="image/x-icon">
+
+    <link rel="shortcut icon" href="../../assets/logo/cube_logo_no_background.ico" type="image/x-icon">
+
     <script src="../../node_modules/toastify-js/src/toastify.css"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <title>Planilha Financeira</title>
+    <title>Finstash - Planilha Financeira</title>
 </head>
 <body>
     <?php require_once '../../assets/templates/navbar.php' ?>

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
     <script src="../../node_modules/toastify-js/src/toastify.js"></script>
 
-    <title>LOGIN</title>
+    <title>Finstash - LOGIN</title>
 </head>
 <body class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="absolute top-4 left-4">
