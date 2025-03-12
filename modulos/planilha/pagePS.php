@@ -8,6 +8,13 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Buscar planilhas do usuário
+$sql = "SELECT id, nome_arquivo, data_criacao FROM planilhas WHERE usuario_id = ? ORDER BY data_criacao DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('i', $usuario_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$planilhas = $result->fetch_all(MYSQLI_ASSOC);
 
 // CRIAR A BASE DE DADOS PARA SALVAR AS PLANILHAS //
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
@@ -39,6 +46,8 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
+    <link rel="shortcut icon" href="../../assets/logo/cube-logo.ico" type="image/x-icon">
+    <script src="../../node_modules/toastify-js/src/toastify.css"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <title>Planilha Financeira</title>
@@ -46,19 +55,62 @@ if (!isset($_SESSION['user_id'])) {
 <body>
     <?php require_once '../../assets/templates/navbar.php' ?>
 
+    <?php //toastify
+        if (isset($_GET['mensagem'])) {
+            echo "<script>
+                window.onload = function() {
+                    switch ('" . $_GET['mensagem'] . "') {
+                        case 'PlanilhaImportadaSucesso':
+                            Toastify({
+                                text: 'Login efetuado com sucesso!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#28a745', // cor verde para sucesso
+                            }).showToast();
+                            break;
+                        default:
+                            Toastify({
+                                text: 'Ação desconhecida!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                            }).showToast();
+                            break;
+                    }
+
+                    // Limpa a URL após exibir o Toastify
+                    const url = new URL(window.location);
+                    url.searchParams.delete('mensagem'); //Remove o parâmetro 'mensagem'
+                    window.history.replaceState(null, '', url); //Atualiza a URL sem recarregar a página
+                }
+            </script>";
+        }
+    ?>
+
     <div class="container mx-auto p-4">
         <!-- Botão "Criar Planilha" no topo -->
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-bold">Suas Planilhas</h1>
-            <a href="./planilha.php">
-                <button class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">
-                    Criar uma Planilha
-                </button>
-            </a>
+            <div class="flex flex-row gap-2 items-center">
+                <!-- Formulário de Upload -->
+                <form action="upload_planilha.php" method="POST" enctype="multipart/form-data" class="mb-6 flex items-center">
+                    <input type="file" name="planilha" required class="border p-2 rounded">
+                    <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Importar Planilha</button>
+                </form>
+                <a href="./planilha.php">
+                    <button class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">
+                        Criar uma Planilha
+                    </button>
+                </a>
+            </div>
         </div>
 
         <!-- Seção de Modelos de Planilhas -->
-        <h1 class="text-2xl font-bold">Modelo de planilhas</h1>
+        <h1 class="text-2xl font-bold text-center">Modelo de planilhas</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Card 1: Orçamento Mensal -->
             <div class="bg-white rounded-lg shadow-lg p-6">
@@ -93,6 +145,26 @@ if (!isset($_SESSION['user_id'])) {
                     Abrir Modelo
                 </button>
             </div>
+        </div>
+
+        <h1 class="text-2xl font-bold text-center mt-4">Minhas Planilhas</h1>
+        <!-- Lista de Planilhas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <?php if (!empty($planilhas)): ?>
+                <?php foreach ($planilhas as $planilha): ?>
+                    <div class="bg-white p-4 rounded shadow">
+                        <h2 class="text-lg font-bold truncate"> <?php echo htmlspecialchars($planilha['nome_arquivo']); ?> </h2>
+                        <p class="text-gray-700 text-sm">Data: <?php echo date('d/m/Y', strtotime($planilha['data_criacao'])); ?></p>
+                        <a href="../../assets/uploads/planilhas/ <?php echo htmlspecialchars($planilha['nome_arquivo']); ?>" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 mt-4 inline-block" download>
+                            Baixar Planilha
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="w-full">
+                    <p class="grid-2 text-gray-600 text-center">Nenhuma planilha importada ainda.</p>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -215,6 +287,10 @@ if (!isset($_SESSION['user_id'])) {
 
             doc.save("planilha_editada.pdf");
         }
+    </script>
+
+    <script> //Toastify
+
     </script>
 </body>
 </html>
