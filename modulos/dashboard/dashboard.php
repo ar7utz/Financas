@@ -13,10 +13,10 @@ $order_by = '';
 // Define a ordenação com base no filtro selecionado
 switch ($filtro) {
     case 'valor-positivo':
-        $order_by = 'tipo = 1';
+        $order_by = "tipo = 1";
         break;
     case 'valor-negativo':
-        $order_by = 'tipo = 2';
+        $order_by = "tipo = 2";
         break;
     case 'categoria':
         $order_by = 'categoria_id';
@@ -67,6 +67,9 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="../../assets/logo/cube_logo_no_background.ico" type="image/x-icon">
+
     <link rel="stylesheet" href="../../assets/css/output.css">
     <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
     <script src="../../node_modules/toastify-js/src/toastify.js"></script>
@@ -560,7 +563,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         });
     </script>
 
-    <script>
+    <script> //filtro search
         document.getElementById('filtroSearch').addEventListener('input', function() {
             const searchQuery = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
