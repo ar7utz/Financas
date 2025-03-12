@@ -708,10 +708,6 @@ video {
   top: 1rem;
 }
 
-.right-5 {
-  right: 1.25rem;
-}
-
 .isolate {
   isolation: isolate;
 }
@@ -875,6 +871,10 @@ video {
 
 .mt-8 {
   margin-top: 2rem;
+}
+
+.mr-8 {
+  margin-right: 2rem;
 }
 
 .box-border {

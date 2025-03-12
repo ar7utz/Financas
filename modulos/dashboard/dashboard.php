@@ -158,10 +158,8 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     </form>
 
                     <div class="ml-4">
-                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" value="<?php echo isset($_GET['filtroSearch']) ? $_GET['filtroSearch'] : ''; ?>" class="border border-gray-300 rounded p-2 w-full max-w-xs">
+                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" class="border border-gray-300 rounded p-2 w-full max-w-xs">
                     </div>
-
-                    <button type="submit" class=" ml-4 bg-tollens text-white px-4 py-2 rounded hover:bg-purple-500">Filtrar</button>
 
                     <!-- Combobox de Anos -->
                     <div class="bg-slate-500 flex items-center align-middle">
@@ -181,7 +179,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                                
+
                         <!-- Combobox de Meses -->
                         <div class="flex items-center mb-4 ml-2">
                             <label for="mes" class="mr-2 font-semibold">Mês:</label>
@@ -190,7 +188,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                             </select>
                         </div>
                     </div>
-
 
                     <div class="flex items-center mb-4 ml-2">
                         <label for="FiltroCategoria" class="mr-2 font-semibold">Categoria:</label>
@@ -519,22 +516,22 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         });
     </script>
 
-    <script>
+    <script> //filtro categoria
         document.getElementById('FiltroCategoria').addEventListener('change', function() {
             const categoriaId = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
             const transacoesContainer = document.getElementById('transacoesContainer');
-        
+
             if (categoriaId) {
                 fetch(`../transacoes/filtro_categoria.php?categoria_id=${categoriaId}`)
                     .then(response => response.json())
                     .then(data => {
                         transacoesContainer.innerHTML = '';
-                    
+
                         if (data.length > 0) {
                             data.forEach(transacao => {
                                 const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR');
-                            
+
                                 transacoesContainer.innerHTML += `
                                     <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
                                         <div class="grid grid-cols-5 gap-4 items-center">
@@ -556,6 +553,93 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                             });
                         } else {
                             transacoesContainer.innerHTML = '<p class="text-gray-600 text-center">Nenhuma transação encontrada para esta categoria.</p>';
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar transações:', error));
+            }
+        });
+    </script>
+
+    <script>
+        document.getElementById('filtroSearch').addEventListener('input', function() {
+            const searchQuery = this.value;
+            const usuarioId = <?php echo $_SESSION['user_id']; ?>;
+            const transacoesContainer = document.getElementById('transacoesContainer');
+
+            if (searchQuery) {
+                fetch(`../transacoes/filtro_search.php?query=${searchQuery}&usuario_id=${usuarioId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        transacoesContainer.innerHTML = '';
+
+                        if (data.length > 0) {
+                            data.forEach(transacao => {
+                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                });
+
+                                transacoesContainer.innerHTML += `
+                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
+                                        <div class="grid grid-cols-5 gap-4 items-center">
+                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
+                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
+                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
+                                                </a>
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
+                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            transacoesContainer.innerHTML = '<p class="text-center text-gray-500">Nenhuma transação encontrada com esse nome.</p>';
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar transações:', error));
+            } else {
+                // Buscar todas as transações quando a caixa de pesquisa estiver vazia
+                fetch(`../transacoes/filtro_search.php?usuario_id=${usuarioId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        transacoesContainer.innerHTML = '';
+
+                        if (data.length > 0) {
+                            data.forEach(transacao => {
+                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                });
+
+                                transacoesContainer.innerHTML += `
+                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
+                                        <div class="grid grid-cols-5 gap-4 items-center">
+                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
+                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
+                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
+                                                </a>
+                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
+                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            transacoesContainer.innerHTML = '<p class="text-center text-gray-500">Nenhuma transação encontrada.</p>';
                         }
                     })
                     .catch(error => console.error('Erro ao buscar transações:', error));
