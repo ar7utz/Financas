@@ -164,31 +164,60 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     <button type="submit" class=" ml-4 bg-tollens text-white px-4 py-2 rounded hover:bg-purple-500">Filtrar</button>
 
                     <!-- Combobox de Anos -->
-                    <div class="flex items-center mb-4">
-                        <label for="ano" class="mr-2 font-semibold">Filtrar por Ano:</label>
-                        <select id="ano" name="ano" class="border border-gray-300 rounded p-2">
-                            <option value="">Selecionar Ano</option>
-                            <?php 
-                            $sql_anos = "SELECT DISTINCT YEAR(data) AS ano FROM transacoes WHERE usuario_id = ? ORDER BY ano DESC";
-                            $stmt_anos = $conn->prepare($sql_anos);
-                            $stmt_anos->bind_param('i', $usuario_id);
-                            $stmt_anos->execute();
-                            $resultado_anos = $stmt_anos->get_result();
-                            $anos = $resultado_anos->fetch_all(MYSQLI_ASSOC);
-                            foreach ($anos as $ano): ?>
-                                <option value="<?php echo $ano['ano']; ?>"><?php echo $ano['ano']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                            
-                    <!-- Combobox de Meses -->
-                    <div class="flex items-center mb-4">
-                        <label for="mes" class="mr-2 font-semibold">Filtrar por Mês:</label>
-                        <select id="mes" name="mes" class="border border-gray-300 rounded p-2" disabled>
-                            <option value="">Selecionar Mês</option>
-                        </select>
+                    <div class="bg-slate-500 flex items-center align-middle">
+                        <div class="flex items-center mb-4">
+                            <label for="ano" class="mr-2 font-semibold">Filtrar por Ano:</label>
+                            <select id="ano" name="ano" class="border border-gray-300 rounded p-2">
+                                <option value="">Selecionar Ano</option>
+                                <?php 
+                                $sql_anos = "SELECT DISTINCT YEAR(data) AS ano FROM transacoes WHERE usuario_id = ? ORDER BY ano DESC";
+                                $stmt_anos = $conn->prepare($sql_anos);
+                                $stmt_anos->bind_param('i', $usuario_id);
+                                $stmt_anos->execute();
+                                $resultado_anos = $stmt_anos->get_result();
+                                $anos = $resultado_anos->fetch_all(MYSQLI_ASSOC);
+                                foreach ($anos as $ano): ?>
+                                    <option value="<?php echo $ano['ano']; ?>"><?php echo $ano['ano']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                                
+                        <!-- Combobox de Meses -->
+                        <div class="flex items-center mb-4 ml-2">
+                            <label for="mes" class="mr-2 font-semibold">Mês:</label>
+                            <select id="mes" name="mes" class="border border-gray-300 rounded p-2" disabled>
+                                <option value="">Selecionar Mês</option>
+                            </select>
+                        </div>
                     </div>
 
+
+                    <div class="flex items-center mb-4 ml-2">
+                        <label for="FiltroCategoria" class="mr-2 font-semibold">Categoria:</label>
+                        <select id="FiltroCategoria" name="FiltroCategoria" class="border border-gray-300 rounded p-2">
+                            <option value="">Selecionar Categoria</option>
+                            <?php 
+                            // Busca as categorias que possuem transações
+                            $sql_categoria = "
+                                SELECT DISTINCT c.id, c.nome_categoria 
+                                FROM categoria c
+                                JOIN transacoes t ON c.id = t.categoria_id
+                                WHERE t.usuario_id = ?
+                                ORDER BY c.nome_categoria ASC
+                            ";
+
+                            $stmt_categoria = $conn->prepare($sql_categoria);
+                            $stmt_categoria->bind_param('i', $usuario_id);
+                            $stmt_categoria->execute();
+                            $resultado_categoria = $stmt_categoria->get_result();
+
+                            while ($categoria = $resultado_categoria->fetch_assoc()): ?>
+                                <option value="<?php echo $categoria['id']; ?>">
+                                    <?php echo htmlspecialchars($categoria['nome_categoria']); ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Tabela de Transações -->
@@ -487,6 +516,50 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     modal.classList.add('hidden');
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.getElementById('FiltroCategoria').addEventListener('change', function() {
+            const categoriaId = this.value;
+            const usuarioId = <?php echo $_SESSION['user_id']; ?>;
+            const transacoesContainer = document.getElementById('transacoesContainer');
+        
+            if (categoriaId) {
+                fetch(`../transacoes/filtro_categoria.php?categoria_id=${categoriaId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        transacoesContainer.innerHTML = '';
+                    
+                        if (data.length > 0) {
+                            data.forEach(transacao => {
+                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR');
+                            
+                                transacoesContainer.innerHTML += `
+                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
+                                        <div class="grid grid-cols-5 gap-4 items-center">
+                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
+                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
+                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.nome_categoria}</div>
+                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
+                                                <a href="#" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                    <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
+                                                </a>
+                                                <a href="#" onclick="abrirModalExcluir(${transacao.id})">
+                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500">Excluir</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            transacoesContainer.innerHTML = '<p class="text-gray-600 text-center">Nenhuma transação encontrada para esta categoria.</p>';
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar transações:', error));
+            }
         });
     </script>
 
