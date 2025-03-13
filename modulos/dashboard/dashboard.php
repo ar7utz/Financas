@@ -275,7 +275,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         }
                     }
 
-
                     //toastify para mensagem adicionada com sucesso
                     if (isset($_GET['mensagem'])) {
                         echo "<script>

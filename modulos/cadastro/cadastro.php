@@ -79,8 +79,6 @@
         </div>
     </form>
 
-
-
     <script> // Preview da imagem
         const inputFoto = document.getElementById('foto_perfil');
         const preview = document.getElementById('preview');
@@ -122,6 +120,16 @@
         echo "<script>
             window.onload = function() {
                 switch ('" . $_GET['mensagem'] . "') {
+                    case 'CadastroSucesso':
+                        Toastify({
+                            text: 'Usuário cadastrado com sucesso!',
+                            duration: 3000,
+                            close: true,
+                            gravity: 'bottom',
+                            position: 'right',
+                            backgroundColor: '#28a745',
+                        }).showToast();
+                        break;
                     case 'SenhaObrigatoria':
                         Toastify({
                             text: 'A senha é obrigatória!',
