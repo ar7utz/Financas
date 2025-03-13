@@ -3406,6 +3406,10 @@ video {
 }
 
 @media (min-width: 768px) {
+  .md\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
   .md\:mt-7 {
     margin-top: 1.75rem;
   }
@@ -3490,6 +3494,10 @@ video {
 
   .lg\:left-1\/2 {
     left: 50%;
+  }
+
+  .lg\:col-span-3 {
+    grid-column: span 3 / span 3;
   }
 
   .lg\:mr-auto {

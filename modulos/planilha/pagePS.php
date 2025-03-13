@@ -97,9 +97,9 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
         <!-- Botão "Criar Planilha" no topo -->
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-bold">Suas Planilhas</h1>
-            <div class="flex flex-row gap-2 items-center">
+            <div class="flex items-center">
                 <!-- Formulário de Upload -->
-                <form action="upload_planilha.php" method="POST" enctype="multipart/form-data" class="mb-6 flex items-center">
+                <form action="upload_planilha.php" method="POST" enctype="multipart/form-data" class="space-x-2 p-2">
                     <input type="file" name="planilha" required class="border p-2 rounded">
                     <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Importar Planilha</button>
                 </form>
@@ -163,8 +163,8 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="w-full">
-                    <p class="grid-2 text-gray-600 text-center">Nenhuma planilha importada ainda.</p>
+                <div class="w-full text-center col-span-1 md:col-span-2 lg:col-span-3">
+                    <p class="text-gray-600 text-center">Nenhuma planilha importada ainda.</p>
                 </div>
             <?php endif; ?>
         </div>
