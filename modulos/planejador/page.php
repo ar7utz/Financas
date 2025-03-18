@@ -40,7 +40,7 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <?php foreach ($metas as $meta): ?>
-                <div class="bg-white p-4 rounded shadow transition-transform transform hover:-translate-y-3 hover:shadow-lg hover:shadow-gray-500/50 cursor-help">
+                <div class="bg-white p-4 rounded shadow transition-transform transform hover:-translate-y-3 hover:shadow-lg hover:shadow-gray-500/50">
                     <h2 class="text-lg font-bold"> <?php echo htmlspecialchars($meta['razao']); ?> </h2>
                     <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($meta['preco_meta'], 2, ',', '.'); ?></p>
                     <p><strong>Valor Atual:</strong> R$ <?php echo number_format($meta['capital'], 2, ',', '.'); ?></p>

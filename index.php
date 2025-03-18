@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./assets/css/output.css">
 
+    <link rel="shortcut icon" href="assets/logo/cube_logo_no_background.ico" type="image/x-icon">
+
     <link rel="stylesheet" href="./node_modules/toastify-js/src/toastify.css">
     <script src="./node_modules/toastify-js/src/toastify.js"></script>
-    <title>Index</title>
+    <title>Finstash</title>
 </head>
 <body>
     <?php // Notificações do Toastify
@@ -58,8 +60,8 @@
     
     <main>
         <div id="navbar_1" class="flex flex-row w-full h-12 justify-center items-center bg-black">
-            <div id="logo_nav" class="basis-6/12 items-center text-left ml-5 text-white">
-                logo.img
+            <div id="logo_nav" class="basis-6/12 items-center text-left ml-5">
+                <img src="assets/logo/cube_logo_no_background.png" class="w-16 h-auto">
             </div>
             <div id="btns_login" class="flex basis-6/12 justify-end bg-black text-white">
                 <div id="btn_login" class="mr-5">

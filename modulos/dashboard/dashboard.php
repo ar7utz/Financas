@@ -143,7 +143,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             <!-- Histórico -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h3 class="text-lg font-bold mb-4">Histórico</h3>
-                <div class="flex items-center mb-4">
+                <div class="flex items-center mb-4"> <!--div filtros-->
                     <!--Filtro-->
                     <form id="filterForm" method="POST" action="" onchange="document.getElementById('filterForm').submit()">
                         <label for="filter" class="mr-2 font-semibold">Filtrar por:</label>
@@ -165,9 +165,9 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <!-- Combobox de Anos -->
-                    <div class="bg-slate-500 flex items-center align-middle">
-                        <div class="flex items-center mb-4">
-                            <label for="ano" class="mr-2 font-semibold">Filtrar por Ano:</label>
+                    <div class="flex items-center align-middle">
+                        <div class="flex items-center">
+                            <label for="ano" class="ml-2 mr-2 font-semibold">Filtrar por Ano:</label>
                             <select id="ano" name="ano" class="border border-gray-300 rounded p-2">
                                 <option value="">Selecionar Ano</option>
                                 <?php 
@@ -184,7 +184,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         </div>
 
                         <!-- Combobox de Meses -->
-                        <div class="flex items-center mb-4 ml-2">
+                        <div class="flex items-center ml-2">
                             <label for="mes" class="mr-2 font-semibold">Mês:</label>
                             <select id="mes" name="mes" class="border border-gray-300 rounded p-2" disabled>
                                 <option value="">Selecionar Mês</option>
@@ -192,7 +192,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         </div>
                     </div>
 
-                    <div class="flex items-center mb-4 ml-2">
+                    <div class="flex items-center ml-2">
                         <label for="FiltroCategoria" class="mr-2 font-semibold">Categoria:</label>
                         <select id="FiltroCategoria" name="FiltroCategoria" class="border border-gray-300 rounded p-2">
                             <option value="">Selecionar Categoria</option>
