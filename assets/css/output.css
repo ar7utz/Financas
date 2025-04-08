@@ -1056,12 +1056,12 @@ video {
   width: 3.5rem;
 }
 
-.w-2\/3 {
-  width: 66.666667%;
+.w-16 {
+  width: 4rem;
 }
 
-.w-24 {
-  width: 6rem;
+.w-2\/3 {
+  width: 66.666667%;
 }
 
 .w-3\/4 {
@@ -1130,14 +1130,6 @@ video {
 
 .w-full {
   width: 100%;
-}
-
-.w-12 {
-  width: 3rem;
-}
-
-.w-16 {
-  width: 4rem;
 }
 
 .min-w-full {
@@ -2287,6 +2279,11 @@ video {
 .bg-gray-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(156 163 175 / var(--tw-bg-opacity));
+}
+
+.bg-gray-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity));
 }
 
 .bg-gray-500 {

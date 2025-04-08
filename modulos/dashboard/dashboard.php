@@ -61,7 +61,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -73,6 +73,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="../../assets/css/output.css">
     <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
     <script src="../../node_modules/toastify-js/src/toastify.js"></script>
+
     <title>Finstash - Gerenciamento de Finanças Pessoal</title>
 </head>
 
@@ -462,7 +463,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             const mesSelecionado = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
             const transacoesContainer = document.getElementById('transacoesContainer');
-        
+
             if (mesSelecionado) {
                 fetch(`../transacoes/filtro_mes.php?mes=${mesSelecionado}&usuario_id=${usuarioId}`)
                     .then(response => response.json())
@@ -485,7 +486,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                             <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
                                             <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
                                             <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
                                                     <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
                                                 </a>
                                                 <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
@@ -523,17 +524,17 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             const categoriaId = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
             const transacoesContainer = document.getElementById('transacoesContainer');
-
+        
             if (categoriaId) {
                 fetch(`../transacoes/filtro_categoria.php?categoria_id=${categoriaId}`)
                     .then(response => response.json())
                     .then(data => {
                         transacoesContainer.innerHTML = '';
-
+                    
                         if (data.length > 0) {
                             data.forEach(transacao => {
                                 const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR');
-
+                            
                                 transacoesContainer.innerHTML += `
                                     <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
                                         <div class="grid grid-cols-5 gap-4 items-center">
@@ -542,7 +543,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                             <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
                                             <div class="col-span-1 text-center truncate py-3 px-6">${transacao.nome_categoria}</div>
                                             <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="#" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
                                                     <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
                                                 </a>
                                                 <a href="#" onclick="abrirModalExcluir(${transacao.id})">
@@ -567,13 +568,13 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             const searchQuery = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
             const transacoesContainer = document.getElementById('transacoesContainer');
-
+        
             if (searchQuery) {
                 fetch(`../transacoes/filtro_search.php?query=${searchQuery}&usuario_id=${usuarioId}`)
                     .then(response => response.json())
                     .then(data => {
                         transacoesContainer.innerHTML = '';
-
+                    
                         if (data.length > 0) {
                             data.forEach(transacao => {
                                 const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
@@ -581,7 +582,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                     month: '2-digit',
                                     year: 'numeric'
                                 });
-
+                            
                                 transacoesContainer.innerHTML += `
                                     <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
                                         <div class="grid grid-cols-5 gap-4 items-center">
@@ -590,7 +591,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                             <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
                                             <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
                                             <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
                                                     <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
                                                 </a>
                                                 <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
@@ -612,7 +613,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     .then(response => response.json())
                     .then(data => {
                         transacoesContainer.innerHTML = '';
-
+                    
                         if (data.length > 0) {
                             data.forEach(transacao => {
                                 const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
@@ -620,7 +621,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                     month: '2-digit',
                                     year: 'numeric'
                                 });
-
+                            
                                 transacoesContainer.innerHTML += `
                                     <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
                                         <div class="grid grid-cols-5 gap-4 items-center">
@@ -629,7 +630,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                             <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
                                             <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
                                             <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalEditar(${transacao.id}, '${transacao.descricao}', '${transacao.valor}', '${transacao.data}', '${transacao.categoria_id}')">
+                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
                                                     <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
                                                 </a>
                                                 <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">

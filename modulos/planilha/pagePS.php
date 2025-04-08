@@ -51,8 +51,9 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
 
     <script src="../../node_modules/toastify-js/src/toastify.css"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <title>Finstash - Planilha Financeira</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>    <title>Finstash - Planilha Financeira</title>
 </head>
 <body>
     <?php require_once '../../assets/templates/navbar.php' ?>
@@ -171,7 +172,7 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <!-- Modal de Edição da Planilha -->
-    <div id="modalPlanilha" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center p-4">
+    <div id="modalPlanilha" class="fixed flex inset-0 bg-black bg-opacity-50 hidden justify-center items-center p-4">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-6">
             <h2 class="text-2xl font-bold mb-4">Editando: <span id="modeloSelecionado"></span></h2>
             <div class="overflow-x-auto">
@@ -270,23 +271,38 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
 
         // Função para exportar a planilha para PDF
         function exportarParaPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            // Importa jsPDF do módulo UMD
+            const { jsPDF } = window.jspdf || {};
 
+            if (!jsPDF) {
+                console.error("A biblioteca jsPDF não foi carregada corretamente.");
+                return;
+            }
+        
+            const doc = new jsPDF();
+        
+            // Certifique-se de que o plugin autoTable está disponível
+            if (typeof doc.autoTable === 'undefined') {
+                console.error("O plugin autoTable não está carregado corretamente.");
+                return;
+            }
+        
             const tabela = document.getElementById('tabelaPlanilha');
             const rows = tabela.querySelectorAll('tr');
-
+        
             let data = [];
             rows.forEach(row => {
                 const cells = row.querySelectorAll('th, td');
-                data.push([...cells].map(cell => cell.textContent));
+                data.push([...cells].map(cell => cell.textContent.trim()));
             });
-
+        
             doc.autoTable({
-                head: [data[0]],
-                body: data.slice(1),
+                head: [data[0]], // Cabeçalho da tabela
+                body: data.slice(1), // Corpo da tabela
+                theme: 'grid', // Estilo da tabela
+                styles: { fontSize: 10 }, // Ajuste do tamanho da fonte
             });
-
+        
             doc.save("planilha_editada.pdf");
         }
     </script>

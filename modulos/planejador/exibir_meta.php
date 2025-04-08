@@ -63,37 +63,81 @@ $investimentos = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/css/output.css">
-    <title>Finstash - Meta <?php echo htmlspecialchars ($capital) ?></title> <!--ajustar para colocar o objetivo da meta-->
+    <title>Finstash - Meta <?php echo htmlspecialchars($meta['razao']); ?></title>
 </head>
-<body>
+<body class="bg-gray-100">
     <?php require_once '../../assets/templates/navbar.php'; ?>
 
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Sua Meta Financeira</h1>
-        
-        <div class="">
-            <h1> <?php echo $nome ?> </h1>
+    <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">Sua Meta Financeira: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span></h1>
+
+        <!-- Informações da Meta -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">Detalhes da Meta</h2>
+            <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></p>
+            <p><strong>Valor Atual:</strong> R$ <?php echo number_format($capital, 2, ',', '.'); ?></p>
+            <p><strong>Investimento Mensal:</strong> R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></p>
+            <p><strong>Tempo Necessário:</strong> <?php echo is_numeric($meses_necessarios) ? "$meses_necessarios meses" : $meses_necessarios; ?></p>
         </div>
 
-        <p><strong>Objetivo:</strong> <?php echo htmlspecialchars($meta['razao']); ?></p>
-        <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></p>
-        <p><strong>Valor Atual:</strong> R$ <?php echo number_format($capital, 2, ',', '.'); ?></p>
-        <p><strong>Investimento Mensal:</strong> R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></p>
-        <p><strong>Tempo Necessário:</strong> <?php echo is_numeric($meses_necessarios) ? "$meses_necessarios meses" : $meses_necessarios; ?></p>
-        
-        <h2 class="text-xl font-bold mt-6">Dicas para Acelerar</h2>
-        <ul class="list-disc ml-5">
-            <?php foreach ($dicas as $dica) {
-                echo "<li>$dica</li>";
-            } ?>
-        </ul>
-        
-        <h2 class="text-xl font-bold mt-6">Opções de Investimento</h2>
-        <ul class="list-disc ml-5">
-            <?php foreach ($investimentos as $titulo => $descricao) {
-                echo "<li><strong>$titulo:</strong> $descricao</li>";
-            } ?>
-        </ul>
+        <!-- Dicas para Acelerar -->
+        <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">Dicas para Acelerar</h2>
+            <ul class="list-disc ml-5">
+                <?php foreach ($dicas as $dica): ?>
+                    <li><?php echo $dica; ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+
+        <!-- Informações de Mercado -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-4">Opções e Dicas de Investimento</h2>
+            <ul class="list-disc ml-5">
+                <?php foreach ($investimentos as $titulo => $descricao): ?>
+                    <li><strong><?php echo $titulo; ?>:</strong> <?php echo $descricao; ?></li>
+                <?php endforeach; ?>
+            </ul>
+
+            <!-- Informações de Mercado da API -->
+            <div id="marketData" class="mt-6">
+                <h3 class="text-lg font-bold mb-2">Informações de Mercado</h3>
+                <p class="text-gray-600">Carregando dados de mercado...</p>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Função para buscar dados de mercado da API Polygon.io
+        async function fetchMarketData() {
+            const apiKey = 'qPI2YVLHqBzBCd4A44kTak0IBkGVFyea'; // Substitua pela sua chave da API 
+            const url = `https://api.polygon.io/v2/aggs/ticker/AAPL/prev?apiKey=${apiKey}`; // Exemplo com o ticker AAPL (Apple)
+            //fazer buscador com opções de ações de mercado e mostrar mais opções default, as ma
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.results && data.results.length > 0) {
+                    const marketData = data.results[0];
+                    document.getElementById('marketData').innerHTML = `
+                        <p><strong>Ticker:</strong> AAPL</p>
+                        <p><strong>Preço de Fechamento:</strong> $${marketData.c}</p>
+                        <p><strong>Alta do Dia:</strong> $${marketData.h}</p>
+                        <p><strong>Baixa do Dia:</strong> $${marketData.l}</p>
+                        <p><strong>Volume:</strong> ${marketData.v}</p>
+                    `;
+                } else {
+                    document.getElementById('marketData').innerHTML = '<p class="text-gray-600">Nenhum dado de mercado disponível.</p>';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar dados de mercado:', error);
+                document.getElementById('marketData').innerHTML = '<p class="text-red-500">Erro ao carregar dados de mercado.</p>';
+            }
+        }
+
+        // Chamar a função ao carregar a página
+        fetchMarketData();
+    </script>
 </body>
 </html>
