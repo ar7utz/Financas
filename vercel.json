@@ -1,5 +1,22 @@
 {
+    "cleanUrls": true,
     "rewrites": [
       { "source": "/", "destination": "/index.html" }
+    ],
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "key": "Content-Type",
+            "value": "text/html; charset=utf-8"
+          }
+        ]
+      }
     ]
   }
+  
