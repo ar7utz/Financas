@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" href="./node_modules/toastify-js/src/toastify.css">
     <script src="./node_modules/toastify-js/src/toastify.js"></script>
+
     <title>Finstash</title>
 </head>
 <body>

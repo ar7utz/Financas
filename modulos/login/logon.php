@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $senha = $_POST['senha'];
     
     if (empty($login) || empty($senha)) {
-        $_SESSION['erro_login'] = "<span class='text-center text-red-600'> Login e senha são obrigatórios! </span>";
+        $_SESSION['erro_login'] = "Login e senha são obrigatórios!";
         header('Location: ../login/login.php');
         exit;
     }
@@ -28,16 +28,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['nome'] = $user['nome'];
             $_SESSION['foto'] = $user['foto'] ? $user['foto'] : 'foto_default.png';
+            $_SESSION['sucesso_login'] = "Sucesso ao fazer login";
+            
+            header('Location: ../dashboard/hp_login.php?mensagem=LoginSucesso');
 
-            header("Location: ../dashboard/hp_login.php?mensagem=LoginSucesso");
             exit;
         } else {
-            $_SESSION['erro_login'] = "<span class='text-center text-red-600'> E-mail ou senha incorretos! </span>";
+            $_SESSION['erro_login'] = "E-mail ou senha incorretos!";
             header('Location: ../login/login.php?mensagem=ErroLogin');
             exit;
         }
     } else {
-        $_SESSION['erro_login'] = "<span class='text-center text-red-600'> Usuário não encontrado! </span>";
+        $_SESSION['erro_login'] = "Usuário não encontrado!";
         header('Location: ../login/login.php?mensagem=UserNotFound');
         exit;
     }
