@@ -356,10 +356,10 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     <form id="novaTransacaoForm" method="POST" action="../transacoes/add_transacao.php">
                         <fieldset class="flex flex-row justify-center mb-4 gap-4">
                             <label class="block mb-2 cursor-pointer">
-                                <input type="radio" name="tipo" value="positivo" required> Entrada
+                                <input type="radio" name="tipo" value="positivo" required> Receita
                             </label>
                             <label class="block cursor-pointer">
-                                <input type="radio" name="tipo" value="negativo" required> Saída
+                                <input type="radio" name="tipo" value="negativo" required> Despesa
                             </label>
                         </fieldset>
                         <input type="text" name="descricao" placeholder="Descrição" required class="w-full p-2 mb-4 border border-gray-300 rounded">

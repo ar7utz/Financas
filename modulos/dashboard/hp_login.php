@@ -108,12 +108,19 @@ $dados = obterDados($filtro);
         </div>
     </div>
 
+    <?php echo $usuario_id; ?> //////////
 
     <div class="flex">
         <!-- Sidebar preta -->
         <?php include_once('../../assets/templates/navbar_lateral.php') ?>
         <div class="flex justify-center w-4/6">
             <?php include_once('../../assets/templates/graficos/grafico_pizza.php') ?>
+        </div>
+    </div>
+
+    <div class="flex">
+        <div class="flex justify-center w-4/6">
+            <?php include_once('../../assets/templates/graficos/graficos_extend.php') ?>
         </div>
     </div>
 

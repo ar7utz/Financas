@@ -41,6 +41,27 @@ if ($quanto_quero_pagar_mes > 0) {
     $meses_necessarios = 'Indefinido (defina um valor para investir mensalmente)';
 }
 
+if (is_numeric($meses_necessarios)) {
+    $anos = floor($meses_necessarios / 12);
+    $meses_restantes = $meses_necessarios % 12;
+    $tempo_formatado = '';
+    if ($anos > 0) {
+        $tempo_formatado .= $anos . ' ano' . ($anos > 1 ? 's' : '');
+    }
+    if ($anos > 0 && $meses_restantes > 0) {
+        $tempo_formatado .= ' e ';
+    }
+    if ($meses_restantes > 0) {
+        $tempo_formatado .= $meses_restantes . ' ' . ($meses_restantes > 1 ? 'meses' : 'meses');
+    }
+    if ($tempo_formatado === '') {
+        $tempo_formatado = '0 meses';
+    }
+    $tempo_formatado .= " ($meses_necessarios meses)";
+} else {
+    $tempo_formatado = $meses_necessarios;
+}
+
 // Dicas para acelerar o objetivo
 $dicas = [
     "Aumente seu aporte mensal investindo uma parte do seu salário.",
@@ -74,10 +95,13 @@ $investimentos = [
         <!-- Informações da Meta -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-xl font-bold mb-4">Detalhes da Meta</h2>
+            <div class="">
+                <a href="./editar_meta.php"><button>Editar meta</button></a>
+            </div>
             <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></p>
             <p><strong>Valor Atual:</strong> R$ <?php echo number_format($capital, 2, ',', '.'); ?></p>
             <p><strong>Investimento Mensal:</strong> R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></p>
-            <p><strong>Tempo Necessário:</strong> <?php echo is_numeric($meses_necessarios) ? "$meses_necessarios meses" : $meses_necessarios; ?></p>
+            <p><strong>Tempo Necessário:</strong> <?php echo is_numeric($tempo_formatado) ? "$tempo_formatado meses" : $tempo_formatado; ?></p>
         </div>
 
         <!-- Dicas para Acelerar -->
@@ -110,9 +134,8 @@ $investimentos = [
     <script>
         // Função para buscar dados de mercado da API Polygon.io
         async function fetchMarketData() {
-            const apiKey = 'qPI2YVLHqBzBCd4A44kTak0IBkGVFyea'; // Substitua pela sua chave da API 
+            const apiKey = 'qPI2YVLHqBzBCd4A44kTak0IBkGVFyea'; 
             const url = `https://api.polygon.io/v2/aggs/ticker/AAPL/prev?apiKey=${apiKey}`; // Exemplo com o ticker AAPL (Apple)
-            //fazer buscador com opções de ações de mercado e mostrar mais opções default, as ma
 
             try {
                 const response = await fetch(url);

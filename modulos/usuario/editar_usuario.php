@@ -96,7 +96,6 @@ if ($resultado->num_rows > 0) {
 
 
     <div class="fixed bottom-0 left-1/2 transform -translate-x-1/2 mb-4 mt-2">
-        <a href="update_usuario.php"><button class="w-48 h-8 rounded-md bg-slate-500 text-white">Salvar Alterações</button></a>
         <a href="perfil.php"><button class="w-48 h-8 rounded-md bg-slate-500 text-white">Descartar Alterações</button></a>
     </div>
 
