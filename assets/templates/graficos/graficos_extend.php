@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gráficos Dinâmicos</title>
-    <script src="../../../../node_modules/chart.js/dist/chart.umd.js"></script>
-    <link rel="stylesheet" href="../../../../assets/css/output.css">
+    <script src="/Financas/node_modules/chart.js/dist/chart.umd.js"></script>
+    <link rel="stylesheet" href="/Financas/assets/css/output.css">
 </head>
 <body class="bg-gray-100 p-6">
 
@@ -18,7 +18,6 @@
             <select id="chartType" class="border border-gray-300 rounded px-4 py-2">
                 <option value="bar">Bar Chart</option>
                 <option value="line">Line Chart</option>
-                <option value="mixed">Mixed Chart</option>
             </select>
 
             <label for="filterType" class="block mt-4 mb-2 font-medium">Filtrar por:</label>
@@ -45,46 +44,65 @@
     </div>
 
     <script>
-        // Já implementado no arquivo graficos_extend.php
-        fetch(`./endpoint_gfc.php?filterType=${filterType}&timeRange=${timeRange}`)
-            .then(response => {
+        let dynamicChart = null;
+
+        async function updateChart() {
+            const chartType = document.getElementById('chartType').value;
+            const filterType = document.getElementById('filterType').value;
+            const timeRange = document.getElementById('timeRange').value;
+
+            try {
+                const response = await fetch(`/Financas/assets/templates/graficos/endpoint_gfc.php?filterType=${filterType}&timeRange=${timeRange}`);
                 if (!response.ok) {
                     throw new Error(`Erro na requisição: ${response.status}`);
                 }
-                return response.json();
-            })
-            .then(data => {
+                const data = await response.json();
+
                 if (data.error) {
-                    console.error(data.error);
+                    alert(data.error);
                     return;
                 }
-            
+
                 // Processar os dados recebidos
                 let labels = [];
                 let dataset = [];
-            
+
                 if (filterType === 'categorias') {
-                    labels = Object.keys(data.data.categorias);
-                    dataset = labels.map(label => {
-                        const valores = data.data.categorias[label];
-                        return Object.values(valores).reduce((acc, curr) => acc + curr, 0); // Soma os valores por categoria
-                    });
+                    if (data.data.categorias && Object.keys(data.data.categorias).length > 0) {
+                        labels = Object.keys(data.data.categorias);
+                        dataset = labels.map(label => {
+                            const valores = data.data.categorias[label];
+                            return Object.values(valores).reduce((acc, curr) => acc + Number(curr), 0);
+                        });
+                    }
                 } else if (filterType === 'receitas') {
-                    labels = data.data.receitas.map(item => item.mes);
-                    dataset = data.data.receitas.map(item => item.total);
+                    if (data.data.receitas && data.data.receitas.length > 0) {
+                        labels = data.data.receitas.map(item => item.mes);
+                        dataset = data.data.receitas.map(item => Number(item.total));
+                    }
                 } else if (filterType === 'despesas') {
-                    labels = data.data.despesas.map(item => item.mes);
-                    dataset = data.data.despesas.map(item => item.total);
+                    if (data.data.despesas && data.data.despesas.length > 0) {
+                        labels = data.data.despesas.map(item => item.mes);
+                        dataset = data.data.despesas.map(item => Number(item.total));
+                    }
                 }
-            
+
+                // Se não houver dados, exibe mensagem e não tenta criar o gráfico
+                if (labels.length === 0 || dataset.length === 0) {
+                    if (dynamicChart) dynamicChart.destroy();
+                    document.getElementById('dynamicChart').getContext('2d').clearRect(0, 0, 400, 200);
+                    alert('Nenhum dado encontrado para o filtro selecionado.');
+                    return;
+                }
+
                 // Atualizar ou criar o gráfico
                 const ctx = document.getElementById('dynamicChart').getContext('2d');
                 if (dynamicChart) {
-                    dynamicChart.destroy(); // Destruir o gráfico atual para recriar com novos dados
+                    dynamicChart.destroy();
                 }
-            
+
                 dynamicChart = new Chart(ctx, {
-                    type: chartType, // Tipo de gráfico selecionado
+                    type: chartTypeToUse,
                     data: {
                         labels: labels,
                         datasets: [
@@ -110,9 +128,17 @@
                         }
                     }
                 });
-            })
-            .catch(error => console.error('Erro ao buscar os dados:', error));
+            } catch (error) {
+                console.error('Erro ao buscar os dados:', error);
+                alert('Erro ao buscar os dados do gráfico.');
+            }
+        }
 
+        // Atualiza o gráfico ao clicar no botão
+        document.getElementById('updateChart').addEventListener('click', updateChart);
+
+        // Gera o gráfico ao carregar a página
+        window.onload = updateChart;
     </script>
 </body>
 </html>

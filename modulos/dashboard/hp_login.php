@@ -124,8 +124,6 @@ $dados = obterDados($filtro);
         </div>
     </div>
 
-
-
     <script> //Função para buscar e exibir o horário local
         function atualizarHorario() {
             const apiKey = 'LQDWDPYI57PP';

@@ -1,17 +1,20 @@
 <?php
 session_start();
-include_once '../../../bd/conexao.php';
+include_once '../../bd/conexao.php';
 
 header('Content-Type: application/json');
 
 // Verifica se o usuário está logado
-if (!isset($_SESSION['usuario_id'])) {
+if (isset($_SESSION['usuario_id'])) {
+    $usuario_id = $_SESSION['usuario_id'];
+} elseif (isset($_SESSION['user_id'])) {
+    $usuario_id = $_SESSION['user_id'];
+} else {
     echo json_encode(['error' => 'Usuário não autenticado']);
     exit;
 }
 
-$usuario_id = $_SESSION['usuario_id'];
-$filterType = isset($_GET['filterType']) ? $_GET['filterType'] : 'categorias';
+$filterType = isset($_GET['filterType']) ? $_GET['filterType'] : 'categoria';
 $timeRange = isset($_GET['timeRange']) ? $_GET['timeRange'] : 'mensal';
 
 $data = [];
@@ -38,7 +41,7 @@ switch ($timeRange) {
 }
 
 // Consulta os dados com base no filtro
-if ($filterType === 'categorias') {
+if ($filterType === 'categoria') {
     $query = "SELECT categoria, tipo, SUM(valor) AS total 
               FROM transacoes 
               WHERE usuario_id = ? AND $dateCondition 
@@ -52,7 +55,7 @@ if ($filterType === 'categorias') {
     while ($row = $result->fetch_assoc()) {
         $categorias[$row['categoria']][$row['tipo']] = $row['total'];
     }
-    $data['categorias'] = $categorias;
+    $data['categoria'] = $categorias;
 } elseif ($filterType === 'receitas' || $filterType === 'despesas') {
     $tipo = $filterType === 'receitas' ? 'positivo' : 'negativo';
     $query = "SELECT MONTHNAME(data) AS mes, SUM(valor) AS total 
@@ -72,4 +75,8 @@ if ($filterType === 'categorias') {
 }
 
 echo json_encode(['data' => $data]);
+if (!isset($conn)) {
+    echo json_encode(['error' => 'Falha na conexão com o banco de dados']);
+    exit;
+}
 ?>

@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="../css/output.css">
+<link rel="stylesheet" href="/Financas/assets/css/output.css">
 <div class="w-80 h-screen rounded-br-3xl">
     <div class="bg-red items-center justify-center text-center">
         <a href="../../modulos/dashboard/dashboard.php">
