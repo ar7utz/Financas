@@ -22,7 +22,7 @@
 
             <label for="filterType" class="block mt-4 mb-2 font-medium">Filtrar por:</label>
             <select id="filterType" class="border border-gray-300 rounded px-4 py-2">
-                <option value="categorias">Categorias</option>
+                <option value="categoria">Categorias</option> <!-- Corrigido aqui -->
                 <option value="receitas">Receitas</option>
                 <option value="despesas">Despesas</option>
             </select>
@@ -67,11 +67,11 @@
                 let labels = [];
                 let dataset = [];
 
-                if (filterType === 'categorias') {
-                    if (data.data.categorias && Object.keys(data.data.categorias).length > 0) {
-                        labels = Object.keys(data.data.categorias);
+                if (filterType === 'categoria') {
+                    if (data.data.categoria && Object.keys(data.data.categoria).length > 0) {
+                        labels = Object.keys(data.data.categoria);
                         dataset = labels.map(label => {
-                            const valores = data.data.categorias[label];
+                            const valores = data.data.categoria[label];
                             return Object.values(valores).reduce((acc, curr) => acc + Number(curr), 0);
                         });
                     }
@@ -91,7 +91,7 @@
                 if (labels.length === 0 || dataset.length === 0) {
                     if (dynamicChart) dynamicChart.destroy();
                     document.getElementById('dynamicChart').getContext('2d').clearRect(0, 0, 400, 200);
-                    alert('Nenhum dado encontrado para o filtro selecionado.');
+                    console.log('Nenhum dado encontrado para o filtro selecionado.');
                     return;
                 }
 
@@ -101,13 +101,16 @@
                     dynamicChart.destroy();
                 }
 
+                // Defina o tipo de gráfico corretamente
+                const chartTypeToUse = chartType;
+
                 dynamicChart = new Chart(ctx, {
                     type: chartTypeToUse,
                     data: {
                         labels: labels,
                         datasets: [
                             {
-                                label: filterType === 'categorias' ? 'Categorias' : filterType === 'receitas' ? 'Receitas' : 'Despesas',
+                                label: filterType === 'categoria' ? 'Categorias' : filterType === 'receitas' ? 'Receitas' : 'Despesas',
                                 data: dataset,
                                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -130,15 +133,19 @@
                 });
             } catch (error) {
                 console.error('Erro ao buscar os dados:', error);
-                alert('Erro ao buscar os dados do gráfico.');
+                console.log('Erro ao buscar os dados do gráfico.');
             }
         }
 
         // Atualiza o gráfico ao clicar no botão
-        document.getElementById('updateChart').addEventListener('click', updateChart);
+        window.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('updateChart');
+            if (btn) {
+                btn.addEventListener('click', updateChart);
+            }
+            updateChart();
+        });
 
-        // Gera o gráfico ao carregar a página
-        window.onload = updateChart;
     </script>
 </body>
 </html>

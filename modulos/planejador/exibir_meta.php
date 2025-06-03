@@ -33,14 +33,24 @@ if (!$meta) {
 $preco_meta = $meta['preco_meta'];
 $capital = $meta['capital'];
 $quanto_quero_pagar_mes = $meta['quanto_quero_pagar_mes'];
+$quanto_tempo_quero_pagar = $meta['quanto_tempo_quero_pagar']; // Certifique-se que este campo existe no banco
 
-// Calcular tempo necessário para alcançar a meta
+// 1. Quanto precisa investir por mês para pagar no tempo desejado
+if ($quanto_tempo_quero_pagar > 0) {
+    $valor_necessario_por_mes = ($preco_meta - $capital) / $quanto_tempo_quero_pagar;
+    $valor_necessario_por_mes = $valor_necessario_por_mes > 0 ? $valor_necessario_por_mes : 0;
+} else {
+    $valor_necessario_por_mes = null;
+}
+
+// 2. Quanto tempo levaria pagando o valor que quer investir por mês
 if ($quanto_quero_pagar_mes > 0) {
     $meses_necessarios = ceil(($preco_meta - $capital) / $quanto_quero_pagar_mes);
 } else {
     $meses_necessarios = 'Indefinido (defina um valor para investir mensalmente)';
 }
 
+// Formatação do tempo
 if (is_numeric($meses_necessarios)) {
     $anos = floor($meses_necessarios / 12);
     $meses_restantes = $meses_necessarios % 12;
@@ -52,7 +62,7 @@ if (is_numeric($meses_necessarios)) {
         $tempo_formatado .= ' e ';
     }
     if ($meses_restantes > 0) {
-        $tempo_formatado .= $meses_restantes . ' ' . ($meses_restantes > 1 ? 'meses' : 'meses');
+        $tempo_formatado .= $meses_restantes . ' meses';
     }
     if ($tempo_formatado === '') {
         $tempo_formatado = '0 meses';
@@ -99,9 +109,22 @@ $investimentos = [
                 <a href="./editar_meta.php"><button>Editar meta</button></a>
             </div>
             <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></p>
-            <p><strong>Valor Atual:</strong> R$ <?php echo number_format($capital, 2, ',', '.'); ?></p>
-            <p><strong>Investimento Mensal:</strong> R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></p>
-            <p><strong>Tempo Necessário:</strong> <?php echo is_numeric($tempo_formatado) ? "$tempo_formatado meses" : $tempo_formatado; ?></p>
+            <p><strong>Valor de Entrada:</strong> R$ <?php echo number_format($capital, 2, ',', '.'); ?></p>
+            <p><strong>Investimento Mensal Desejado:</strong> R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></p>
+            <p><strong>Tempo que deseja pagar:</strong> <?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></p>
+            <div class="bg-slate-500 rounded-md">
+                <p><strong>Pagando o valor mensal desejado, você levaria:</strong> <?php echo $tempo_formatado; ?></p>
+                <p><strong>Você precisaria investir por mês:</strong>
+                    <?php
+                    if ($valor_necessario_por_mes !== null) {
+                        echo 'R$ ' . number_format($valor_necessario_por_mes, 2, ',', '.');
+                    } else {
+                        echo 'Informe o tempo desejado para calcular.';
+                    }
+                    ?>
+                </p>
+            </div>
+
         </div>
 
         <!-- Dicas para Acelerar -->

@@ -1,8 +1,14 @@
 <?php
 session_start();
-include_once '../../bd/conexao.php';
+include_once '../../assets/bd/conexao.php';
 
 header('Content-Type: application/json');
+
+// Testa conexão ANTES de qualquer coisa
+if (!isset($conn) || !$conn) {
+    echo json_encode(['error' => 'Falha na conexão com o banco de dados']);
+    exit;
+}
 
 // Verifica se o usuário está logado
 if (isset($_SESSION['usuario_id'])) {
@@ -47,8 +53,15 @@ if ($filterType === 'categoria') {
               WHERE usuario_id = ? AND $dateCondition 
               GROUP BY categoria, tipo";
     $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        echo json_encode(['error' => 'Erro na query: ' . $conn->error]);
+        exit;
+    }
     $stmt->bind_param('i', $usuario_id);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        echo json_encode(['error' => 'Erro ao executar query: ' . $stmt->error]);
+        exit;
+    }
     $result = $stmt->get_result();
 
     $categorias = [];
@@ -63,8 +76,15 @@ if ($filterType === 'categoria') {
               WHERE usuario_id = ? AND tipo = ? AND $dateCondition 
               GROUP BY MONTH(data)";
     $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        echo json_encode(['error' => 'Erro na query: ' . $conn->error]);
+        exit;
+    }
     $stmt->bind_param('is', $usuario_id, $tipo);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        echo json_encode(['error' => 'Erro ao executar query: ' . $stmt->error]);
+        exit;
+    }
     $result = $stmt->get_result();
 
     $transacoes = [];
@@ -75,8 +95,5 @@ if ($filterType === 'categoria') {
 }
 
 echo json_encode(['data' => $data]);
-if (!isset($conn)) {
-    echo json_encode(['error' => 'Falha na conexão com o banco de dados']);
-    exit;
-}
+exit;
 ?>

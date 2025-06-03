@@ -128,20 +128,25 @@ $nomeExibido = formatarNome($nome);
     const menuLateral = document.getElementById('menuLateral');
     const menuOverlay = document.getElementById('menuOverlay');
     // Função para abrir o menu
-    btnMenu.addEventListener('click', () => {
-        menuLateral.classList.remove('-translate-x-full');
-        menuOverlay.classList.remove('hidden');
-    });
+    if (btnMenu) {
+        btnMenu.addEventListener('click', () => {
+            menuLateral.classList.remove('-translate-x-full');
+            menuOverlay.classList.remove('hidden');
+        });
+    }
     // Função para fechar o menu
-    btnFechar.addEventListener('click', () => {
-        menuLateral.classList.add('-translate-x-full');
-        menuOverlay.classList.add('hidden');
-    });
-    // Fechar o menu ao clicar no overlay
-    menuOverlay.addEventListener('click', () => {
-        menuLateral.classList.add('-translate-x-full');
-        menuOverlay.classList.add('hidden');
-    });
+    if (btnFechar) {
+        btnFechar.addEventListener('click', () => {
+            menuLateral.classList.add('-translate-x-full');
+            menuOverlay.classList.add('hidden');
+        });
+    }
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', () => {
+            menuLateral.classList.add('-translate-x-full');
+            menuOverlay.classList.add('hidden');
+        });
+    }
 </script>
 
 <script>

@@ -41,7 +41,14 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <?php foreach ($metas as $meta): ?>
                 <div class="bg-white p-4 rounded shadow transition-transform transform hover:-translate-y-3 hover:shadow-lg hover:shadow-gray-500/50">
-                    <h2 class="text-lg font-bold"> <?php echo htmlspecialchars($meta['razao']); ?> </h2>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-lg font-bold"><?php echo htmlspecialchars($meta['razao']); ?></h2>
+                        <a href="./excluir_meta.php?id=<?php echo $meta['id']; ?>">
+                            <button class="flex bg-tollens text-white py-2 px-4 rounded hover:bg-slate-500">
+                                Excluir meta
+                            </button>
+                        </a>
+                    </div>
                     <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($meta['preco_meta'], 2, ',', '.'); ?></p>
                     <p><strong>Valor Atual:</strong> R$ <?php echo number_format($meta['capital'], 2, ',', '.'); ?></p>
                     <p><strong>Investimento Mensal:</strong> R$ <?php echo number_format($meta['quanto_quero_pagar_mes'], 2, ',', '.'); ?></p>

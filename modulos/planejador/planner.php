@@ -31,25 +31,25 @@ include_once '../../assets/bd/conexao.php'
 
                 <!-- Preço da Meta -->
                 <div class="step hidden">
-                    <label for="preco_meta" class="block text-gray-700 font-medium mb-2">Preço da meta ($)</label>
+                    <label for="preco_meta" class="block text-gray-700 font-medium mb-2">Preço da meta: ($)</label>
                     <input type="number" id="preco_meta" name="preco_meta" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
                 <!-- Quanto Tenho -->
                 <div class="step hidden">
-                    <label for="quanto_tenho" class="block text-gray-700 font-medium mb-2">Quanto eu tenho ($)</label>
+                    <label for="quanto_tenho" class="block text-gray-700 font-medium mb-2">Quanto eu tenho para dar de entrada? ($)</label>
                     <input type="number" id="capital" name="capital" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
                 <!-- Tempo para Pagar -->
                 <div class="step hidden">
-                    <label for="tempo_pagar" class="block text-gray-700 font-medium mb-2">Quanto tempo quero pagar (meses)</label>
+                    <label for="tempo_pagar" class="block text-gray-700 font-medium mb-2">Quanto tempo quero pagar? (meses)</label>
                     <input type="number" id="quanto_tempo_quero_pagar" name="quanto_tempo_quero_pagar" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
                 <!-- Quanto Quero Pagar por Mês -->
                 <div class="step hidden">
-                    <label for="valor_mensal" class="block text-gray-700 font-medium mb-2">Quanto quero pagar por mês ($)</label>
+                    <label for="valor_mensal" class="block text-gray-700 font-medium mb-2">Até quanto quero ou posso pagar por mês? ($)</label>
                     <input type="number" id="quanto_quero_pagar_mes" name="quanto_quero_pagar_mes" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
