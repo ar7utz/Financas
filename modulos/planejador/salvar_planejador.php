@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($stmt->execute()) {
             $_SESSION['status_cadastro'] = true;
-            header("Location: ../planejador/page.php?mensagem=MetaCriadoSucesso");
+            header('Location: page.php?mensagem=metaAdicionada');
             exit;
         } else {
             $_SESSION['status_cadastro'] = false;
@@ -47,4 +47,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $conn->close();
+
 ?>

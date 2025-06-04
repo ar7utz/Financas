@@ -19,5 +19,6 @@ if (isset($_GET['id'])) {
 } else {
     echo 'ID da Meta não fornecido.';
 }
-header("Location: ./page.php?mensagem=excluirMeta");
+header('Location: page.php?mensagem=metaExcluida');
+exit;
 ?>
