@@ -241,6 +241,27 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
                     if (isset($_SESSION['user_id'])) {
                         $usuario_id = $_SESSION['user_id'];
+
+                        // Paginação
+                        $itensPorPagina = 15;
+                        $paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
+                        $offset = ($paginaAtual - 1) * $itensPorPagina;
+
+                        // Conta total de transações
+                        $sqlTotal = "SELECT COUNT(*) as total FROM transacoes WHERE usuario_id = ?";
+                        $stmtTotal = $conn->prepare($sqlTotal);
+                        $stmtTotal->bind_param('i', $usuario_id);
+                        $stmtTotal->execute();
+                        $resultTotal = $stmtTotal->get_result();
+                        $totalTransacoes = $resultTotal->fetch_assoc()['total'];
+                        $totalPaginas = ceil($totalTransacoes / $itensPorPagina);
+
+                        // Busca as transações da página atual
+                        $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY data DESC LIMIT ? OFFSET ?";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param('iii', $usuario_id, $itensPorPagina, $offset);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
                     
                         $sql = "
                             SELECT t.*, c.nome_categoria AS categoria_nome
@@ -663,7 +684,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         });
     </script>
 
-    <script>
+    <script> //Exportar PDF e Excel
         document.getElementById('btnExportar').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('exportOptions').classList.toggle('hidden');
@@ -806,6 +827,21 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     </script>
 
+    <div class="flex justify-center gap-2 mb-6">
+        <?php if ($paginaAtual > 1): ?>
+            <a href="?pagina=<?php echo $paginaAtual - 1; ?>" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">&laquo; Anterior</a>
+        <?php endif; ?>
+
+        <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+            <a href="?pagina=<?php echo $i; ?>" class="px-3 py-1 rounded <?php echo $i == $paginaAtual ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'; ?>">
+                <?php echo $i; ?>
+            </a>
+        <?php endfor; ?>
+
+        <?php if ($paginaAtual < $totalPaginas): ?>
+            <a href="?pagina=<?php echo $paginaAtual + 1; ?>" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Próxima &raquo;</a>
+        <?php endif; ?>
+    </div>
 </body>
 
 </html>

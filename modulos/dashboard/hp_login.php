@@ -54,7 +54,7 @@ $dados = obterDados($filtro);
     <title>Finstash - Bem Vindo</title>
 </head>
 
-<body>
+<body class="p-0 margin-0">
     <?php include_once('../../assets/templates/navbar.php') ?>
 
     <?php //toastify
@@ -108,21 +108,76 @@ $dados = obterDados($filtro);
         </div>
     </div>
 
-    <?php echo $usuario_id; ?> //////////
+    <?php echo ('id do usuario: ') . $usuario_id; ?>
 
     <div class="flex">
         <!-- Sidebar preta -->
         <?php include_once('../../assets/templates/navbar_lateral.php') ?>
         <div class="flex justify-center w-4/6">
-            <?php include_once('../../assets/templates/graficos/grafico_pizza.php') ?>
+            <?php
+            // Conecte ao banco se necessário
+            include_once('../../assets/bd/conexao.php');
+            $usuario_id = $_SESSION['user_id'] ?? $_SESSION['usuario_id'] ?? null;
+
+            // Verifica se o usuário tem transações
+            $temTransacao = false;
+            if ($usuario_id) {
+                $sql = "SELECT COUNT(*) as total FROM transacoes WHERE usuario_id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('i', $usuario_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                $temTransacao = $row['total'] > 0;
+            }
+
+            if ($temTransacao) {
+                include_once('../../assets/templates/graficos/grafico_pizza.php');
+            } else {
+                echo '<div class="text-center text-gray-600 text-lg font-semibold p-8">Você ainda não possui nenhuma transação registrada.</div>';
+            }
+            ?>
         </div>
     </div>
 
-    <div class="flex">
-        <div class="flex justify-center w-4/6">
-            <?php include_once('../../assets/templates/graficos/graficos_extend.php') ?>
-        </div>
+    <div class="flex flex-col items-center align-middle justify-between p-4 bg-gray-100 rounded-md mb-6">
+        <form id="graficoForm" class="flex flex-col md:flex-row gap-4 mb-6 items-center">
+            <div>
+                <label for="chartType" class="mr-2 font-semibold">Tipo de Gráfico:</label>
+                <select id="chartType" class="border rounded px-2 py-1">
+                    <option value="pie">Pizza</option>
+                    <option value="bar">Barra</option>
+                    <option value="line">Linha</option>
+                </select>
+            </div>
+            <div>
+                <label for="filterType" class="mr-2 font-semibold">Filtro:</label>
+                <select id="filterType" class="border rounded px-2 py-1">
+                    <option value="categoria">Categoria</option>
+                    <option value="receitas">Receitas</option>
+                    <option value="despesas">Despesas</option>
+                </select>
+            </div>
+            <div>
+                <label for="timeRange" class="mr-2 font-semibold">Período:</label>
+                <select id="timeRange" class="border rounded px-2 py-1">
+                    <option value="mensal">Mensal</option>
+                    <option value="semanal">Semanal</option>
+                    <option value="trimestral">Trimestral</option>
+                    <option value="semestral">Semestral</option>
+                    <option value="anual">Anual</option>
+                </select>
+            </div>
+            <button id="updateChart" type="button" class="bg-tollens text-white px-4 py-2 rounded hover:bg-green-500">Atualizar Gráfico</button>
+        </form>
     </div>
+
+
+    <div>
+        <canvas id="dynamicChart" width="400" height="200"></canvas>
+        <?php include_once('../../assets/templates/graficos/graficos_extend.php'); ?>
+    </div>
+
 
     <script> //Função para buscar e exibir o horário local
         function atualizarHorario() {

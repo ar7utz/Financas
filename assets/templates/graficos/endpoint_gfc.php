@@ -1,6 +1,6 @@
 <?php
 session_start();
-include_once '../../assets/bd/conexao.php';
+include_once '../../../assets/bd/conexao.php';
 
 header('Content-Type: application/json');
 
@@ -48,33 +48,33 @@ switch ($timeRange) {
 
 // Consulta os dados com base no filtro
 if ($filterType === 'categoria') {
-    $query = "SELECT categoria, tipo, SUM(valor) AS total 
-              FROM transacoes 
-              WHERE usuario_id = ? AND $dateCondition 
-              GROUP BY categoria, tipo";
+    $query = "SELECT c.nome_categoria AS categoria, t.tipo, SUM(t.valor) AS total
+              FROM transacoes t
+              LEFT JOIN categoria c ON t.categoria_id = c.id
+              WHERE t.usuario_id = ? AND $dateCondition
+              GROUP BY c.nome_categoria, t.tipo";
     $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        echo json_encode(['error' => 'Erro na query: ' . $conn->error]);
-        exit;
-    }
     $stmt->bind_param('i', $usuario_id);
-    if (!$stmt->execute()) {
-        echo json_encode(['error' => 'Erro ao executar query: ' . $stmt->error]);
-        exit;
-    }
+    $stmt->execute();
     $result = $stmt->get_result();
 
     $categorias = [];
     while ($row = $result->fetch_assoc()) {
-        $categorias[$row['categoria']][$row['tipo']] = $row['total'];
+        $cat = $row['categoria'] ?? 'Sem categoria';
+        $categorias[$cat][$row['tipo']] = $row['total'];
     }
     $data['categoria'] = $categorias;
 } elseif ($filterType === 'receitas' || $filterType === 'despesas') {
     $tipo = $filterType === 'receitas' ? 'positivo' : 'negativo';
-    $query = "SELECT MONTHNAME(data) AS mes, SUM(valor) AS total 
+    $query = "SELECT 
+                YEAR(data) AS ano,
+                MONTH(data) AS mes_num,
+                MONTHNAME(data) AS mes,
+                SUM(valor) AS total 
               FROM transacoes 
               WHERE usuario_id = ? AND tipo = ? AND $dateCondition 
-              GROUP BY MONTH(data)";
+              GROUP BY ano, mes_num
+              ORDER BY ano, mes_num";
     $stmt = $conn->prepare($query);
     if (!$stmt) {
         echo json_encode(['error' => 'Erro na query: ' . $conn->error]);
@@ -89,7 +89,11 @@ if ($filterType === 'categoria') {
 
     $transacoes = [];
     while ($row = $result->fetch_assoc()) {
-        $transacoes[] = $row;
+        // Exibe mês/ano para não misturar anos diferentes
+        $transacoes[] = [
+            'mes' => $row['mes'] . '/' . $row['ano'],
+            'total' => $row['total']
+        ];
     }
     $data[$filterType] = $transacoes;
 }

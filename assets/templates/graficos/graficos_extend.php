@@ -1,50 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráficos Dinâmicos</title>
-    <script src="/Financas/node_modules/chart.js/dist/chart.umd.js"></script>
-    <link rel="stylesheet" href="/Financas/assets/css/output.css">
-</head>
-<body class="bg-gray-100 p-6">
-
-    <div class="container mx-auto">
-        <h1 class="text-2xl font-bold mb-4">Gráficos Dinâmicos</h1>
-
-        <!-- Filtros -->
-        <div class="mb-6">
-            <label for="chartType" class="block mb-2 font-medium">Escolha o tipo de gráfico:</label>
-            <select id="chartType" class="border border-gray-300 rounded px-4 py-2">
-                <option value="bar">Bar Chart</option>
-                <option value="line">Line Chart</option>
-            </select>
-
-            <label for="filterType" class="block mt-4 mb-2 font-medium">Filtrar por:</label>
-            <select id="filterType" class="border border-gray-300 rounded px-4 py-2">
-                <option value="categoria">Categorias</option> <!-- Corrigido aqui -->
-                <option value="receitas">Receitas</option>
-                <option value="despesas">Despesas</option>
-            </select>
-
-            <label for="timeRange" class="block mt-4 mb-2 font-medium">Intervalo de tempo:</label>
-            <select id="timeRange" class="border border-gray-300 rounded px-4 py-2">
-                <option value="semanal">Semana</option>
-                <option value="mensal">Mês</option>
-                <option value="trimestral">Trimestre</option>
-                <option value="semestral">Semestre</option>
-                <option value="anual">Ano</option>
-            </select>
-
-            <button id="updateChart" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Atualizar Gráfico</button>
-        </div>
-
-        <!-- Canvas do Gráfico -->
-        <canvas id="dynamicChart" width="400" height="200"></canvas>
-    </div>
-
-    <script>
-        let dynamicChart = null;
+<script>
+    let dynamicChart = null;
 
         async function updateChart() {
             const chartType = document.getElementById('chartType').value;
