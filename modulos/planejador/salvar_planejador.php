@@ -33,6 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param('isdidsss', $usuario_id, $razao, $preco_meta, $capital, $quanto_tempo_quero_pagar, $quanto_quero_pagar_mes, $criado_em, $horario_criado);
 
         if ($stmt->execute()) {
+            // Registrar movimentação
+            $tipo = 'criada';
+            $descricao = "Meta '$razao' criada.";
+            $sql_mov = "INSERT INTO movimentacoes (usuario_id, tipo, descricao, data, hora) VALUES (?, ?, ?, ?, ?)";
+            $stmt_mov = $conn->prepare($sql_mov);
+            $stmt_mov->bind_param('issss', $usuario_id, $tipo, $descricao, $criado_em, $horario_criado);
+            $stmt_mov->execute();
+
             $_SESSION['status_cadastro'] = true;
             header('Location: page.php?mensagem=metaAdicionada');
             exit;

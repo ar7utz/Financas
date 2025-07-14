@@ -32,13 +32,13 @@ include_once '../../assets/bd/conexao.php'
                 <!-- Preço da Meta -->
                 <div class="step hidden">
                     <label for="preco_meta" class="block text-gray-700 font-medium mb-2">Preço da meta: ($)</label>
-                    <input type="number" id="preco_meta" name="preco_meta" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="number" id="preco_meta" name="preco_meta" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" data-mascara-valor required>
                 </div>
 
                 <!-- Quanto Tenho -->
                 <div class="step hidden">
                     <label for="quanto_tenho" class="block text-gray-700 font-medium mb-2">Quanto eu tenho para dar de entrada? ($)</label>
-                    <input type="number" id="capital" name="capital" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="number" id="capital" name="capital" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" data-mascara-valor required>
                 </div>
 
                 <!-- Tempo para Pagar -->
@@ -50,7 +50,7 @@ include_once '../../assets/bd/conexao.php'
                 <!-- Quanto Quero Pagar por Mês -->
                 <div class="step hidden">
                     <label for="valor_mensal" class="block text-gray-700 font-medium mb-2">Até quanto quero ou posso pagar por mês? ($)</label>
-                    <input type="number" id="quanto_quero_pagar_mes" name="quanto_quero_pagar_mes" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="number" id="quanto_quero_pagar_mes" name="quanto_quero_pagar_mes" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" data-mascara-valor required>
                 </div>
 
                 <!-- Botões de navegação -->
@@ -110,6 +110,25 @@ include_once '../../assets/bd/conexao.php'
                 position: "right", 
                 backgroundColor: "#1133A6",
             }).showToast();
+        });
+    </script>
+    <script> /*máscara de valor*/
+        function mascaraValor(input) {
+            let v = input.value.replace(/\D/g, ''); // Remove tudo que não for dígito
+            v = (v / 100).toFixed(2) + ''; // Divide por 100 e fixa 2 casas decimais
+            v = v.replace('.', ','); // Troca ponto por vírgula
+            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); // Adiciona pontos a cada milhar
+            input.value = v;
+        }
+
+        // Aplica a máscara em todos os inputs do tipo number (ou text, se você trocar)
+        document.querySelectorAll('input[data-mascara-valor]').forEach(function(input) {
+            input.type = 'text'; // Troca para text para permitir máscara
+            input.addEventListener('input', function() {
+                mascaraValor(this);
+            });
+            // Opcional: formata ao carregar valor inicial
+            mascaraValor(input);
         });
     </script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

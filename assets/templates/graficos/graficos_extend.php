@@ -101,6 +101,4 @@
             updateChart();
         });
 
-    </script>
-</body>
-</html>
+</script>

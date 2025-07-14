@@ -243,7 +243,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         $usuario_id = $_SESSION['user_id'];
 
                         // Paginação
-                        $itensPorPagina = 15;
+                        $itensPorPagina = 5;
                         $paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
                         $offset = ($paginaAtual - 1) * $itensPorPagina;
 

@@ -95,7 +95,7 @@ $dados = obterDados($filtro);
 
     <div class="flex w-full items-center justify-between p-4">
         <!-- Clima -->
-        <div class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-2">
+        <div class="flex w-52 h-16 items-center justify-center bg-kansai rounded-md p-2">
             <p class="font-medium" id="weatherDescription">Carregando clima...</p>
             <img id="weatherIcon" alt="Ícone do clima" style="width: 40px; height: 40px; margin-left: 10px;">
         </div>
@@ -173,7 +173,7 @@ $dados = obterDados($filtro);
     </div>
 
 
-    <div>
+    <div class="flex flex-col items-center align-middle justify-between p-4 rounded-md mb-6 bg-slate-400">
         <canvas id="dynamicChart" width="400" height="200"></canvas>
         <?php include_once('../../assets/templates/graficos/graficos_extend.php'); ?>
     </div>
