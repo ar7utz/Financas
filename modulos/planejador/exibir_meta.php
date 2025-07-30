@@ -115,15 +115,34 @@ $investimentos = [
             <div class="">
                 <a href="./editar_meta.php?id=<?php echo $meta_id; ?>"><button>Adicionar movimentação</button></a>
             </div>
-            <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center"> <!-- vou arrumar essa bomba -->
-                <p class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-4"><strong>Valor da Meta:</strong> R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></p>
-                <p class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-4"><strong>Valor de Entrada:</strong> R$ <?php echo number_format($capital, 2, ',', '.'); ?></p>
-                <p class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-4"><strong>Investimento Mensal Desejado:</strong> R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></p>
-                <p class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-4"><strong>Tempo que deseja pagar:</strong> <?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></p>
+            
+            <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center text-center">
+                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                    <strong>Valor da Meta:</strong>
+                    <span>R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></span>
+                </p>
+                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                    <strong>Valor de Entrada:</strong>
+                    <span>R$ <?php echo number_format($capital, 2, ',', '.'); ?></span>
+                </p>
+                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                    <strong>Investimento Mensal Desejado:</strong>
+                    <span>R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></span>
+                </p>
+                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                    <strong>Tempo que deseja pagar:</strong>
+                    <span><?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></span>
+                </p>
+            </div>
 
-                <!-- <div class="flex flex-row">
-                    <p class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-4"><strong>Pagando o valor mensal desejado, você levaria:</strong> <?php echo $tempo_formatado; ?></p>
-                    <p class="flex w-48 h-18 items-center justify-center bg-kansai rounded-md p-2 "><strong class="mr-2">Você precisaria investir por mês: </strong>
+            <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center text-center">
+                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-2">
+                    <strong>Pagando o valor mensal desejado, você levaria:</strong>
+                    <span><?php echo $tempo_formatado; ?></span>
+                </p>
+                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-8">
+                    <strong>Você precisaria investir por mês:</strong>
+                    <span>
                         <?php
                         if ($valor_necessario_por_mes !== null) {
                             echo 'R$ ' . number_format($valor_necessario_por_mes, 2, ',', '.');
@@ -131,12 +150,11 @@ $investimentos = [
                             echo 'Informe o tempo desejado para calcular.';
                         }
                         ?>
-                        para pagar em <strong class="ml-2"> <?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></strong></p>
-                    </p>
-                </div> -->
-
+                        <br>
+                        para pagar em<strong class="ml-2"><?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></strong>
+                    </span>
+                </p>
             </div>
-
         </div>
 
         <!-- Dicas para Acelerar -->
@@ -177,7 +195,7 @@ $investimentos = [
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-md mt-2">
-            <div class="bg-white p-6 rounded-lg shadow-md mt-2">
+            <div class="bg-white p-6 rounded-lg shadow-md mt-2 hover:bg-gray-400 transition-colors duration-200">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleMovimentacoes()">
                     <h1 class="text-center font-bold text-lg mb-2 flex-1">
                         Histórico de movimentações da meta: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span>
