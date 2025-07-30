@@ -178,19 +178,24 @@ $investimentos = [
 
         <div class="bg-white p-6 rounded-lg shadow-md mt-2">
             <div class="bg-white p-6 rounded-lg shadow-md mt-2">
-                <h1 class="text-center font-bold text-lg mb-2">Histórico de movimentações da meta: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span></h1>
-                <div class="flex flex-col">
+                <div class="flex justify-between items-center cursor-pointer" onclick="toggleMovimentacoes()">
+                    <h1 class="text-center font-bold text-lg mb-2 flex-1">
+                        Histórico de movimentações da meta: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span>
+                    </h1>
+                    <span id="iconeSeta" class="ml-4 text-2xl transition-transform duration-200"><i class="fa fa-chevron-down"></i></span>
+                </div>
+                <div id="movimentacoesContainer" class="flex flex-col mt-4 hidden">
                     <?php
                     $sql = "SELECT * FROM movimentacoes WHERE usuario_id = ? AND meta_id = ? ORDER BY data DESC, hora DESC";
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param('ii', $usuario_id, $meta_id);
                     $stmt->execute();
                     $result = $stmt->get_result();
-                            
+
                     $temMovimentacao = false;
                     while ($row = $result->fetch_assoc()) {
                         $temMovimentacao = true;
-                        echo "<div class='mb-2 p-2 border-b bg-slate-400 border-gray-300 rounded-md'>";
+                        echo "<div class='mb-2 p-2 border-b cursor-pointer bg-slate-400 border-gray-300 rounded-md hover:bg-slate-500 transition-colors duration-200'>";
                         echo "<span class='tipo'>{$row['tipo']}</span> - ";
                         echo "<span class='descricao'>{$row['descricao']} - </span> ";
                         echo "<span class='valor'>R$ " . number_format($row['valor'], 2, ',', '.') . "</span> - ";
@@ -275,6 +280,15 @@ $investimentos = [
             }
         });
         </script>
+
+    <script>
+        function toggleMovimentacoes() {
+            const container = document.getElementById('movimentacoesContainer');
+            const icone = document.getElementById('iconeSeta');
+            container.classList.toggle('hidden');
+            icone.classList.toggle('rotate-180');
+        }
+</script>
 
 </body>
 </html>
