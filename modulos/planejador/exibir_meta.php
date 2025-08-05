@@ -99,6 +99,7 @@ $investimentos = [
 
     <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
     <script src="../../node_modules/toastify-js/src/toastify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="shortcut icon" href="../../assets/logo/cube_logo_no_background.ico" type="image/x-icon">
     <title>Finstash - Meta <?php echo htmlspecialchars($meta['razao']); ?></title>
@@ -112,10 +113,10 @@ $investimentos = [
         <!-- Informações da Meta -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-xl font-bold mb-4">Detalhes da Meta</h2>
-            <div class="">
+            <div class="w-28 h-6 bg-gray-400 p-4 rounded-lg shadow-sm">
                 <a href="./editar_meta.php?id=<?php echo $meta_id; ?>"><button>Adicionar movimentação</button></a>
             </div>
-            
+
             <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center text-center">
                 <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
                     <strong>Valor da Meta:</strong>
@@ -176,11 +177,41 @@ $investimentos = [
                 <?php endforeach; ?>
             </ul>
 
-            <!-- Informações de Mercado da API -->
+            <!-- Informações de Mercado da API Apple -->
             <div id="marketData" class="mt-6">
                 <h3 class="text-lg font-bold mb-2">Informações de Mercado</h3>
                 <p class="text-gray-600">Carregando dados de mercado...</p>
             </div>
+
+            <!-- IPCA -->
+            <div id="ipcaData" class="mt-8">
+                <h3 class="text-lg font-bold mb-2">Índice de Preços ao Consumidor Amplo (IPCA)</h3>
+                <canvas id="ipcaChart" height="60"></canvas>
+                <p id="ipcaAtual" class="mt-2 text-gray-700"></p>
+            </div>
+
+            <!-- Bitcoin -->
+            <div id="bitcoinData" class="mt-8">
+                <h3 class="text-lg font-bold mb-2">Preço do Bitcoin (BTC)</h3>
+                <canvas id="bitcoinChart" height="60"></canvas>
+                <p id="bitcoinAtual" class="mt-2 text-gray-700"></p>
+                <a href="https://developer.bitcoin.org/" target="_blank" class="text-blue-600 underline text-sm">Saiba mais sobre Bitcoin (documentação oficial)</a>
+            </div>
+
+            <!-- Cotação do Dólar -->
+            <div id="dolarData" class="mt-8">
+                <h3 class="text-lg font-bold mb-2">Cotação do Dólar (USD/BRL)</h3>
+                <canvas id="dolarChart" height="60"></canvas>
+                <p id="dolarAtual" class="mt-2 text-gray-700"></p>
+            </div>
+
+            <!-- Taxa Selic -->
+            <div id="selicData" class="mt-8">
+                <h3 class="text-lg font-bold mb-2">Taxa de Juros Selic</h3>
+                <canvas id="selicChart" height="60"></canvas>
+                <p id="selicAtual" class="mt-2 text-gray-700"></p>
+            </div>
+
         </div>
 
         <!-- Modal de Confirmação de Exclusão -->
@@ -195,8 +226,8 @@ $investimentos = [
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-md mt-2">
-            <div class="bg-white p-6 rounded-lg shadow-md mt-2 hover:bg-gray-400 transition-colors duration-200">
-                <div class="flex justify-between items-center cursor-pointer" onclick="toggleMovimentacoes()">
+            <div class="bg-white p-6 rounded-lg shadow-md mt-2 cursor-pointer">
+                <div class="flex justify-between items-center" onclick="toggleMovimentacoes()">
                     <h1 class="text-center font-bold text-lg mb-2 flex-1">
                         Histórico de movimentações da meta: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span>
                     </h1>
@@ -248,7 +279,7 @@ $investimentos = [
         // Função para buscar dados de mercado da API Polygon.io
         async function fetchMarketData() {
             const apiKey = 'qPI2YVLHqBzBCd4A44kTak0IBkGVFyea'; 
-            const url = `https://api.polygon.io/v2/aggs/ticker/AAPL/prev?apiKey=${apiKey}`; // Exemplo com o ticker AAPL (Apple)
+            const url = `https://api.polygon.io/v2/aggs/ticker/AAPL/prev?apiKey=${apiKey}`; //Exemplo com o ticker AAPL (Apple)
 
             try {
                 const response = await fetch(url);
@@ -306,7 +337,257 @@ $investimentos = [
             container.classList.toggle('hidden');
             icone.classList.toggle('rotate-180');
         }
-</script>
+    </script>
+
+    <script>
+    // Cotação do Dólar diária
+    fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados?formato=json&dataInicial=01/01/2025')
+    .then(res => res.json())
+    .then(data => {
+        // Pega os últimos 30 dias
+        const ultimos = data.slice(-30);
+        const labels = ultimos.map(d => d.data);
+        const valores = ultimos.map(d => parseFloat(d.valor.replace(',', '.')));
+        document.getElementById('dolarAtual').innerText = 'Última cotação: R$ ' + valores[valores.length-1].toFixed(2);
+
+        new Chart(document.getElementById('dolarChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Dólar (R$)',
+                    data: valores,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37,99,235,0.1)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: {
+                        display: true,
+                        text: 'Cotação diária do Dólar (últimos 30 dias)'
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Dia',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 10,
+                            font: { size: 12 }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Valor (R$)',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    // Taxa Selic anual (acumulada no mês, mas exibindo como anual)
+    fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados?formato=json&dataInicial=01/01/2025')
+        .then(res => res.json())
+        .then(data => {
+            const ultimos = data.slice(-30);
+            const labels = ultimos.map(d => d.data);
+            const valores = ultimos.map(d => parseFloat(d.valor.replace(',', '.')));
+            document.getElementById('selicAtual').innerText = 'Última taxa anual: ' + valores[valores.length-1].toFixed(2) + '% a.a.';
+        
+            new Chart(document.getElementById('selicChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Selic acumulada no mês (%)',
+                        data: valores,
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22,163,74,0.1)',
+                        fill: true,
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true },
+                        title: {
+                            display: true,
+                            text: 'Taxa Selic acumulada no mês (últimos 30 meses)'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Data',
+                                font: { size: 14 }
+                            },
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 10,
+                                font: { size: 12 }
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Taxa (%)',
+                                font: { size: 14 }
+                            },
+                            ticks: {
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // IPCA mensal
+    fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.10844/dados?formato=json&dataInicial=01/01/2018')
+    .then(res => res.json())
+    .then(data => {
+        const ultimos = data.slice(-30);
+        const labels = ultimos.map(d => d.data);
+        const valores = ultimos.map(d => parseFloat(d.valor.replace(',', '.')));
+        document.getElementById('ipcaAtual').innerText = 'Último IPCA: ' + valores[valores.length-1].toFixed(2) + '%';
+
+        new Chart(document.getElementById('ipcaChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'IPCA (%)',
+                    data: valores,
+                    borderColor: '#eab308',
+                    backgroundColor: 'rgba(234,179,8,0.1)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: {
+                        display: true,
+                        text: 'IPCA mensal (últimos 30 meses)'
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Data',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 10,
+                            font: { size: 12 }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'IPCA (%)',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    // Preço do Bitcoin (últimos 30 dias) usando CoinGecko
+    fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=brl&days=30')
+    .then(res => res.json())
+    .then(data => {
+        const prices = data.prices; // [timestamp, price]
+        const labels = prices.map(p => {
+            const date = new Date(p[0]);
+            return date.toLocaleDateString('pt-BR');
+        });
+        const valores = prices.map(p => p[1]);
+        document.getElementById('bitcoinAtual').innerText = 'Último preço: R$ ' + valores[valores.length-1].toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+        new Chart(document.getElementById('bitcoinChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Bitcoin (R$)',
+                    data: valores,
+                    borderColor: '#f7931a',
+                    backgroundColor: 'rgba(247,147,26,0.1)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: {
+                        display: true,
+                        text: 'Preço do Bitcoin (últimos 30 dias)'
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Data',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 10,
+                            font: { size: 12 }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Preço (R$)',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
 
 </body>
 </html>

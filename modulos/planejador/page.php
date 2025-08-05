@@ -36,8 +36,8 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
 <body>
     <?php require_once '../../assets/templates/navbar.php'; ?>
 
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Suas Metas Financeiras</h1>
+    <div class="container mx-auto p-4 justify-between">
+        <h1 class="text-2xl font-bold mb-4 text-center">Suas Metas Financeiras</h1>
 
         <a href="./planner.php">
             <button class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Criar +</button>
