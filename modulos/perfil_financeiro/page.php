@@ -19,7 +19,7 @@
 <body class="bg-gray-100 min-h-screen font-OpenSans">
     <?php require_once '../../assets/templates/navbar.php' ?>
 
-    <div class="font-OpenSans max-w-3xl mx-auto mt-10 bg-white rounded-xl shadow-lg p-8">
+    <div class="font-OpenSans max-w-3xl mx-auto mt-10 mb-10 bg-white rounded-xl shadow-lg p-8">
         <div class="flex flex-col items-center text-center">
             <h1 class="text-3xl font-bold mb-2 text-blue-700">Descubra seu Perfil Financeiro</h1>
             <p class="text-gray-600 mb-6 max-w-2xl">

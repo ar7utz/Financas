@@ -60,8 +60,9 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
                     <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($meta['preco_meta'], 2, ',', '.'); ?></p>
                     <p><strong>Valor Atual:</strong> R$ <?php echo number_format($meta['capital'], 2, ',', '.'); ?></p>
                     <p><strong>Investimento Mensal:</strong> R$ <?php echo number_format($meta['quanto_quero_pagar_mes'], 2, ',', '.'); ?></p>
+                    <p><strong>Investido até agora:</strong> R$ <?php echo number_format($meta['preco_meta']); ?></p>
                     <a href="./exibir_meta.php?id=<?php echo $meta['id']; ?>">
-                        <button class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mt-6">
+                        <button class="border-2 border-black bg-tollens text-white py-2 px-4 rounded hover:bg-ghostwhite hover:text-black hover:border-black mt-6">
                             Abrir
                         </button>
                     </a>

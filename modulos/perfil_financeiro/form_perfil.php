@@ -1,4 +1,14 @@
 <?php
+session_start();
+require_once '../../assets/bd/conexao.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login/login.php');
+    exit;
+}
+
+$usuario_id = $_SESSION['user_id'];
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -19,10 +29,22 @@
     <div class="max-w-3xl mx-auto mt-10 bg-white rounded-xl shadow-lg p-8">
         <h1 class="text-3xl font-bold mb-6">Descubra seu perfil financeiro</h1>
         <p class="mb-4">Responda às perguntas abaixo para descobrir seu perfil financeiro e receber recomendações personalizadas.</p>
-        <form id="perfilFinanceiroForm" class="bg-white p-6 rounded-lg shadow-md">
-            <div class="step">
-                teste
+        <!-- Barra de progresso -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-1">
+                <span id="progressText" class="text-gray-600 text-lg"></span>
             </div>
+            <div class="w-full bg-gray-100 rounded h-2 overflow-hidden">
+                <div id="progressBar" class="bg-tollens h-2 transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+        <form method="POST" action="./pontuação_perfil.php" id="perfilFinanceiroForm" class="bg-white p-6 rounded-lg shadow-md">
+            <div class="step">
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                Porro similique officiis, praesentium illum error vero animi qui veritatis accusantium,
+                a sunt sequi deserunt numquam pariatur ratione ipsa incidunt rerum ut!
+            </div>
+
             <!-- Passo 1 -->
             <div class="step">
                 <label for="pergunta1" class="block text-gray-700 text-sm font-bold mb-2">1. Qual é a sua principal prioridade financeira?</label>
@@ -87,13 +109,7 @@
                     <option value="jaAposentei">Já estou aposentado</option>
                 </select>
             </div>
-
             <!-- Botões de navegação -->
-            <div class="flex justify-between mt-4">
-                <button type="button" id="prevBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hidden">Anterior</button>
-                <button type="button" id="nextBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Próximo</button>
-            </div>
-            <!-- Botão de enviar no último passo -->
             <div class="flex justify-between mt-4">
                 <button type="button" id="prevBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hidden">Anterior</button>
                 <button type="button" id="nextBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Próximo</button>
@@ -103,31 +119,20 @@
                 <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg w-full">Descobrir Perfil</button>
             </div>
         </form>
-        <div id="resultado" class="mt-6 hidden bg-green-100 p-4 rounded-lg shadow-md">
-            <h2 class="text-xl font-bold mb-2">Seu Perfil Financeiro</h2>
-            <p id="perfilResultado" class="text-gray-700"></p>
+        <div id="resultado" class="mt-6 bg-green-100 p-4 rounded-lg shadow-md hidden">
+            <h2 class="text-xl font-bold mb-2 text-center">Seu Perfil Financeiro</h2>
+            <p class="text-gray-700" id="perfilResultado">
+            </p>
         </div>
     </div>
-
-
-    <script>
-        document.getElementById('perfilFinanceiroForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('resultado').classList.remove('hidden');
-
-            // Desabilita o botão Anterior e o botão Próximo após o envio
-            prevBtn.disabled = true;
-            nextBtn.disabled = true;
-            prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        });
-    </script>
 
     <script>
         const steps = document.querySelectorAll(".step");
         const nextBtn = document.getElementById("nextBtn");
         const prevBtn = document.getElementById("prevBtn");
         const submitBtnWrapper = document.getElementById("submitBtnWrapper");
+        const progressText = document.getElementById("progressText");
+        const progressBar = document.getElementById("progressBar");
         let currentStep = 0;
 
         // Inicializa apenas o primeiro passo visível
@@ -159,6 +164,17 @@
             prevBtn.classList.toggle("hidden", index === 0);
             nextBtn.classList.toggle("hidden", index === steps.length - 1);
             submitBtnWrapper.classList.toggle("hidden", index !== steps.length - 1);
+
+            // Atualiza a barra de progresso SOMENTE se não for o texto inicial (lorem)
+            if (index === 0) {
+                progressBar.style.width = '0%';
+                progressText.innerText = '';
+            } else {
+                // Total de perguntas (desconsiderando o texto inicial)
+                const totalPerguntas = steps.length - 1;
+                progressBar.style.width = `${(index / totalPerguntas) * 100}%`;
+                progressText.innerText = `Pergunta ${index} de ${totalPerguntas}`;
+            }
         }
 
         nextBtn.addEventListener("click", () => {
@@ -185,12 +201,38 @@
 
         showStep(currentStep);
 
+        // Envio AJAX para exibir resultado sem recarregar a página
         document.getElementById('perfilFinanceiroForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            document.getElementById('resultado').classList.remove('hidden');
-            document.getElementById('perfilResultado').innerText = "Perfil calculado com base nas suas respostas!";
 
-            // Desabilita o botão Anterior e o botão Próximo após o envio
+            const formData = new FormData(this);
+
+            fetch('pontuação_perfil.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                // Esconde o formulário de perguntas
+                document.getElementById('perfilFinanceiroForm').classList.add('hidden');
+                // Mostra o resultado
+                document.getElementById('resultado').classList.remove('hidden');
+                if (data.status === "ok") {
+                    document.getElementById('perfilResultado').innerHTML =
+                        `<span class="font-bold">Seu perfil financeiro é:</span>
+                         <span class="text-blue-700">${data.perfil}</span><br>
+                         <span class="text-sm text-gray-500">Pontuação: ${data.pontos}</span>`;
+                } else {
+                    document.getElementById('perfilResultado').innerText = "Erro ao calcular perfil: " + (data.msg || "Tente novamente.");
+                }
+            })
+            .catch(() => {
+                document.getElementById('perfilFinanceiroForm').classList.add('hidden');
+                document.getElementById('resultado').classList.remove('hidden');
+                document.getElementById('perfilResultado').innerText = "Erro ao enviar respostas. Tente novamente.";
+            });
+
+            // Desabilita os botões após envio
             prevBtn.disabled = true;
             nextBtn.disabled = true;
             prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
