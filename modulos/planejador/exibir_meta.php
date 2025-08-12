@@ -74,7 +74,7 @@ if (is_numeric($meses_necessarios)) {
 
 // Dicas para acelerar o objetivo
 $dicas = [
-    "Aumente seu aporte mensal investindo uma parte do seu salário.",
+    "Aumente seu aporte mensal investindo uma terço do seu salário.",
     "Evite gastos desnecessários e redirecione esse valor para o investimento.",
     "Escolha investimentos com maior rentabilidade para acelerar os ganhos.",
     "Considere fontes de renda extra para aumentar o capital investido.",
@@ -102,7 +102,7 @@ $investimentos = [
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="shortcut icon" href="../../assets/logo/cube_logo_no_background.ico" type="image/x-icon">
-    <title>Finstash - Meta <?php echo htmlspecialchars($meta['razao']); ?></title>
+    <title>Finstash - Meta - <?php echo htmlspecialchars($meta['razao']); ?></title>
 </head>
 <body class="bg-gray-100">
     <?php require_once '../../assets/templates/navbar.php'; ?>
@@ -112,9 +112,9 @@ $investimentos = [
 
         <!-- Informações da Meta -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-xl font-bold mb-4">Detalhes da Meta</h2>
-            <div class="w-28 h-6 bg-gray-400 p-4 rounded-lg shadow-sm">
-                <a href="./editar_meta.php?id=<?php echo $meta_id; ?>"><button>Adicionar movimentação</button></a>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold mb-4">Detalhes da Meta</h2>
+                <a class="bg-slate-400 w-40 p-2 rounded-md" href="./editar_meta.php?id=<?php echo $meta_id; ?>"><button>Adicionar movimentação</button></a>
             </div>
 
             <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center text-center">
@@ -190,12 +190,17 @@ $investimentos = [
                 <p id="ipcaAtual" class="mt-2 text-gray-700"></p>
             </div>
 
+            <!-- Títulos Tesouro IPCA+ -->
+            <div id="ipcaTitulos" class="mt-4 bg-gray-50 p-4 rounded shadow">
+                <h4 class="text-md font-bold mb-2">Títulos Tesouro IPCA+</h4>
+                <div id="listaIpcaTitulos" class="text-sm text-gray-800">Carregando títulos IPCA...</div>
+            </div>
+
             <!-- Bitcoin -->
             <div id="bitcoinData" class="mt-8">
                 <h3 class="text-lg font-bold mb-2">Preço do Bitcoin (BTC)</h3>
                 <canvas id="bitcoinChart" height="60"></canvas>
                 <p id="bitcoinAtual" class="mt-2 text-gray-700"></p>
-                <a href="https://developer.bitcoin.org/" target="_blank" class="text-blue-600 underline text-sm">Saiba mais sobre Bitcoin (documentação oficial)</a>
             </div>
 
             <!-- Cotação do Dólar -->
@@ -276,7 +281,7 @@ $investimentos = [
         <?php endif; ?>
 
     <script>
-        // Função para buscar dados de mercado da API Polygon.io
+        
         async function fetchMarketData() {
             const apiKey = 'qPI2YVLHqBzBCd4A44kTak0IBkGVFyea'; 
             const url = `https://api.polygon.io/v2/aggs/ticker/AAPL/prev?apiKey=${apiKey}`; //Exemplo com o ticker AAPL (Apple)
@@ -303,7 +308,7 @@ $investimentos = [
             }
         }
 
-        // Chamar a função ao carregar a página
+        
         fetchMarketData();
     </script>
 
@@ -586,6 +591,41 @@ $investimentos = [
                 }
             }
         });
+    });
+
+fetch('./proxy_tesouro_ipca.php')
+    .then(res => res.json())
+    .then(data => {
+        
+        let titulos = [];
+        if (data && Array.isArray(data.response)) {
+            titulos = data.response;
+        } else if (Array.isArray(data)) {
+            titulos = data;
+        } else if (data.bondData) {
+            titulos = data.bondData;
+        }
+
+        if (!titulos || titulos.length === 0) {
+            document.getElementById('listaIpcaTitulos').innerHTML = 'Nenhum título encontrado no momento.';
+            return;
+        }
+
+        let html = '<ul class="list-disc ml-5">';
+        titulos.forEach(titulo => {
+            html += `<li>
+                <strong>${titulo.bondName}</strong> (${titulo.maturityDate})<br>
+                <span>Tipo: ${titulo.bondType}</span><br>
+                <span>Taxa Indicativa: ${titulo.interestRate}% a.a.</span><br>
+                <span>Preço Unitário: R$ ${Number(titulo.unitPrice).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+            </li>`;
+        });
+        html += '</ul>';
+        document.getElementById('listaIpcaTitulos').innerHTML = html;
+    })
+    .catch((err) => {
+        document.getElementById('listaIpcaTitulos').innerHTML = '<span class="text-red-500">Erro ao carregar títulos: ' + err.message + '</span>';
+        console.error('Erro ao buscar títulos:', err);
     });
     </script>
 

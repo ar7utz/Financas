@@ -38,6 +38,7 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
 
     <div class="container mx-auto p-4 justify-between">
         <h1 class="text-2xl font-bold mb-4 text-center">Suas Metas Financeiras</h1>
+        <a href="../perfil_financeiro/page.php">testeperfilfinanceiro</a>
 
         <a href="./planner.php">
             <button class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Criar +</button>
