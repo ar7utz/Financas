@@ -40,9 +40,9 @@ $usuario_id = $_SESSION['user_id'];
         </div>
         <form method="POST" action="./pontuação_perfil.php" id="perfilFinanceiroForm" class="bg-white p-6 rounded-lg shadow-md">
             <div class="step">
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Porro similique officiis, praesentium illum error vero animi qui veritatis accusantium,
-                a sunt sequi deserunt numquam pariatur ratione ipsa incidunt rerum ut!
+                Definir o perfil financeiro é essencial para alinhar seus investimentos aos seus objetivos e à sua tolerância ao risco.
+                Esse diagnóstico nos ajuda a sugerir opções adequadas, sejam Conservadoras, Moderadas ou Agressivas. Conhecer o seu perfil é o primeiro
+                passo para investir e gerenciar suas finanças com inteligência, direcionando seu patrimônio para escolhas mais alinhadas ao seu momento financeiro e metas pessoais.
             </div>
 
             <!-- Passo 1 -->

@@ -94,18 +94,22 @@ $dados = obterDados($filtro);
     ?>
 
     <div class="flex w-full items-center justify-between p-4">
-        <!-- Clima -->
-        <div class="flex w-52 h-16 items-center justify-center bg-kansai rounded-md p-2">
-            <p class="font-medium" id="weatherDescription">Carregando clima...</p>
-            <img id="weatherIcon" alt="Ícone do clima" style="width: 40px; height: 40px; margin-left: 10px;">
-        </div>
+    <!-- Clima -->
+    <div id="weatherGlass" class="flex w-52 h-16 items-center justify-center bg-kansai rounded-md p-2
+        bg-white/20 backdrop-blur-md shadow-lg border border-kansai"
+        style="box-shadow: 0 4px 32px 0 rgba(31, 38, 135, 0.15);">
+        <p class="font-medium text-black drop-shadow" id="weatherDescription">Carregando clima...</p>
+        <img id="weatherIcon" alt="Ícone do clima" style="width: 40px; height: 40px; margin-left: 10px;">
+    </div>
         
-        <!-- Horário -->
-        <div class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-2">
-            <div class="font-medium" id="localTime">
-                00:00H
-            </div>
+    <!-- Horário -->
+    <div id="clockGlass" class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-2
+        bg-white/20 backdrop-blur-md shadow-lg border border-kansai"
+        style="box-shadow: 0 4px 32px 0 rgba(31, 38, 135, 0.15);">
+        <div class="font-medium text-black drop-shadow" id="localTime">
+            00:00H
         </div>
+    </div>
     </div>
 
     <?php echo ('id do usuario: ') . $usuario_id; ?>
@@ -253,6 +257,34 @@ $dados = obterDados($filtro);
         window.onload = function () {
             obterLocalizacao();
         };
+    </script>
+
+    <script>
+        // Função para aplicar efeito glassmorphism interativo
+        function addGlassHoverEffect(divId, corBase = '#FFD600', corFundo = 'rgba(255,255,255,0.15)') {
+            const div = document.getElementById(divId);
+            if (!div) return;
+        
+            div.addEventListener('mousemove', function(e) {
+                const rect = div.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                div.style.background = `
+                    radial-gradient(circle at ${x}px ${y}px, ${corBase}55 0%, ${corBase}22 40%, ${corFundo} 100%)
+                `;
+                div.style.transition = 'background 0.2s';
+            });
+        
+            div.addEventListener('mouseleave', function() {
+                div.style.background = '';
+            });
+        }
+
+        // Aplique nas suas divs
+        window.addEventListener('DOMContentLoaded', function() {
+            addGlassHoverEffect('weatherGlass', '#1133A6', 'rgba(255,255,255,0.15)'); // tollens
+            addGlassHoverEffect('clockGlass', '#1133A6', 'rgba(255,255,255,0.15)');
+        });
     </script>
 
 </body>

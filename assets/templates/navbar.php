@@ -52,10 +52,10 @@ $nomeExibido = formatarNome($nome);
 
 ?>
 
-<header class="bg-tollens p-4 flex items-center relative">
+<header class="bg-white p-4 flex items-center relative shadow-lg">
 
     <?php if (!$esconder_botao_menu): ?>
-        <button id="btnMenu" class="bg-blue-500 text-white py-2 px-4 rounded">
+        <button id="btnMenu" class="bg-white text-white py-2 px-4 rounded hover:border border-kansai hover:shadow-lg focus:outline-none transition duration-300">
             <img src="../../assets/img/icone_menu.png" alt="Menu" width="20px" height="20px">
         </button>
     <?php endif; ?>
@@ -86,7 +86,7 @@ $nomeExibido = formatarNome($nome);
 
     <div class="ml-auto relative">
         <!-- Ícone da foto do usuário -->
-        <button id="dropdownToggle" class="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded focus:outline-none relative">
+        <button id="dropdownToggle" class="flex items-center space-x-2 bg-white border border-kansai text-kansai py-2 px-4 rounded focus:outline-none relative">
             <img src="<?php echo '../../assets/uploads/' . $foto; ?>" alt="Foto do Usuário" class="w-8 h-8 rounded-full object-cover"
             />
             <span class="font-medium"><?php echo htmlspecialchars($nomeExibido); ?></span>
