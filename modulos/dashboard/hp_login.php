@@ -96,16 +96,16 @@ $dados = obterDados($filtro);
     <div class="flex w-full items-center justify-between p-4">
     
     <!-- Clima -->
-    <div id="weatherGlass" class="flex w-52 h-16 items-center justify-center bg-kansai rounded-md p-2
-        bg-white/20 backdrop-blur-md shadow-lg"
+    <div id="weatherGlass" class="flex w-52 h-16 items-center justify-center bg-resene rounded-md p-2
+        backdrop-blur-md shadow-lg"
         style="box-shadow: 0 4px 32px 0 rgba(31, 38, 135, 0.15);">
         <p class="font-medium text-black drop-shadow" id="weatherDescription">Carregando clima...</p>
         <img id="weatherIcon" alt="Ícone do clima" style="width: 40px; height: 40px; margin-left: 10px;">
     </div>
         
     <!-- Horário -->
-    <div id="clockGlass" class="flex w-48 h-16 items-center justify-center bg-kansai rounded-md p-2
-        bg-white/20 backdrop-blur-md shadow-lg"
+    <div id="clockGlass" class="flex w-48 h-16 items-center justify-center bg-resene rounded-md p-2
+        backdrop-blur-md shadow-lg"
         style="box-shadow: 0 4px 32px 0 rgba(31, 38, 135, 0.15);">
         <div class="font-medium text-black drop-shadow" id="localTime">
             00:00H

@@ -168,6 +168,16 @@ $investimentos = [
             </ul>
         </div>
 
+        <!--Sugestor-->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-4">Opções e Dicas de Investimento</h2>
+            <ul class="list-disc ml-5">
+                <?php foreach ($investimentos as $titulo => $descricao): ?>
+                    <li><strong><?php echo $titulo; ?>:</strong> <?php echo $descricao; ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+
         <!-- Informações de Mercado -->
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-bold mb-4">Opções e Dicas de Investimento</h2>
