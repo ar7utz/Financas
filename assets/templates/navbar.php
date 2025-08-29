@@ -52,28 +52,32 @@ $nomeExibido = formatarNome($nome);
 
 ?>
 
-<header class="bg-white p-4 flex items-center relative shadow-lg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<header class="bg-white p-2 ml-4 mr-4 mt-4 justify-evenly flex items-center relative shadow-lg rounded-full">
 
     <?php if (!$esconder_botao_menu): ?>
-        <button id="btnMenu" class="bg-white text-white py-2 px-4 rounded hover:border border-kansai hover:shadow-lg focus:outline-none transition duration-300">
+        <button id="btnMenu" class="bg-white text-white py-2 px-4 ml-2 rounded hover:shadow-lg focus:outline-none transition duration-300">
             <img src="../../assets/img/icone_menu.png" alt="Menu" width="20px" height="20px">
         </button>
     <?php endif; ?>
 
-    <div id="menuLateral" class="fixed top-0 left-0 h-screen w-64 bg-gray-800 text-white transform -translate-x-full transition-transform duration-300 z-50" >
+    <div id="menuLateral" class="fixed top-0 left-0 h-screen w-64 bg-kansai text-white transform -translate-x-full transition-transform duration-300 z-50" >
         <div class="p-4">
-            <h2 class="text-xl font-bold mb-4">Menu Lateral</h2>
+            <div class="flex flex-row items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Finstash</h2>
+
+                <button id="btnFechar" class="text-white rounded justify-end-safe">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+
             <ul class="space-y-3">
                 <li><a href="../../modulos/dashboard/hp_login.php" class="hover:underline">Home page</a></li>
                 <li><a href="../../modulos/dashboard/dashboard.php" class="hover:underline">Dashboard</a></li>
                 <li><a href="../../modulos/planejador/page.php" class="hover:underline">Planejador</a></li>
                 <li><a href="../../modulos/planilha/pagePS.php" class="hover:underline">Planilha</a></li>
             </ul>
-
-            <!-- Botão para fechar o menu -->
-            <button id="btnFechar" class="bg-red-500 text-white mt-6 py-2 px-4 rounded">
-                Fechar Menu
-            </button>
         </div>
     </div>
 
@@ -86,7 +90,7 @@ $nomeExibido = formatarNome($nome);
 
     <div class="ml-auto relative">
         <!-- Ícone da foto do usuário -->
-        <button id="dropdownToggle" class="flex items-center space-x-2 bg-white border border-kansai text-kansai py-2 px-4 rounded focus:outline-none relative">
+        <button id="dropdownToggle" class="flex items-center space-x-2 bg-white text-kansai py-2 px-4 rounded focus:outline-none relative">
             <img src="<?php echo '../../assets/uploads/' . $foto; ?>" alt="Foto do Usuário" class="w-8 h-8 rounded-full object-cover"
             />
             <span class="font-medium"><?php echo htmlspecialchars($nomeExibido); ?></span>
@@ -96,7 +100,7 @@ $nomeExibido = formatarNome($nome);
         </button>
 
         <!-- Dropdown -->
-        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+        <div id="dropdownMenu" class="hidden absolute right-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
             <a href="<?php echo $url_base; ?>./modulos/usuario/perfil.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Meu Perfil</a>
             <button id="abrirModalLogout" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Sair</button>
         </div>

@@ -33,7 +33,7 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
 
     <title>Finstash - Metas</title>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
     <?php require_once '../../assets/templates/navbar.php'; ?>
 
     <div class="container mx-auto p-4 justify-between">

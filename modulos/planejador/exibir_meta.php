@@ -118,30 +118,30 @@ $investimentos = [
             </div>
 
             <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center text-center">
-                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                <p id="weatherGlass" class="flex flex-col w-52 h-28 items-center justify-center shadow-lg bg-white rounded-md p-4">
                     <strong>Valor da Meta:</strong>
                     <span>R$ <?php echo number_format($preco_meta, 2, ',', '.'); ?></span>
                 </p>
-                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                <p id="weatherGlass1" class="flex flex-col w-52 h-28 items-center justify-center shadow-lg bg-white rounded-md p-4">
                     <strong>Valor de Entrada:</strong>
                     <span>R$ <?php echo number_format($capital, 2, ',', '.'); ?></span>
                 </p>
-                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                <p id="weatherGlass2" class="flex flex-col w-52 h-28 items-center justify-center shadow-lg bg-white rounded-md p-4">
                     <strong>Investimento Mensal Desejado:</strong>
                     <span>R$ <?php echo number_format($quanto_quero_pagar_mes, 2, ',', '.'); ?></span>
                 </p>
-                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-4">
+                <p id="weatherGlass3" class="flex flex-col w-52 h-28 items-center justify-center shadow-lg bg-white rounded-md p-4">
                     <strong>Tempo que deseja pagar:</strong>
                     <span><?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></span>
                 </p>
             </div>
 
             <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center text-center">
-                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-2">
+                <p id="weatherGlass4" class="flex flex-col w-52 h-28 items-center justify-center shadow-lg bg-white rounded-md p-2">
                     <strong>Pagando o valor mensal desejado, você levaria:</strong>
                     <span><?php echo $tempo_formatado; ?></span>
                 </p>
-                <p class="flex flex-col w-52 h-28 items-center justify-center bg-kansai rounded-md p-8">
+                <p id="weatherGlass5" class="flex flex-col w-52 h-28 items-center justify-center shadow-lg bg-white rounded-md p-8">
                     <strong>Você precisaria investir por mês:</strong>
                     <span>
                         <?php
@@ -264,8 +264,9 @@ $investimentos = [
                     ?>
                 </div>
             </div>
+        </div>
     </div>
-
+    
     <?php if (isset($_GET['mensagem']) && $_GET['mensagem'] === 'excluido'): ?>
         <script src="../../node_modules/toastify-js/src/toastify.js"></script>
         <script>
@@ -335,6 +336,7 @@ $investimentos = [
         });
         </script>
 
+    
     <script>
         function toggleMovimentacoes() {
             const container = document.getElementById('movimentacoesContainer');
@@ -342,6 +344,7 @@ $investimentos = [
             container.classList.toggle('hidden');
             icone.classList.toggle('rotate-180');
         }
+    
     </script>
 
     <script>
@@ -627,6 +630,37 @@ fetch('./proxy_tesouro_ipca.php')
         document.getElementById('listaIpcaTitulos').innerHTML = '<span class="text-red-500">Erro ao carregar títulos: ' + err.message + '</span>';
         console.error('Erro ao buscar títulos:', err);
     });
+    </script>
+
+    <script>
+        function addGlassHoverEffect(divId, corBase = '#FFD600', corFundo = 'rgba(255,255,255,0.15)') {
+            const div = document.getElementById(divId);
+            if (!div) return;
+        
+            div.addEventListener('mousemove', function(e) {
+                const rect = div.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                div.style.background = `
+                    radial-gradient(circle at ${x}px ${y}px, ${corBase}55 0%, ${corBase}22 40%, ${corFundo} 100%)
+                `;
+                div.style.transition = 'background 0.2s';
+            });
+        
+            div.addEventListener('mouseleave', function() {
+                div.style.background = '';
+            });
+        }
+
+        // Aplique nas suas divs
+        window.addEventListener('DOMContentLoaded', function() {
+            addGlassHoverEffect('weatherGlass', '#1133A6', 'rgba(255,255,255,0.15)');
+            addGlassHoverEffect('weatherGlass1', '#1133A6', 'rgba(255,255,255,0.15)');
+            addGlassHoverEffect('weatherGlass2', '#1133A6', 'rgba(255,255,255,0.15)');
+            addGlassHoverEffect('weatherGlass3', '#1133A6', 'rgba(255,255,255,0.15)');
+            addGlassHoverEffect('weatherGlass4', '#1133A6', 'rgba(255,255,255,0.15)');
+            addGlassHoverEffect('weatherGlass5', '#1133A6', 'rgba(255,255,255,0.15)');
+        });
     </script>
 
 </body>

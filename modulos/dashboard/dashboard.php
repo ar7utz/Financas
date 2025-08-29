@@ -80,6 +80,9 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
     <!-- SheetJS para Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+    <!-- Ícone -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <title>Finstash - Gerenciamento de Finanças Pessoal</title>
 </head>
 
@@ -299,8 +302,8 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                 echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
                                 echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
                                 echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                                echo '<a href="../transacoes/page_editar.php?id=' . $row['id'] . '" rel="noopener noreferrer"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button></a>';
-                                echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '">Excluir</button></a>';
+                                echo '<a href="../transacoes/page_editar.php?id=' . $row['id'] . '" rel="noopener noreferrer"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil" aria-hidden="true"></i></button></a>';
+                                echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '"><i class="fa fa-trash" aria-hidden="true"></i></button></a>';
                                 echo '</div>';
                                 echo '</div>';
                                 echo '</div>';

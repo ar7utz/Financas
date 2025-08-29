@@ -53,10 +53,10 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <title>Finstash - Planilha Financeira</title>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
     <?php require_once '../../assets/templates/navbar.php' ?>
 
     <?php //toastify

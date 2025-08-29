@@ -31,6 +31,17 @@ if ($resultado->num_rows > 0) {
     echo "Utilizador não encontrado.";
     exit;
 }
+
+// Buscar o total investido na tabela movimentacoes
+$totalInvestido = 0.0;
+$sqlInvest = "SELECT SUM(valor) as total FROM movimentacoes WHERE usuario_id = ? AND tipo = 'aplicacao'";
+$stmtInvest = $conn->prepare($sqlInvest);
+$stmtInvest->bind_param('i', $usuario_id);
+$stmtInvest->execute();
+$resultInvest = $stmtInvest->get_result();
+if ($rowInvest = $resultInvest->fetch_assoc()) {
+    $totalInvestido = $rowInvest['total'] ? $rowInvest['total'] : 0.0;
+}
 ?>
 
 <!DOCTYPE html>
@@ -71,7 +82,12 @@ if ($resultado->num_rows > 0) {
                 <div class="">
                     <label for="">Email:</label>
                     <input type="text" value="<?php echo htmlspecialchars($email);?>" class="border p-2 w-full rounded-md" disabled>
-                </div>  
+                </div>
+
+                <div>
+                    <label for="">Total Investido:</label>
+                    <input type="text" value="<?php echo number_format($totalInvestido, 2, ',', '.');?>" class="border p-2 w-full rounded-md" disabled>
+                </div>
 
                 <div class="fixed bottom-0 left-1/2 transform -translate-x-1/2 mb-4 mt-2">
                     <a href="./editar_usuario.php"><button class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Editar Informações</button></a>
