@@ -67,26 +67,36 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
             </div>
             <!-- Div das informações - lado direito -->
             <div class="w-8/12 flex flex-col justify-center">
-                <div class="">
-                    <label for="nome">Nome:</label>
-                    <input type="text" value="<?php echo htmlspecialchars($nome);?>" class="border p-2 w-full rounded-md" disabled>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="flex flex-col">
+                        <label for="nome">Nome:</label>
+                        <input type="text" value="<?php echo htmlspecialchars($nome);?>" class="border p-2  rounded-md" disabled>
+                    </div>
+                    <div class="">
+                        <label for="">Nome de usuário</label>
+                        <input type="text" value="<?php echo htmlspecialchars($username);?>" class="border p-2 w-full rounded-md" disabled>
+                    </div>
                 </div>
-                <div class="">
-                    <label for="">Nome de usuário</label>
-                    <input type="text" value="<?php echo htmlspecialchars($username);?>" class="border p-2 w-full rounded-md" disabled>
-                </div>
-                <div class="">
-                    <label for="">Telefone</label>
-                    <input type="text" value="<?php echo htmlspecialchars($telefone);?>" class="border p-2 w-full rounded-md" disabled>
-                </div>
-                <div class="">
-                    <label for="">Email:</label>
-                    <input type="text" value="<?php echo htmlspecialchars($email);?>" class="border p-2 w-full rounded-md" disabled>
+            
+                <div class="flex flex-col">
+                    <div class="">
+                        <label for="">Telefone</label>
+                        <input type="text" value="<?php echo htmlspecialchars($telefone);?>" class="border p-2 w-full rounded-md" disabled>
+                    </div>
                 </div>
 
-                <div>
-                    <label for="">Total Investido:</label>
-                    <input type="text" value="<?php echo number_format($totalInvestido, 2, ',', '.');?>" class="border p-2 w-full rounded-md" disabled>
+                <div class="flex flex-col">
+                    <div class="">
+                        <label for="">Email:</label>
+                        <input type="text" value="<?php echo htmlspecialchars($email);?>" class="border p-2 w-full rounded-md" disabled>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <div>
+                        <label for="">Total Investido até o momento:</label>
+                        <input type="text" value="<?php echo number_format($totalInvestido, 2, ',', '.');?>" class="border p-2 w-full rounded-md" disabled>
+                    </div>
                 </div>
 
                 <div class="fixed bottom-0 left-1/2 transform -translate-x-1/2 mb-4 mt-2">

@@ -75,7 +75,7 @@
 
         <div>
             <input type="submit" value="Cadastrar"
-                class="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 cursor-pointer">
+                class="w-full px-4 py-2 bg-tollens text-white font-semibold rounded hover:bg-blue-700 transition duration-300 cursor-pointer">
         </div>
     </form>
 

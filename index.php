@@ -13,6 +13,7 @@
     <title>Finstash</title>
 </head>
 <body>
+    
     <?php // Notificações do Toastify
         if (isset($_GET['mensagem'])) {
             echo "<script>
@@ -60,19 +61,39 @@
     ?>
     
     <main>
-        <div id="navbar_1" class="flex flex-row w-full h-12 justify-center items-center bg-black">
-            <div id="logo_nav" class="basis-6/12 items-center text-left ml-5">
+        <div id="navbar_1" class="bg-white p-2 ml-4 mr-4 mt-4 justify-evenly flex items-center relative shadow-lg rounded-full">
+            <div id="logo_nav" class="items-center text-left">
                 <img src="assets/logo/cube_logo_no_background.png" class="w-16 h-auto">
             </div>
-            <div id="btns_login" class="flex basis-6/12 justify-end bg-black text-white">
-                <div id="btn_login" class="mr-5">
-                    <a href="modulos/login/login.php"  rel="noopener noreferrer"><button>Login</button></a>
-                </div>
-                <div id="btn_cadastro" class="mr-5 hover:bg-slate-50">
-                    <a href="modulos/cadastro/cadastro.php"  rel="noopener noreferrer"><button>Cadastre-se</button></a>
+
+            <div id="btns_login" class="flex justify-end basis-6/12 text-black mr-5">
+                <div class="flex p-4 space-x-4">
+                    <div id="btn_login" class="">
+                        <a href="modulos/login/login.php" rel="noopener noreferrer"><button class="hover:underline">Login</button></a>
+                    </div>
+                    <div id="btn_cadastro" class="hover:underline hover:cursor-pointer hover:font-bold">
+                        <a href="modulos/cadastro/cadastro.php" rel="noopener noreferrer"><button class="hover:underline">Cadastre-se</button></a>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="flex flex-col items-center justify-center mt-10 mb-10">
+            <h1 class="text-4xl font-bold mb-6 text-center">Bem-vindo ao Finstash</h1>
+            <p class="text-lg text-center max-w-2xl">Sua plataforma completa para gerenciamento financeiro, planejamento de investimentos e controle de despesas. Comece agora a organizar suas finanças pessoais com facilidade e segurança!</p>
+            <a href="modulos/cadastro/cadastro.php" rel="noopener noreferrer">
+                <button class="mt-6 bg-tollens text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300">Comece Agora</button>
+            </a>
+        </div>
+
+        <div class="bg-gray-100 p-6 rounded-lg shadow-md max-w-4xl mx-auto mb-10">
+            <h2 class="text-2xl font-bold mb-4 text-center">Sobre o Finstash</h2>
+            <p class="text-gray-700 mb-4">O Finstash é uma plataforma inovadora projetada para ajudar você a gerenciar suas finanças pessoais de maneira eficiente e inteligente. Com uma interface amigável e recursos avançados, o Finstash oferece tudo o que você precisa para controlar seus gastos, planejar investimentos e alcançar seus objetivos financeiros.</p>
+            <p class="text-gray-700 mb-4">Nosso sistema de planejamento financeiro permite que você crie orçamentos personalizados, acompanhe suas despesas em tempo real e receba insights valiosos sobre seus hábitos de consumo. Além disso, com a integração de inteligência artificial, o Finstash pode sugerir investimentos adequados ao seu perfil financeiro, ajudando você a maximizar seus retornos.</p>
+            <p class="text-gray-700">Junte-se a milhares de usuários satisfeitos que já estão transformando suas vidas financeiras com o Finstash. Cadastre-se hoje mesmo e comece a trilhar o caminho para a liberdade financeira!</p>
+        </div>
+
+
     </main>
 </body>
 </html>
