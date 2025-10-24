@@ -86,6 +86,36 @@ $investimentos = [
     "Tesouro Prefixado" => "Indicado para quem deseja garantir uma taxa de retorno fixa.",
     "Tesouro IPCA+" => "Protege contra a inflação e gera rendimentos acima do IPCA.",
 ];
+
+// Buscar o perfil do usuário no banco
+$sqlPerfil = "SELECT * FROM perfil_financeiro WHERE id = ?";
+$stmtPerfil = $conn->prepare($sqlPerfil);
+$stmtPerfil->bind_param('i', $usuario_id);
+$stmtPerfil->execute();
+$resultPerfil = $stmtPerfil->get_result();
+$perfil_usuario = '?';
+
+$perfil_financeiro = $resultPerfil->fetch_assoc();
+
+if ($rowPerfil = $resultPerfil->fetch_assoc()) {
+    $perfil_usuario = $rowPerfil['perfil_financeiro'] ?? 'Conservador';
+}
+
+$perfil_usuario = $_SESSION['perfil'] ?? 'Conservador'; /* recupere o perfil, ex: 'Conservador', 'Moderado', 'Agressivo' */
+
+switch ($perfil_usuario) {
+    case 'Conservador':
+        $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
+        break;
+    case 'Moderado':
+        $sugestoes = include __DIR__ . '/../Sugestor/perfilModerado.php';
+        break;
+    case 'Agressivo':
+        $sugestoes = include __DIR__ . '/../Sugestor/perfilAgressivo.php';
+        break;
+    default:
+        $sugestoes = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -109,7 +139,7 @@ $investimentos = [
 
     <div class="container mx-auto p-6">
         <h1 class="text-2xl font-bold mb-6 text-center">Sua Meta Financeira: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span></h1>
-
+        <p>perfil financeiro: <?php echo htmlspecialchars($perfil_financeiro['nome']); ?></p>
         <!-- Informações da Meta -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <div class="flex justify-between items-center mb-4">
@@ -155,6 +185,7 @@ $investimentos = [
                         para pagar em<strong class="ml-2"><?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></strong>
                     </span>
                 </p>
+                
             </div>
         </div>
 
@@ -164,6 +195,20 @@ $investimentos = [
             <ul class="list-disc ml-5">
                 <?php foreach ($dicas as $dica): ?>
                     <li><?php echo $dica; ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+
+        <!-- Sugestão -->
+        <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">Sugestão de acordo com o seu perfil financeiro</h2>
+            <ul class="list-disc ml-5">
+                <?php foreach ($sugestoes as $sugestao): ?>
+                    <li>
+                        <strong><?php echo htmlspecialchars($sugestao['nome']); ?></strong>:
+                        <?php echo htmlspecialchars($sugestao['descricao']); ?>
+                        <a href="<?php echo htmlspecialchars($sugestao['link']); ?>" target="_blank" class="text-blue-600 underline ml-2">Saiba mais</a>
+                    </li>
                 <?php endforeach; ?>
             </ul>
         </div>

@@ -62,12 +62,13 @@ $nomeExibido = formatarNome($nome);
         </button>
     <?php endif; ?>
 
-    <div id="menuLateral" class="fixed top-0 left-0 h-screen w-64 bg-kansai text-white transform -translate-x-full transition-transform duration-300 z-50" >
+    <div id="menuLateral" class="fixed top-0 left-0 h-screen w-64 bg-ghostwhite text-black transform -translate-x-full transition-transform duration-300 z-50" >
         <div class="p-4">
             <div class="flex flex-row items-center justify-between mb-6">
+                <img src="../logo/cube_logo_no_background.png" alt="">
                 <h2 class="text-xl font-bold">Finstash</h2>
 
-                <button id="btnFechar" class="text-white rounded justify-end-safe">
+                <button id="btnFechar" class="text-black rounded justify-end-safe">
                     <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>

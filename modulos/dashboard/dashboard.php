@@ -123,32 +123,25 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         ?>
 
         <!--div transação-->
-        <div class="flex items-center justify-center mb-8">
-            <button id="abrirModalAddTransacao" class="bg-tollens text-white justify-center py-2 px-4 rounded hover:bg-purple-500">
-                + Nova Transação
-            </button>
-        </div>
-
-        <div class="flex justify-center items-center">
-            <div class="p-4 w-32 rounded-lg shadow-md text-center justify-end">
+        <div class="flex flex-col gap-2 mb-4 lg:flex-row lg:items-center lg:justify-center">
+            <!-- Saldo -->
+            <div class="order-1 lg:order-2 bg-white p-4 rounded-lg shadow-md text-center w-full mb-2 lg:mb-0 lg:w-1/3 lg:mx-4">
                 <p class="font-bold text-tollens">SALDO</p>
-                <p class="text-xl font-semibold"><?php echo number_format($saldo, 2); ?></p>
+                <p class="text-xl font-semibold"><?php echo 'R$ '. number_format($saldo, 2); ?></p>
+            </div>
+            <div class="order-2 lg:order-1 flex w-full gap-2 lg:w-auto">
+                <!-- Entradas -->
+                <div class="bg-white p-4 rounded-lg shadow-md w-1/2 text-center flex-1 lg:w-32 lg:mr-2">
+                    <p class="font-bold text-green-600">Entradas</p>
+                    <p class="text-xl font-semibold"><?php echo 'R$ '. number_format($entradas, 2); ?></p>
+                </div>
+                <!-- Saídas -->
+                <div class="bg-white p-4 rounded-lg shadow-md w-1/2 text-center flex-1 lg:w-32 lg:ml-2">
+                    <p class="font-bold text-red-600">Saídas</p>
+                    <p class="text-xl font-semibold"><?php echo 'R$ '. number_format($saidas, 2); ?></p>
+                </div>
             </div>
         </div>
-
-        <div class="bg-red">
-            <!-- Entradas e Saídas -->
-            <div class="flex justify-between items-center mb-8">
-                <div class="bg-white p-4 rounded-lg shadow-md w-1/3 text-center">
-                    <p class="font-bold text-green-600">Entradas</p>
-                    <p class="text-xl font-semibold"><?php echo number_format($entradas, 2); ?></p>
-                </div>
-                <div class="bg-white p-4 rounded-lg shadow-md w-1/3 text-center">
-                    <p class="font-bold text-red-600">Saídas</p>
-                    <p class="text-xl font-semibold"><?php echo number_format($saidas, 2); ?></p>
-                </div>
-            </div>
-
 
             <!-- Histórico -->
             <div class="bg-white p-6 rounded-lg shadow-md">
@@ -159,12 +152,28 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     <button onclick="exportarExcel()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar Excel</button>
                 </div>
             </div>
-                <h3 class="text-lg font-bold mb-4">Histórico</h3>
-                <div class="flex items-center mb-4"> <!--div filtros-->
-                    <!--Filtro-->
-                    <form id="filterForm" method="POST" action="" onchange="document.getElementById('filterForm').submit()">
-                        <label for="filter" class="mr-2 font-semibold">Filtrar por:</label>
-                        <select id="filter" name="filtro" class="border border-gray-300 rounded p-2">
+
+            <h3 class="text-2xl font-bold mb-4 text-center">Histórico</h3>
+
+            <!-- DIV FILTRO -->
+            <div class="p-4 mb-8 mt-6 rounded-lg shadow-lg">
+                <div class="flex items-center justify-between cursor-pointer" onclick="toggleFiltros()">
+                    <h3 class="text-lg font-bold">Filtros</h3>
+                    <span id="iconeFiltros" class="ml-4 text-2xl transition-transform duration-200"><i class="fa fa-chevron-down"></i></span>
+                </div>
+
+                <!-- Conteúdo dos filtros: oculto por padrão no mobile, visível em lg -->
+                <div id="filtrosContainer" class="hidden mt-2 flex-col gap-2 lg:flex lg:flex-row lg:items-start lg:justify-center">
+                    <!-- Busca (ocupa linha inteira no mobile, compacta no lg) -->
+                    <div class="w-full lg:w-auto">
+                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar"
+                               class="border border-gray-300 rounded p-2 w-full">
+                    </div>
+
+                    <!-- Filtro principal (ocupa linha inteira no mobile, compacta no lg) -->
+                    <form id="filterForm" method="POST" action="" onchange="document.getElementById('filterForm').submit()" class="w-full lg:w-auto">
+                        <label for="filter" class="block mb-1 font-semibold">Filtrar por:</label>
+                        <select id="filter" name="filtro" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
                             <option value="data-desc" <?php echo ($filtro == 'data-desc') ? 'selected' : ''; ?>>Data (Mais recentes)</option>
                             <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
                             <option value="valor-desc" <?php echo ($filtro == 'valor-desc') ? 'selected' : ''; ?>>Valor (Maior para menor)</option>
@@ -177,15 +186,11 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         </select>
                     </form>
 
-                    <div class="ml-4">
-                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" class="border border-gray-300 rounded p-2 w-full max-w-xs">
-                    </div>
-
-                    <!-- Combobox de Anos -->
-                    <div class="flex items-center align-middle">
-                        <div class="flex items-center">
-                            <label for="ano" class="ml-2 mr-2 font-semibold">Filtrar por Ano:</label>
-                            <select id="ano" name="ano" class="border border-gray-300 rounded p-2">
+                    <!-- Ano e Mês (empilhados no mobile, inline no lg) -->
+                    <div class="w-full flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4 lg:w-auto">
+                        <div class="w-full lg:w-auto">
+                            <label for="ano" class="block mb-1 font-semibold">Filtrar por Ano:</label>
+                            <select id="ano" name="ano" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
                                 <option value="">Selecionar Ano</option>
                                 <?php 
                                 $sql_anos = "SELECT DISTINCT YEAR(data) AS ano FROM transacoes WHERE usuario_id = ? ORDER BY ano DESC";
@@ -200,18 +205,18 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                             </select>
                         </div>
 
-                        <!-- Combobox de Meses -->
-                        <div class="flex items-center ml-2">
-                            <label for="mes" class="mr-2 font-semibold">Mês:</label>
-                            <select id="mes" name="mes" class="border border-gray-300 rounded p-2" disabled>
+                        <div class="w-full lg:w-auto">
+                            <label for="mes" class="block mb-1 font-semibold">Mês:</label>
+                            <select id="mes" name="mes" class="border border-gray-300 rounded p-2 w-full lg:w-auto" disabled>
                                 <option value="">Selecionar Mês</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="flex items-center ml-2">
-                        <label for="FiltroCategoria" class="mr-2 font-semibold">Categoria:</label>
-                        <select id="FiltroCategoria" name="FiltroCategoria" class="border border-gray-300 rounded p-2">
+                    <!-- Categoria (ocupa linha inteira no mobile, compacta no lg) -->
+                    <div class="w-full lg:w-auto">
+                        <label for="FiltroCategoria" class="block mb-1 font-semibold">Categoria:</label>
+                        <select id="FiltroCategoria" name="FiltroCategoria" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
                             <option value="">Selecionar Categoria</option>
                             <?php 
                             // Busca as categorias que possuem transações
@@ -236,149 +241,171 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         </select>
                     </div>
                 </div>
+            </div>
 
-                <!-- Tabela de Transações -->
-                <div id="transacoesContainer">
-                    <?php
-                    include('../../assets/bd/conexao.php');
+            <!-- Tabela de Transações -->
+            <div id="transacoesContainer">
+                <?php
+                include('../../assets/bd/conexao.php');
 
-                    if (isset($_SESSION['user_id'])) {
-                        $usuario_id = $_SESSION['user_id'];
+                if (isset($_SESSION['user_id'])) {
+                    $usuario_id = $_SESSION['user_id'];
 
-                        // Paginação
-                        $itensPorPagina = 5;
-                        $paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
-                        $offset = ($paginaAtual - 1) * $itensPorPagina;
+                    // Paginação
+                    $itensPorPagina = 5;
+                    $paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
+                    $offset = ($paginaAtual - 1) * $itensPorPagina;
 
-                        // Conta total de transações
-                        $sqlTotal = "SELECT COUNT(*) as total FROM transacoes WHERE usuario_id = ?";
-                        $stmtTotal = $conn->prepare($sqlTotal);
-                        $stmtTotal->bind_param('i', $usuario_id);
-                        $stmtTotal->execute();
-                        $resultTotal = $stmtTotal->get_result();
-                        $totalTransacoes = $resultTotal->fetch_assoc()['total'];
-                        $totalPaginas = ceil($totalTransacoes / $itensPorPagina);
+                    // Conta total de transações
+                    $sqlTotal = "SELECT COUNT(*) as total FROM transacoes WHERE usuario_id = ?";
+                    $stmtTotal = $conn->prepare($sqlTotal);
+                    $stmtTotal->bind_param('i', $usuario_id);
+                    $stmtTotal->execute();
+                    $resultTotal = $stmtTotal->get_result();
+                    $totalTransacoes = $resultTotal->fetch_assoc()['total'];
+                    $totalPaginas = ceil($totalTransacoes / $itensPorPagina);
 
-                        // Busca as transações da página atual
-                        $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY data DESC LIMIT ? OFFSET ?";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param('iii', $usuario_id, $itensPorPagina, $offset);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
+                    // Busca as transações da página atual
+                    $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY data DESC LIMIT ? OFFSET ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param('iii', $usuario_id, $itensPorPagina, $offset);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                
+                    $sql = "
+                        SELECT t.*, c.nome_categoria AS categoria_nome
+                        FROM transacoes t
+                        LEFT JOIN categoria c ON t.categoria_id = c.id
+                        WHERE t.usuario_id = ?
+                        ORDER BY $order_by";
+
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param('i', $usuario_id);
+                    $stmt->execute();
+                    $resultado = $stmt->get_result();
+                
+                    // Verifica se há transações
+                    if ($resultado->num_rows > 0) {
+                        echo '<div class="grid grid-cols-5 gap-4 items-center mb-2 hidden lg:grid">'; // cabeçalho apenas para desktop
+                        echo '<div class="col-span-1 text-center font-bold">Descrição</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Data</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Valor</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Categoria</div>';
+                        echo '<div class="col-span-1 text-center font-bold">Ações</div>';
+                        echo '</div>';
                     
-                        $sql = "
-                            SELECT t.*, c.nome_categoria AS categoria_nome
-                            FROM transacoes t
-                            LEFT JOIN categoria c ON t.categoria_id = c.id
-                            WHERE t.usuario_id = ?
-                            ORDER BY $order_by";
+                        // Exibir as transações no histórico
+                        while ($row = $resultado->fetch_assoc()) {
+                            // Formata a data corretamente
+                            $data_original = $row['data'];
+                            $data = DateTime::createFromFormat('Y-m-d', $data_original);
+                            $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
+                            $categoria_id = $row['categoria_id'];
 
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param('i', $usuario_id);
-                        $stmt->execute();
-                        $resultado = $stmt->get_result();
-                    
-                        // Verifica se há transações
-                        if ($resultado->num_rows > 0) {
-                            echo '<div class="grid grid-cols-5 gap-4 items-center mb-2">';
-                            echo '<div class="col-span-1 text-center font-bold">Descrição</div>';
-                            echo '<div class="col-span-1 text-center font-bold">Data</div>';
-                            echo '<div class="col-span-1 text-center font-bold">Valor</div>';
-                            echo '<div class="col-span-1 text-center font-bold">Categoria</div>';
-                            echo '<div class="col-span-1 text-center font-bold">Ações</div>';
+                            echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
+
+                            echo '<div class="hidden lg:grid grid-cols-5 gap-4 items-center">';
+                            echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . htmlspecialchars($row['descricao']) . '</div>';
+                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($data_formatada) . '</div>';
+                            echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
+                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
+                            echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
+                            echo '<a href="../transacoes/page_editar.php?id=' . $row['id'] . '" rel="noopener noreferrer"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil" aria-hidden="true"></i></button></a>';
+                            echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . '); event.stopPropagation();"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '"><i class="fa fa-trash" aria-hidden="true"></i></button></a>';
                             echo '</div>';
-                        
-                            // Exibir as transações no histórico
-                            while ($row = $resultado->fetch_assoc()) {
-                                // Formata a data corretamente
-                                $data_original = $row['data'];
-                                $data = DateTime::createFromFormat('Y-m-d', $data_original);
-                                $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
-                                $categoria_id = $row['categoria_id'];
-                                echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
-                                echo '<div class="grid grid-cols-5 gap-4 items-center">';
-                                echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . htmlspecialchars($row['descricao']) . '</div>';
-                                echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($data_formatada) . '</div>';
-                                echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
-                                echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
-                                echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                                echo '<a href="../transacoes/page_editar.php?id=' . $row['id'] . '" rel="noopener noreferrer"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil" aria-hidden="true"></i></button></a>';
-                                echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . ')"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '"><i class="fa fa-trash" aria-hidden="true"></i></button></a>';
-                                echo '</div>';
-                                echo '</div>';
-                                echo '</div>';
-                            }
-                        } else {
-                            echo '<li>Nenhuma transação encontrada.</li>';
+                            echo '</div>';
+
+                            echo '<div class="block lg:hidden">';
+                            echo '  <div class="mobile-transacao cursor-pointer" data-id="' . $row['id'] . '">';
+                            $valor_class = ($row['valor'] >= 0) ? 'text-green-600' : 'text-red-600';
+                            echo '    <div class="flex justify-between items-start">';
+                            echo '      <div class="w-2/3 text-left font-semibold text-gray-800 truncate">' . htmlspecialchars($row['descricao']) . '</div>';
+                            echo '      <div class="text-right font-bold ' . $valor_class . '">' . htmlspecialchars(number_format($row['valor'], 2, ',', '.')) . '</div>';
+                            echo '    </div>';
+                            echo '    <div class="flex justify-between text-xs text-gray-500 mt-1">';
+                            echo '      <div>' . htmlspecialchars($data_formatada) . '</div>';
+                            echo '      <div>' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
+                            echo '    </div>';
+                            // garantir que ações móveis só existam no mobile (reforço com lg:hidden)
+                            echo '    <div class="actions-mobile hidden mt-3 flex justify-end space-x-2 lg:hidden">';
+                            echo '      <a href="../transacoes/page_editar.php?id=' . $row['id'] . '" onclick="event.stopPropagation();"><button class="bg-tollens text-white py-1 px-3 rounded"><i class="fa fa-pencil"></i></button></a>';
+                            echo '      <a href="#" onclick="event.stopPropagation(); abrirModalExcluir(' . $row['id'] . ');"><button class="bg-red-600 text-white py-1 px-3 rounded"><i class="fa fa-trash"></i></button></a>';
+                            echo '    </div>';
+                            echo '  </div>';
+                            echo '</div>';
+
+                            echo '</div>';
                         }
+                    } else {
+                        echo '<li>Nenhuma transação encontrada.</li>';
                     }
+                }
 
-                    //toastify para mensagem adicionada com sucesso
-                    if (isset($_GET['mensagem'])) {
-                        echo "<script>
-                            window.onload = function() {
-                                switch ('" . $_GET['mensagem'] . "') {
-                                    case 'sucesso':
-                                        Toastify({
-                                            text: 'Transação adicionada com sucesso!',
-                                            duration: 3000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'right',
-                                            backgroundColor: '#28a745', // cor verde para sucesso
-                                        }).showToast();
-                                        break;
-                                    case 'erroTransacao':
-                                        Toastify({
-                                            text: 'Erro ao adicionar a transação!',
-                                            duration: 3000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'right',
-                                            backgroundColor: '#dc3545', // cor vermelha para erro
-                                        }).showToast();
-                                        break;
-                                    case 'SuceEdit':
-                                        Toastify({
-                                            text: 'Sucesso ao editar o item',
-                                            duration: 3000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'right',
-                                            backgroundColor: '#dc3545', // cor amarela para aviso
-                                        }).showToast();
-                                        break;
-                                    case 'excluirTransacao':
-                                        Toastify({
-                                            text: 'Transação excluída com sucesso',
-                                            duration: 3000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'right',
-                                            backgroundColor: '#dc3545', // cor amarela para aviso
-                                        }).showToast();
+                //toastify para mensagem adicionada com sucesso
+                if (isset($_GET['mensagem'])) {
+                    echo "<script>
+                        window.onload = function() {
+                            switch ('" . $_GET['mensagem'] . "') {
+                                case 'sucesso':
+                                    Toastify({
+                                        text: 'Transação adicionada com sucesso!',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#28a745', // cor verde para sucesso
+                                    }).showToast();
                                     break;
-                                    default:
-                                        Toastify({
-                                            text: 'Ação desconhecida!',
-                                            duration: 3000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'right',
-                                            backgroundColor: '#6c757d', // cor cinza para ação desconhecida
-                                        }).showToast();
-                                        break;
-                                }
-
-                                //Limpar a URL após exibir o Toastify
-                                const url = new URL(window.location);
-                                url.searchParams.delete('mensagem'); //Remove o parâmetro 'mensagem'
-                                window.history.replaceState(null, '', url); //Atualiza a URL sem recarregar a página
+                                case 'erroTransacao':
+                                    Toastify({
+                                        text: 'Erro ao adicionar a transação!',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#dc3545', // cor vermelha para erro
+                                    }).showToast();
+                                    break;
+                                case 'SuceEdit':
+                                    Toastify({
+                                        text: 'Sucesso ao editar o item',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#dc3545', // cor amarela para aviso
+                                    }).showToast();
+                                    break;
+                                case 'excluirTransacao':
+                                    Toastify({
+                                        text: 'Transação excluída com sucesso',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#dc3545', // cor amarela para aviso
+                                    }).showToast();
+                                break;
+                                default:
+                                    Toastify({
+                                        text: 'Ação desconhecida!',
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: 'top',
+                                        position: 'right',
+                                        backgroundColor: '#6c757d', // cor cinza para ação desconhecida
+                                    }).showToast();
+                                    break;
                             }
-                        </script>";
-                    }
-                    ?>
-                </div>
+
+                            //Limpar a URL após exibir o Toastify
+                            const url = new URL(window.location);
+                            url.searchParams.delete('mensagem'); //Remove o parâmetro 'mensagem'
+                            window.history.replaceState(null, '', url); //Atualiza a URL sem recarregar a página
+                        }
+                    </script>";
+                }
+                ?>
             </div>
         </div>
 
@@ -475,7 +502,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             if (anoSelecionado) {
                 fetch(`../transacoes/filtro_mes.php?ano=${anoSelecionado}&usuario_id=${usuarioId}`)
                     .then(response => response.json())
-                    .then(data => {
+                    .then (data => {
                         mesSelect.innerHTML = '<option value="">Selecionar Mês</option>';
                     
                         if (data.length > 0) {
@@ -723,7 +750,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
                     $categoria_nome = $row['categoria_nome'] ?? 'Sem categoria';
                 ?>
-                {
+                ,{
                     data: "<?php echo $data_formatada; ?>",
                     descricao: "<?php echo htmlspecialchars($row['descricao']); ?>",
                     categoria: "<?php echo htmlspecialchars($categoria_nome); ?>",
@@ -845,6 +872,66 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             <a href="?pagina=<?php echo $paginaAtual + 1; ?>" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Próxima &raquo;</a>
         <?php endif; ?>
     </div>
+
+    <script>
+        function toggleFiltros() {
+            const container = document.getElementById('filtrosContainer');
+            const icone = document.getElementById('iconeFiltros');
+            container.classList.toggle('hidden'); // mostra/esconde no mobile; lg:flex mantém visível no desktop
+            icone.classList.toggle('rotate-180');
+        }
+
+        // Garante comportamento correto ao redimensionar (se mudar para lg, mostra; se voltar mobile, mantém oculto até clicar)
+        window.addEventListener('resize', function() {
+            const container = document.getElementById('filtrosContainer');
+            if (window.innerWidth >= 1024) { // breakpoint padrão do Tailwind para lg
+                container.classList.remove('hidden');
+            } else {
+                //container.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function setupMobileToggles() {
+                document.querySelectorAll('.mobile-transacao').forEach(function(item) {
+                    if (item.dataset.hasListener) return;
+                    item.dataset.hasListener = '1';
+                
+                    item.addEventListener('click', function(e) {
+                        if (window.innerWidth == 1024) return;
+                        const actions = item.querySelector('.actions-mobile');
+                        if (!actions) return;
+                        actions.classList.toggle('hidden');
+                        item.classList.toggle('bg-gray-50');
+                    });
+                
+                    // Previne propagação ao clicar em botões/links dentro do item
+                    item.querySelectorAll('a, button').forEach(btn => {
+                        btn.addEventListener('click', function(ev) {
+                            ev.stopPropagation();
+                        });
+                    });
+                });
+            }
+        
+            setupMobileToggles();
+        
+            const transacoesContainer = document.getElementById('transacoesContainer');
+            if (transacoesContainer) {
+                const obs = new MutationObserver(() => setupMobileToggles());
+                obs.observe(transacoesContainer, { childList: true, subtree: true });
+            }
+        
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024) {
+                    document.querySelectorAll('.actions-mobile').forEach(a => a.classList.add('hidden'));
+                    document.querySelectorAll('.mobile-transacao').forEach(t => t.classList.remove('bg-gray-50'));
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
