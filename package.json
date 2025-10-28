@@ -106,5 +106,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "<h1 align=\"center\" style=\"font-weight: bold;\">FINSTASH 💻</h1>\r <p align=\"center\"> Projeto de gerenciamente financeiro pessoal</p></p>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ar7utz/Financas.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ar7utz/Financas/issues"
+  },
+  "homepage": "https://github.com/ar7utz/Financas#readme"
 }

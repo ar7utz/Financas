@@ -145,11 +145,17 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
             <!-- Histórico -->
             <div class="bg-white p-6 rounded-lg shadow-md">
-            <div class="relative inline-block">
+            <div class="flex flex-row relative justify-between items-center">
                 <button id="btnExportar" class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Exportar ▼</button>
                 <div id="exportOptions" class="hidden absolute bg-white border rounded shadow-md mt-1 right-0 z-10">
                     <button onclick="exportarPDF()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button>
                     <button onclick="exportarExcel()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar Excel</button>
+                </div>
+
+                <div class="flex justify-center mb-4">
+                    <button id="abrirModalAddTransacao" class="bg-tollens text-white py-2 px-4 rounded-lg hover:bg-purple-500 w-full max-w-xs">
+                        + Nova Transação
+                    </button>
                 </div>
             </div>
 
@@ -157,20 +163,20 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
             <!-- DIV FILTRO -->
             <div class="p-4 mb-8 mt-6 rounded-lg shadow-lg">
-                <div class="flex items-center justify-between cursor-pointer" onclick="toggleFiltros()">
+                <div class="flex items-center justify-between cursor-pointer lg:hidden" onclick="toggleFiltros()">
                     <h3 class="text-lg font-bold">Filtros</h3>
                     <span id="iconeFiltros" class="ml-4 text-2xl transition-transform duration-200"><i class="fa fa-chevron-down"></i></span>
                 </div>
 
-                <!-- Conteúdo dos filtros: oculto por padrão no mobile, visível em lg -->
+                <div class="hidden lg:flex lg:items-center lg:justify-start">
+                    <h3 class="text-lg font-bold">Filtros</h3>
+                </div>
+
                 <div id="filtrosContainer" class="hidden mt-2 flex-col gap-2 lg:flex lg:flex-row lg:items-start lg:justify-center">
-                    <!-- Busca (ocupa linha inteira no mobile, compacta no lg) -->
                     <div class="w-full lg:w-auto">
-                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar"
-                               class="border border-gray-300 rounded p-2 w-full">
+                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" class="border border-gray-300 rounded p-2 w-full">
                     </div>
 
-                    <!-- Filtro principal (ocupa linha inteira no mobile, compacta no lg) -->
                     <form id="filterForm" method="POST" action="" onchange="document.getElementById('filterForm').submit()" class="w-full lg:w-auto">
                         <label for="filter" class="block mb-1 font-semibold">Filtrar por:</label>
                         <select id="filter" name="filtro" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
@@ -186,7 +192,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         </select>
                     </form>
 
-                    <!-- Ano e Mês (empilhados no mobile, inline no lg) -->
                     <div class="w-full flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4 lg:w-auto">
                         <div class="w-full lg:w-auto">
                             <label for="ano" class="block mb-1 font-semibold">Filtrar por Ano:</label>
@@ -213,7 +218,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         </div>
                     </div>
 
-                    <!-- Categoria (ocupa linha inteira no mobile, compacta no lg) -->
                     <div class="w-full lg:w-auto">
                         <label for="FiltroCategoria" class="block mb-1 font-semibold">Categoria:</label>
                         <select id="FiltroCategoria" name="FiltroCategoria" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
@@ -271,7 +275,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     $stmt->bind_param('iii', $usuario_id, $itensPorPagina, $offset);
                     $stmt->execute();
                     $result = $stmt->get_result();
-                
+
                     $sql = "
                         SELECT t.*, c.nome_categoria AS categoria_nome
                         FROM transacoes t
@@ -283,61 +287,62 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     $stmt->bind_param('i', $usuario_id);
                     $stmt->execute();
                     $resultado = $stmt->get_result();
-                
+
                     // Verifica se há transações
                     if ($resultado->num_rows > 0) {
-                        echo '<div class="grid grid-cols-5 gap-4 items-center mb-2 hidden lg:grid">'; // cabeçalho apenas para desktop
-                        echo '<div class="col-span-1 text-center font-bold">Descrição</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Data</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Valor</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Categoria</div>';
-                        echo '<div class="col-span-1 text-center font-bold">Ações</div>';
-                        echo '</div>';
-                    
-                        // Exibir as transações no histórico
+                        // Renderiza todas as transações como "cards" (mesmo layout em mobile, md e lg).
                         while ($row = $resultado->fetch_assoc()) {
                             // Formata a data corretamente
                             $data_original = $row['data'];
                             $data = DateTime::createFromFormat('Y-m-d', $data_original);
                             $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
-                            $categoria_id = $row['categoria_id'];
-
-                            echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4">';
-
-                            echo '<div class="hidden lg:grid grid-cols-5 gap-4 items-center">';
-                            echo '<div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">' . htmlspecialchars($row['descricao']) . '</div>';
-                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($data_formatada) . '</div>';
-                            echo '<div class="col-span-1 text-center font-semibold truncate py-3 px-6">' . htmlspecialchars($row['valor']) . '</div>';
-                            echo '<div class="col-span-1 text-center truncate py-3 px-6">' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
-                            echo '<div class="col-span-1 flex justify-end space-x-2 py-3 px-6">';
-                            echo '<a href="../transacoes/page_editar.php?id=' . $row['id'] . '" rel="noopener noreferrer"><button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil" aria-hidden="true"></i></button></a>';
-                            echo '<a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(' . $row['id'] . '); event.stopPropagation();"> <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $row['id'] . '"><i class="fa fa-trash" aria-hidden="true"></i></button></a>';
-                            echo '</div>';
-                            echo '</div>';
-
-                            echo '<div class="block lg:hidden">';
-                            echo '  <div class="mobile-transacao cursor-pointer" data-id="' . $row['id'] . '">';
+                            $categoria_nome = htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria');
                             $valor_class = ($row['valor'] >= 0) ? 'text-green-600' : 'text-red-600';
-                            echo '    <div class="flex justify-between items-start">';
-                            echo '      <div class="w-2/3 text-left font-semibold text-gray-800 truncate">' . htmlspecialchars($row['descricao']) . '</div>';
-                            echo '      <div class="text-right font-bold ' . $valor_class . '">' . htmlspecialchars(number_format($row['valor'], 2, ',', '.')) . '</div>';
+                            $valor_formatado = htmlspecialchars(number_format($row['valor'], 2, ',', '.'));
+                            $descricao = htmlspecialchars($row['descricao']);
+                            $id = intval($row['id']);
+
+                            echo '<div class="bg-white p-4 rounded-lg shadow-lg mb-4 mobile-transacao cursor-pointer" data-id="' . $id . '">';
+
+                            // Linha principal: descrição (esq) e valor (dir)
+                            echo '  <div class="flex items-start justify-between">';
+                            echo '    <div class="flex-1 pr-3">';
+                            echo '      <div class="text-lg font-semibold text-gray-800 truncate">' . htmlspecialchars($row['descricao']) . '</div>';
                             echo '    </div>';
-                            echo '    <div class="flex justify-between text-xs text-gray-500 mt-1">';
-                            echo '      <div>' . htmlspecialchars($data_formatada) . '</div>';
-                            echo '      <div>' . htmlspecialchars($row['categoria_nome'] ?? 'Sem categoria') . '</div>';
-                            echo '    </div>';
-                            // garantir que ações móveis só existam no mobile (reforço com lg:hidden)
-                            echo '    <div class="actions-mobile hidden mt-3 flex justify-end space-x-2 lg:hidden">';
-                            echo '      <a href="../transacoes/page_editar.php?id=' . $row['id'] . '" onclick="event.stopPropagation();"><button class="bg-tollens text-white py-1 px-3 rounded"><i class="fa fa-pencil"></i></button></a>';
-                            echo '      <a href="#" onclick="event.stopPropagation(); abrirModalExcluir(' . $row['id'] . ');"><button class="bg-red-600 text-white py-1 px-3 rounded"><i class="fa fa-trash"></i></button></a>';
+                            echo '    <div class="text-right ml-2">';
+                            echo '      <div class="' . $valor_class . ' text-lg font-bold">' . htmlspecialchars(number_format($row['valor'], 2, ',', '.')) . '</div>';
                             echo '    </div>';
                             echo '  </div>';
-                            echo '</div>';
+
+                            // Segunda linha: data e categoria
+                            echo '  <div class="flex justify-between text-sm text-gray-500 mt-2">';
+                            echo '    <div>' . htmlspecialchars($data_formatada) . '</div>';
+                            echo '    <div>' . $categoria_nome . '</div>';
+                            echo '  </div>';
+
+                            // ações: sempre ocultas por padrão (classe .actions). Toggle geral controla a visibilidade
+                            echo '  <div class="mt-3 flex justify-end">';
+                            echo '    <div class="actions hidden items-center space-x-2">';
+                            echo '      <a href="../transacoes/page_editar.php?id=' . $id . '" rel="noopener noreferrer" onclick="event.stopPropagation();">';
+                            echo '        <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil" aria-hidden="true"></i></button>';
+                            echo '      </a>';
+                            echo '      <a href="#" rel="noopener noreferrer" onclick="event.stopPropagation(); abrirModalExcluir(' . $id . ');">';
+                            echo '        <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $id . '"><i class="fa fa-trash" aria-hidden="true"></i></button>';
+                            echo '      </a>';
+                            // mover ações para os próprios botões (evita que stopPropagation em listeners bloqueie o acionamento)
+                            echo '      <a href="#" rel="noopener noreferrer" onclick="event.preventDefault();">';
+                            echo '        <button type="button" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500" onclick="event.stopPropagation(); location.href=\'../transacoes/page_editar.php?id=' . $id . '\'"><i class="fa fa-pencil" aria-hidden="true"></i></button>';
+                            echo '      </a>';
+                            echo '      <a href="#" rel="noopener noreferrer" onclick="event.preventDefault();">';
+                            echo '        <button type="button" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $id . '" onclick="event.stopPropagation(); abrirModalExcluir(' . $id . ');"><i class="fa fa-trash" aria-hidden="true"></i></button>';
+                            echo '      </a>';
+                            echo '    </div>';
+                            echo '  </div>';
 
                             echo '</div>';
                         }
                     } else {
-                        echo '<li>Nenhuma transação encontrada.</li>';
+                        echo '<p class="text-center text-gray-500">Nenhuma transação encontrada.</p>';
                     }
                 }
 
@@ -522,7 +527,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             }
         });
 
-        // Carregar as transações ao selecionar o mês
+        // Carregar as transações ao selecionar o mês (atualizado para layout em card)
         document.getElementById('mes').addEventListener('change', function() {
             const mesSelecionado = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
@@ -533,7 +538,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     .then(response => response.json())
                     .then(data => {
                         transacoesContainer.innerHTML = '';
-                    
+
                         if (data.length > 0) {
                             data.forEach(transacao => {
                                 const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
@@ -541,20 +546,33 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                                     month: '2-digit',
                                     year: 'numeric'
                                 });
-                            
+
+                                const valorNum = Number(transacao.valor);
+                                const valorFormatado = valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                const valorClass = valorNum >= 0 ? 'text-green-600' : 'text-red-600';
+                                const categoria = transacao.categoria_nome ?? transacao.nome_categoria ?? 'Sem categoria';
+
                                 transacoesContainer.innerHTML += `
-                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
-                                        <div class="grid grid-cols-5 gap-4 items-center">
-                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
-                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
-                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
-                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
+                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4 mobile-transacao cursor-pointer" data-id="${transacao.id}">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex-1 pr-3">
+                                                <div class="text-lg font-semibold text-gray-800 truncate">${transacao.descricao}</div>
+                                            </div>
+                                            <div class="text-right ml-2">
+                                                <div class="${valorClass} text-lg font-bold">R$ ${valorFormatado}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between text-sm text-gray-500 mt-2">
+                                            <div>${dataFormatada}</div>
+                                            <div>${categoria}</div>
+                                        </div>
+                                        <div class="mt-3 flex justify-end">
+                                            <div class="actions hidden items-center space-x-2">
+                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer" onclick="event.stopPropagation();">
+                                                    <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil"></i></button>
                                                 </a>
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
-                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
+                                                <a href="#" rel="noopener noreferrer" onclick="event.stopPropagation(); abrirModalExcluir(${transacao.id})">
+                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500"><i class="fa fa-trash"></i></button>
                                                 </a>
                                             </div>
                                         </div>
@@ -568,50 +586,49 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     .catch(error => console.error('Erro ao buscar transações:', error));
             }
         });
-
     </script>
 
-    <script>//Fechar modais clicando fora da caixa
-        window.addEventListener('click', function(event) {
-            const modais = ['AddTransacaoModal', 'modalEditarTransacao', 'modalConfirmarExclusao'];
-            modais.forEach(function(modalId) {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    modal.classList.add('hidden');
-                }
-            });
-        });
-    </script>
-
-    <script> //filtro categoria
+    <script> // filtro categoria (atualizado para layout em card)
         document.getElementById('FiltroCategoria').addEventListener('change', function() {
             const categoriaId = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
             const transacoesContainer = document.getElementById('transacoesContainer');
-        
+
             if (categoriaId) {
                 fetch(`../transacoes/filtro_categoria.php?categoria_id=${categoriaId}`)
                     .then(response => response.json())
                     .then(data => {
                         transacoesContainer.innerHTML = '';
-                    
+
                         if (data.length > 0) {
                             data.forEach(transacao => {
                                 const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR');
-                            
+                                const valorNum = Number(transacao.valor);
+                                const valorFormatado = valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                const valorClass = valorNum >= 0 ? 'text-green-600' : 'text-red-600';
+                                const categoria = transacao.nome_categoria ?? transacao.categoria_nome ?? 'Sem categoria';
+
                                 transacoesContainer.innerHTML += `
-                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
-                                        <div class="grid grid-cols-5 gap-4 items-center">
-                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
-                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.nome_categoria}</div>
-                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
-                                                    <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
+                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4 mobile-transacao cursor-pointer" data-id="${transacao.id}">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex-1 pr-3">
+                                                <div class="text-lg font-semibold text-gray-800 truncate">${transacao.descricao}</div>
+                                            </div>
+                                            <div class="text-right ml-2">
+                                                <div class="${valorClass} text-lg font-bold">R$ ${valorFormatado}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between text-sm text-gray-500 mt-2">
+                                            <div>${dataFormatada}</div>
+                                            <div>${categoria}</div>
+                                        </div>
+                                        <div class="mt-3 flex justify-end">
+                                            <div class="actions hidden items-center space-x-2">
+                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer" onclick="event.stopPropagation();">
+                                                    <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil"></i></button>
                                                 </a>
-                                                <a href="#" onclick="abrirModalExcluir(${transacao.id})">
-                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500">Excluir</button>
+                                                <a href="#" abrirModalExcluir(${transacao.id})">
+                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500"><i class="fa fa-trash"></i></button>
                                                 </a>
                                             </div>
                                         </div>
@@ -627,88 +644,68 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         });
     </script>
 
-    <script> //filtro search
+    <script> // filtro search (atualizado para layout em card)
         document.getElementById('filtroSearch').addEventListener('input', function() {
             const searchQuery = this.value;
             const usuarioId = <?php echo $_SESSION['user_id']; ?>;
             const transacoesContainer = document.getElementById('transacoesContainer');
-        
-            if (searchQuery) {
-                fetch(`../transacoes/filtro_search.php?query=${searchQuery}&usuario_id=${usuarioId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        transacoesContainer.innerHTML = '';
-                    
-                        if (data.length > 0) {
-                            data.forEach(transacao => {
-                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                });
-                            
-                                transacoesContainer.innerHTML += `
-                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
-                                        <div class="grid grid-cols-5 gap-4 items-center">
-                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
-                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
-                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
-                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
-                                                </a>
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
-                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
-                                                </a>
-                                            </div>
-                                        </div>
+
+            function renderLista(data) {
+                transacoesContainer.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(transacao => {
+                        const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                        const valorNum = Number(transacao.valor);
+                        const valorFormatado = valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const valorClass = valorNum >= 0 ? 'text-green-600' : 'text-red-600';
+                        const categoria = transacao.categoria_nome ?? transacao.nome_categoria ?? 'Sem categoria';
+
+                        transacoesContainer.innerHTML += `
+                            <div class="bg-white p-4 rounded-lg shadow-lg mb-4 mobile-transacao cursor-pointer" data-id="${transacao.id}">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1 pr-3">
+                                        <div class="text-lg font-semibold text-gray-800 truncate">${transacao.descricao}</div>
                                     </div>
-                                `;
-                            });
-                        } else {
-                            transacoesContainer.innerHTML = '<p class="text-center text-gray-500">Nenhuma transação encontrada com esse nome.</p>';
-                        }
-                    })
+                                    <div class="text-right ml-2">
+                                        <div class="${valorClass} text-lg font-bold">R$ ${valorFormatado}</div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-500 mt-2">
+                                    <div>${dataFormatada}</div>
+                                    <div>${categoria}</div>
+                                </div>
+                                <div class="mt-3 flex justify-end">
+                                    <div class="actions hidden items-center space-x-2">
+                                        <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer" onclick="event.stopPropagation();">
+                                            <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil"></i></button>
+                                        </a>
+                                        <a href="#" rel="noopener noreferrer" abrirModalExcluir(${transacao.id})">
+                                            <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500"><i class="fa fa-trash"></i></button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    transacoesContainer.innerHTML = '<p class="text-center text-gray-500">Nenhuma transação encontrada com esse nome.</p>';
+                }
+            }
+
+            if (searchQuery) {
+                fetch(`../transacoes/filtro_search.php?query=${encodeURIComponent(searchQuery)}&usuario_id=${usuarioId}`)
+                    .then(response => response.json())
+                    .then(data => renderLista(data))
                     .catch(error => console.error('Erro ao buscar transações:', error));
             } else {
                 // Buscar todas as transações quando a caixa de pesquisa estiver vazia
                 fetch(`../transacoes/filtro_search.php?usuario_id=${usuarioId}`)
                     .then(response => response.json())
-                    .then(data => {
-                        transacoesContainer.innerHTML = '';
-                    
-                        if (data.length > 0) {
-                            data.forEach(transacao => {
-                                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                });
-                            
-                                transacoesContainer.innerHTML += `
-                                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
-                                        <div class="grid grid-cols-5 gap-4 items-center">
-                                            <div class="col-span-1 w-80 text-left truncate break-normal py-3 px-6">${transacao.descricao}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${dataFormatada}</div>
-                                            <div class="col-span-1 text-center font-semibold truncate py-3 px-6">${transacao.valor}</div>
-                                            <div class="col-span-1 text-center truncate py-3 px-6">${transacao.categoria_nome ?? 'Sem categoria'}</div>
-                                            <div class="col-span-1 flex justify-end space-x-2 py-3 px-6">
-                                                <a href="../transacoes/page_editar.php?id=${transacao.id}" rel="noopener noreferrer">
-                                                    <button id="btn_editar" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500">Editar</button>
-                                                </a>
-                                                <a href="#" rel="noopener noreferrer" onclick="abrirModalExcluir(${transacao.id})">
-                                                    <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="${transacao.id}">Excluir</button>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            transacoesContainer.innerHTML = '<p class="text-center text-gray-500">Nenhuma transação encontrada.</p>';
-                        }
-                    })
+                    .then(data => renderLista(data))
                     .catch(error => console.error('Erro ao buscar transações:', error));
             }
         });
@@ -894,41 +891,39 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            function setupMobileToggles() {
+            function setupCardToggles() {
                 document.querySelectorAll('.mobile-transacao').forEach(function(item) {
                     if (item.dataset.hasListener) return;
                     item.dataset.hasListener = '1';
-                
+
+                    // Toggle geral: abre/fecha .actions em qualquer tamanho de tela
                     item.addEventListener('click', function(e) {
-                        if (window.innerWidth == 1024) return;
-                        const actions = item.querySelector('.actions-mobile');
+                        const actions = item.querySelector('.actions');
                         if (!actions) return;
                         actions.classList.toggle('hidden');
                         item.classList.toggle('bg-gray-50');
                     });
-                
-                    // Previne propagação ao clicar em botões/links dentro do item
+
+                    // Previne propagação ao clicar em botões/links dentro do card
                     item.querySelectorAll('a, button').forEach(btn => {
-                        btn.addEventListener('click', function(ev) {
-                            ev.stopPropagation();
-                        });
+                        btn.addEventListener('click', function(ev) { ev.stopPropagation(); });
                     });
                 });
             }
-        
-            setupMobileToggles();
-        
+
+            setupCardToggles();
+
+            // Observador para itens inseridos dinamicamente (fetch)
             const transacoesContainer = document.getElementById('transacoesContainer');
             if (transacoesContainer) {
-                const obs = new MutationObserver(() => setupMobileToggles());
+                const obs = new MutationObserver(() => setupCardToggles());
                 obs.observe(transacoesContainer, { childList: true, subtree: true });
             }
-        
+
+            // Ao redimensionar, garante que actions fiquem ocultas e remove destaque visual
             window.addEventListener('resize', function() {
-                if (window.innerWidth >= 1024) {
-                    document.querySelectorAll('.actions-mobile').forEach(a => a.classList.add('hidden'));
-                    document.querySelectorAll('.mobile-transacao').forEach(t => t.classList.remove('bg-gray-50'));
-                }
+                document.querySelectorAll('.actions').forEach(a => a.classList.add('hidden'));
+                document.querySelectorAll('.mobile-transacao').forEach(t => t.classList.remove('bg-gray-50'));
             });
         });
     </script>
