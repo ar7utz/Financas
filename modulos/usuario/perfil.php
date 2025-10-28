@@ -73,6 +73,7 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
             </div>
             <!-- Div das informações - lado direito -->
             <div class="w-full md:w-2/3 flex flex-col justify-center mt-5">
+                <!-- Responsividade Nome e User-->
                 <div class="grid md:grid-cols-2 gap-4 mb-4">
                     <div class="flex flex-col">
                         <label for="nome">Nome:</label>
