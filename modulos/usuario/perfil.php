@@ -60,10 +60,10 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
 
     <div class="w-4/5 mx-auto">
         <div class="flex flex-row mt-8">
-            <!-- Div da foto - lado esquerdo -->
+            <!-- Div da foto - lado esquerdo  -->
             <div class="w-4/12 flex flex-col items-center">
             <img src="../../assets/uploads/<?php echo $usuario['foto'] ? htmlspecialchars($usuario['foto']) : '../../assets/uploads/foto_default.png'; ?>" alt="Foto de perfil" class=" w-32 h-32 rounded-full object-cover">
-                <label class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Foto de perfil</label>
+                <label class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Foto de perfil testexxxx</label>
             </div>
             <!-- Div das informações - lado direito -->
             <div class="w-8/12 flex flex-col justify-center">
