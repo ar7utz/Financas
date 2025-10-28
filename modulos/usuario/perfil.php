@@ -61,15 +61,18 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
     ?>
 
     <div class="w-4/5 mx-auto">
-        <div class="flex flex-row mt-8">
-            <!-- Div da foto - lado esquerdo  -->
-            <div class="w-4/12 flex flex-col items-center">
-            <img src="../../assets/uploads/<?php echo $usuario['foto'] ? htmlspecialchars($usuario['foto']) : '../../assets/uploads/foto_default.png'; ?>" alt="Foto de perfil" class=" w-32 h-32 rounded-full object-cover">
-                <label class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Foto de perfil testexxxx</label>
+        <div class="flex flex-col md:flex-row mt-8 bg-white p-6 rounded-lg shadow-md">
+            <div class="w-full md:w-1/3 flex flex-col items-center justify-center">
+                <!-- Div da foto - lado esquerdo -->
+                <div>
+                    <img src="../../assets/uploads/<?php echo $usuario['foto'] ? htmlspecialchars($usuario['foto']) : '../../assets/uploads/foto_default.png'; ?>"
+                     alt="Foto de perfil"
+                     class=" w-64 h-64 rounded-full object-cover">
+                    <!-- <label class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Foto de perfil</label> -->
+                </div>
             </div>
             <!-- Div das informações - lado direito -->
             <div class="w-full md:w-2/3 flex flex-col justify-center mt-5">
-                <!-- Responsividade Nome e User-->
                 <div class="grid md:grid-cols-2 gap-4 mb-4">
                     <div class="flex flex-col">
                         <label for="nome">Nome:</label>
