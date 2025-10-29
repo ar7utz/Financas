@@ -71,7 +71,7 @@
                     <div id="btn_login" class="">
                         <a href="modulos/login/login.php" rel="noopener noreferrer"><button class="hover:underline">Login</button></a>
                     </div>
-                    <div id="btn_cadastro" class="hover:underline hover:cursor-pointer hover:font-bold">
+                    <div id="btn_cadastro" class="hover:underline hover:cursor-pointer">
                         <a href="modulos/cadastro/cadastro.php" rel="noopener noreferrer"><button class="hover:underline">Cadastre-se</button></a>
                     </div>
                 </div>

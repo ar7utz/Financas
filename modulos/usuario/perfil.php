@@ -27,7 +27,7 @@ if ($resultado->num_rows > 0) {
     $telefone = $usuario['telefone'];
     $email = $usuario['email'];
     $foto = $usuario['foto'];
-} else {
+    } else {
     echo "Utilizador não encontrado.";
     exit;
 }
@@ -57,7 +57,7 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
 
 <body class="bg-gray-100">
     <?php
-        include_once('../../assets/templates/navbar.php')
+        include_once ('../../assets/templates/navbar.php');
     ?>
 
     <div class="w-4/5 mx-auto">
@@ -83,7 +83,7 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
                         <input type="text" value="<?php echo htmlspecialchars($username);?>" class="border p-2 w-full rounded-md" disabled>
                     </div>
                 </div>
-            
+
                 <div class="flex flex-col">
                     <div>
                         <label for="">Telefone</label>
@@ -102,6 +102,45 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
                     <div>
                         <label for="">Total Investido até o momento:</label>
                         <input type="text" value="<?php echo number_format($totalInvestido, 2, ',', '.');?>" class="border p-2 w-full rounded-md" disabled>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <div>
+                        <label for="FiltroCategoria" class="mb-1 block">Minhas categorias:</label>
+                        <div class=" gap-2 mb-2">
+                        <a href="../categorias/formAddCategoria.php"><button class="bg-tollens text-white px-3 py-1 rounded">Inserir categoria +</button></a>
+                        </div>
+
+                        <div class="relative">
+                            <select id="FiltroCategoria" name="FiltroCategoria" aria-label="Minhas categorias"
+                                class="block w-full bg-white border border-gray-300 rounded-md p-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-tollens">
+                                <option value="">Selecionar categoria</option>
+                                <?php 
+                                $sql_categoria = "SELECT id, nome_categoria FROM categoria WHERE fk_user_id = ? ORDER BY nome_categoria ASC";
+                                $stmt_categoria = $conn->prepare($sql_categoria);
+                                $stmt_categoria->bind_param('i', $usuario_id);
+                                $stmt_categoria->execute();
+                                $resultado_categoria = $stmt_categoria->get_result();
+
+                                while ($categoria = $resultado_categoria->fetch_assoc()): ?>
+                                    <option value="<?php echo $categoria['id']; ?>">
+                                        <?php echo htmlspecialchars($categoria['nome_categoria']); ?>
+                                    </option>
+                                <?php endwhile; 
+                                $stmt_categoria->close();
+                                ?>
+                            </select>
+
+                            <!-- Ícone de dropdown dentro do "input" -->
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
