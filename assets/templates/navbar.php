@@ -41,11 +41,9 @@ if (isset($_SESSION['user_id'])) {
 }
 
 function formatarNome($nomeCompleto) {
-    $partes = explode(' ', trim($nomeCompleto)); // Divide o nome em partes
-    if (count($partes) > 1) {
-        return $partes[0] . ' ' . $partes[1]; // Retorna os dois primeiros nomes
-    }
-    return $partes[0]; // Retorna apenas o primeiro nome se houver apenas um
+    // Retorna somente o primeiro nome
+    $partes = preg_split('/\s+/', trim($nomeCompleto));
+    return $partes[0] ?? 'Usuário';
 }
 
 $nomeExibido = formatarNome($nome);

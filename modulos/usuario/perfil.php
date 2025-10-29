@@ -68,7 +68,6 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
                     <img src="../../assets/uploads/<?php echo $usuario['foto'] ? htmlspecialchars($usuario['foto']) : '../../assets/uploads/foto_default.png'; ?>"
                      alt="Foto de perfil"
                      class=" w-64 h-64 rounded-full object-cover">
-                    <!-- <label class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Foto de perfil</label> -->
                 </div>
             </div>
             <!-- Div das informações - lado direito -->
@@ -104,50 +103,51 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
                         <input type="text" value="<?php echo number_format($totalInvestido, 2, ',', '.');?>" class="border p-2 w-full rounded-md" disabled>
                     </div>
                 </div>
-
+                
+                <!-- Filtro cagetoria -->
                 <div class="flex flex-col">
                     <div>
                         <label for="FiltroCategoria" class="mb-1 block">Minhas categorias:</label>
-                        <div class=" gap-2 mb-2">
-                        <a href="../categorias/formAddCategoria.php"><button class="bg-tollens text-white px-3 py-1 rounded">Inserir categoria +</button></a>
-                        </div>
 
                         <div class="relative">
-                            <select id="FiltroCategoria" name="FiltroCategoria" aria-label="Minhas categorias"
-                                class="block w-full bg-white border border-gray-300 rounded-md p-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-tollens">
-                                <option value="">Selecionar categoria</option>
-                                <?php 
-                                $sql_categoria = "SELECT id, nome_categoria FROM categoria WHERE fk_user_id = ? ORDER BY nome_categoria ASC";
-                                $stmt_categoria = $conn->prepare($sql_categoria);
-                                $stmt_categoria->bind_param('i', $usuario_id);
-                                $stmt_categoria->execute();
-                                $resultado_categoria = $stmt_categoria->get_result();
+                            <div class="flex items-center gap-2">
+                                <select id="FiltroCategoria" name="FiltroCategoria" aria-label="Minhas categorias"
+                                    class="flex-1 bg-white border border-gray-300 rounded-md p-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-tollens">
+                                    <option value="">Minhas categorias criadas</option>
+                                    <?php
+                                    $sql_categoria = "SELECT id, nome_categoria FROM categoria WHERE fk_user_id = ? ORDER BY nome_categoria ASC";
+                                    $stmt_categoria = $conn->prepare($sql_categoria);
+                                    $stmt_categoria->bind_param('i', $usuario_id);
+                                    $stmt_categoria->execute();
+                                    $resultado_categoria = $stmt_categoria->get_result();
 
-                                while ($categoria = $resultado_categoria->fetch_assoc()): ?>
-                                    <option value="<?php echo $categoria['id']; ?>">
-                                        <?php echo htmlspecialchars($categoria['nome_categoria']); ?>
-                                    </option>
-                                <?php endwhile; 
-                                $stmt_categoria->close();
-                                ?>
-                            </select>
+                                    while ($categoria = $resultado_categoria->fetch_assoc()): ?>
+                                        <option value="<?php echo $categoria['id']; ?>">
+                                            <?php echo htmlspecialchars($categoria['nome_categoria']); ?>
+                                        </option>
+                                    <?php endwhile; 
+                                    $stmt_categoria->close();
+                                    ?>
+                                </select>
 
-                            <!-- Ícone de dropdown dentro do "input" -->
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                     xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
+                                <!-- Ícone de editar ao lado do select -->
+                                <a href="../categorias/listaCategoria.php" title="Gerenciar minhas categorias"
+                                   class="inline-flex items-center justify-center w-10 h-10 bg-gray-100 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                                   aria-label="Editar categorias">
+                                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                                </a>
                             </div>
-                        </div>
+                         </div>
 
+                        <div class=" gap-2 mt-2">
+                            <a href="../categorias/formAddCategoria.php"><button class="bg-tollens text-white px-3 py-1 rounded">Inserir categoria +</button></a>
+                        </div>
                     </div>
                 </div>
-
-                <div class="flex justify-center">
-                    <a href="./editar_usuario.php"><button class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Editar Informações</button></a>
-                </div>
             </div>
+        </div>
+        <div class="flex justify-center items-center align-middle mb-5">
+            <a href="./editar_usuario.php"><button class="bg-blue-500 text-white mt-4 px-4 py-2 rounded-md">Editar Informações</button></a>
         </div>
     </div>
 </body>
