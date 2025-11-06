@@ -209,9 +209,21 @@ $usuario_id = $_SESSION['user_id'];
 
             fetch('pontuação_perfil.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // informa ao servidor que é AJAX
+                }
             })
-            .then(resp => resp.json())
+            .then(async resp => {
+                const text = await resp.text();
+                // tenta parsear JSON; se falhar, lança com texto para tratar no catch
+                try {
+                    const data = JSON.parse(text);
+                    return data;
+                } catch (err) {
+                    throw new Error('Resposta inválida do servidor: ' + text);
+                }
+            })
             .then(data => {
                 // Esconde o formulário de perguntas
                 document.getElementById('perfilFinanceiroForm').classList.add('hidden');
@@ -222,14 +234,22 @@ $usuario_id = $_SESSION['user_id'];
                         `<span class="font-bold">Seu perfil financeiro é:</span>
                          <span class="text-blue-700">${data.perfil}</span><br>
                          <span class="text-sm text-gray-500">Pontuação: ${data.pontos}</span>`;
+                    // opcional: redireciona após delay retornado pelo servidor
+                    if (data.redirect && data.delay_seconds) {
+                        setTimeout(function(){
+                            window.location.href = data.redirect;
+                        }, data.delay_seconds * 1000);
+                    }
                 } else {
                     document.getElementById('perfilResultado').innerText = "Erro ao calcular perfil: " + (data.msg || "Tente novamente.");
                 }
             })
-            .catch(() => {
+            .catch((err) => {
                 document.getElementById('perfilFinanceiroForm').classList.add('hidden');
                 document.getElementById('resultado').classList.remove('hidden');
-                document.getElementById('perfilResultado').innerText = "Erro ao enviar respostas. Tente novamente.";
+                // mostra mensagem útil com possível texto retornado pelo servidor
+                document.getElementById('perfilResultado').innerText = "Erro ao enviar respostas. " + (err.message || "Tente novamente.");
+                console.error('Erro no envio do formulário de perfil:', err);
             });
 
             // Desabilita os botões após envio

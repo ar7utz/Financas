@@ -50,16 +50,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Inserir os dados no banco
-    $sql = "INSERT INTO user (nome, username, email, telefone, senha, foto) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO user (nome, username, email, telefone, senha, foto, perfil_financeiro)
+            VALUES (?, ?, ?, ?, ?, ?, NULL)";
     $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        $_SESSION['erro'] = "Erro ao preparar cadastro: " . $conn->error;
+        header('Location: cadastro.php?mensagem=ErroCadastroUser');
+        exit;
+    }
     $stmt->bind_param('ssssss', $nome, $username, $email, $telefone, $senha, $foto);
 
     if ($stmt->execute()) {
         $_SESSION['status_cadastro'] = true;
         header('Location: ../login/login.php?mensagem=CadastroSucesso');
     } else {
-        $_SESSION['erro'] = "Erro ao cadastrar usuário.";
+        $_SESSION['erro'] = "Erro ao cadastrar usuário: " . $stmt->error;
         header('Location: cadastro.php?mensagem=ErroCadastroUser');
     }
     $stmt->close();

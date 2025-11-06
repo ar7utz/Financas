@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $usuario_id = $_SESSION['user_id'];
 
-// Recuperar o ID da meta a partir da URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     echo "<p class='text-center text-red-500'>Meta não encontrada.</p>";
     exit;
@@ -33,7 +32,7 @@ if (!$meta) {
 $preco_meta = $meta['preco_meta'];
 $capital = $meta['capital'];
 $quanto_quero_pagar_mes = $meta['quanto_quero_pagar_mes'];
-$quanto_tempo_quero_pagar = $meta['quanto_tempo_quero_pagar']; // Certifique-se que este campo existe no banco
+$quanto_tempo_quero_pagar = $meta['quanto_tempo_quero_pagar'];
 
 // 1. Quanto precisa investir por mês para pagar no tempo desejado
 if ($quanto_tempo_quero_pagar > 0) {
@@ -87,34 +86,103 @@ $investimentos = [
     "Tesouro IPCA+" => "Protege contra a inflação e gera rendimentos acima do IPCA.",
 ];
 
-// Buscar o perfil do usuário no banco
-$sqlPerfil = "SELECT * FROM perfil_financeiro WHERE id = ?";
+$sqlPerfil = "SELECT * FROM user WHERE perfil_financeiro = ?";
 $stmtPerfil = $conn->prepare($sqlPerfil);
-$stmtPerfil->bind_param('i', $usuario_id);
+$stmtPerfil->bind_param('i', $perfil_financeiro);
 $stmtPerfil->execute();
 $resultPerfil = $stmtPerfil->get_result();
-$perfil_usuario = '?';
-
 $perfil_financeiro = $resultPerfil->fetch_assoc();
+$stmtPerfil->close();
 
-if ($rowPerfil = $resultPerfil->fetch_assoc()) {
-    $perfil_usuario = $rowPerfil['perfil_financeiro'] ?? 'Conservador';
+$perfil_financeiro = $perfil_financeiro['nome'] ?? null;
+
+$sqlMovimentação = "SELECT * FROM movimentacoes WHERE usuario_id = ? AND meta_id = ?";
+$stmtMovimentação = $conn->prepare($sqlMovimentação);
+$stmtMovimentação->bind_param('ii', $usuario_id, $meta_id);
+$stmtMovimentação->execute();
+$resultMovimentação = $stmtMovimentação->get_result();
+$movimentações = $resultMovimentação->fetch_assoc();
+$stmtMovimentação->close();
+
+$movimentações = $movimentações['valor'];
+
+if ($perfil_financeiro) {
+    switch ($perfil_financeiro) {
+        case 'Conservador':
+            $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
+            break;
+        case 'Moderado':
+            $sugestoes = include __DIR__ . '/../Sugestor/perfilModerado.php';
+            break;
+        case 'Agressivo':
+            $sugestoes = include __DIR__ . '/../Sugestor/perfilAgressivo.php';
+            break;
+        default:
+            $lower = strtolower($perfil_financeiro);
+            if (str_contains($lower, 'conserv')) {
+                $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
+            } elseif (str_contains($lower, 'moder')) {
+                $sugestoes = include __DIR__ . '/../Sugestor/perfilModerado.php';
+            } elseif (str_contains($lower, 'agress')) {
+                $sugestoes = include __DIR__ . '/../Sugestor/perfilAgressivo.php';
+            } else {
+                $sugestoes = [];
+            }
+            break;
+    }
+} else {
+    $sugestoes = [];
 }
 
-$perfil_usuario = $_SESSION['perfil'] ?? 'Conservador'; /* recupere o perfil, ex: 'Conservador', 'Moderado', 'Agressivo' */
+// substitui o bloco que buscava uma movimentação isolada pelo somatório de aplicações
+$sqlMovimentacaoSum = "SELECT COALESCE(SUM(valor),0) AS total_aplicado FROM movimentacoes WHERE usuario_id = ? AND meta_id = ? AND tipo = 'aplicacao'";
+$stmtMovSum = $conn->prepare($sqlMovimentacaoSum);
+$stmtMovSum->bind_param('ii', $usuario_id, $meta_id);
+$stmtMovSum->execute();
+$resMovSum = $stmtMovSum->get_result();
+$rowMovSum = $resMovSum->fetch_assoc();
+$stmtMovSum->close();
 
-switch ($perfil_usuario) {
-    case 'Conservador':
-        $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
-        break;
-    case 'Moderado':
-        $sugestoes = include __DIR__ . '/../Sugestor/perfilModerado.php';
-        break;
-    case 'Agressivo':
-        $sugestoes = include __DIR__ . '/../Sugestor/perfilAgressivo.php';
-        break;
-    default:
-        $sugestoes = [];
+$total_aplicado = floatval($rowMovSum['total_aplicado']); // Aporte total já feito pelo usuário nesta meta
+
+// Atualiza agora os cálculos levando em conta o aporte já realizado (total_aplicado)
+// 1. Quanto precisa investir por mês para pagar no tempo desejado (considerando capital inicial + total_aplicado)
+if ($quanto_tempo_quero_pagar > 0) {
+    $valor_restante = max($preco_meta - $capital - $total_aplicado, 0);
+    $valor_necessario_por_mes = $valor_restante / $quanto_tempo_quero_pagar;
+    $valor_necessario_por_mes = $valor_necessario_por_mes > 0 ? $valor_necessario_por_mes : 0;
+} else {
+    $valor_necessario_por_mes = null;
+}
+
+// 2. Quanto tempo levaria pagando o valor que quer investir por mês (considerando aporte atual como somatório já aplicado)
+if ($quanto_quero_pagar_mes > 0) {
+    $valor_restante2 = max($preco_meta - $capital - $total_aplicado, 0);
+    $meses_necessarios = $valor_restante2 > 0 ? ceil($valor_restante2 / $quanto_quero_pagar_mes) : 0;
+} else {
+    $meses_necessarios = 'Indefinido (defina um valor para investir mensalmente)';
+}
+
+// Formatação do tempo (mantém lógica existente)
+if (is_numeric($meses_necessarios)) {
+    $anos = floor($meses_necessarios / 12);
+    $meses_restantes = $meses_necessarios % 12;
+    $tempo_formatado = '';
+    if ($anos > 0) {
+        $tempo_formatado .= $anos . ' ano' . ($anos > 1 ? 's' : '');
+    }
+    if ($anos > 0 && $meses_restantes > 0) {
+        $tempo_formatado .= ' e ';
+    }
+    if ($meses_restantes > 0) {
+        $tempo_formatado .= $meses_restantes . ' meses';
+    }
+    if ($tempo_formatado === '') {
+        $tempo_formatado = '0 meses';
+    }
+    $tempo_formatado .= " ($meses_necessarios meses)";
+} else {
+    $tempo_formatado = $meses_necessarios;
 }
 ?>
 
@@ -139,12 +207,19 @@ switch ($perfil_usuario) {
 
     <div class="container mx-auto p-6">
         <h1 class="text-2xl font-bold mb-6 text-center">Sua Meta Financeira: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span></h1>
-        <p>perfil financeiro: <?php echo htmlspecialchars($perfil_financeiro['nome']); ?></p>
+        <div class="mb-2">
+            <?php if ($perfil_financeiro && !empty($perfil_financeiro['nome'])): ?>
+                Perfil financeiro: <strong><?php echo htmlspecialchars($perfil_financeiro['nome']); ?></strong>
+            <?php else: ?>
+                Você ainda não definiu seu perfil financeiro.
+                <a href="../usuario/perfil.php" class="text-blue-600 underline ml-2">Clique aqui para definir seu perfil</a>
+            <?php endif; ?>
+        </div>
         <!-- Informações da Meta -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold mb-4">Detalhes da Meta</h2>
-                <a class="bg-slate-400 w-40 p-2 rounded-md" href="./editar_meta.php?id=<?php echo $meta_id; ?>"><button>Adicionar movimentação</button></a>
+                <a class="bg-slate-400 w-40 p-2 rounded-md text-center" href="./editar_meta.php?id=<?php echo $meta_id; ?>"><button>+ Movimentação</button></a>
             </div>
 
             <div class="flex flex-wrap gap-4 mt-4 items-center align-middle justify-center text-center">
@@ -185,6 +260,11 @@ switch ($perfil_usuario) {
                         para pagar em<strong class="ml-2"><?php echo is_numeric($quanto_tempo_quero_pagar) ? $quanto_tempo_quero_pagar . ' meses' : 'Não informado'; ?></strong>
                     </span>
                 </p>
+                <!-- Atualiza exibição do "Aporte mensal atual depositado" -->
+                <p id="weatherGlass6" class="flex flex-col w-52 h-28 items-center justify-center shadow-lg bg-white rounded-md p-4">
+                    <strong>Aporte mensal atual depositado:</strong>
+                    <span>R$ <?php echo number_format($total_aplicado, 2, ',', '.'); ?></span>
+                </p>
                 
             </div>
         </div>
@@ -200,77 +280,101 @@ switch ($perfil_usuario) {
         </div>
 
         <!-- Sugestão -->
+        <?php
+        if (empty($sugestoes)) {
+            $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
+        }
+        ?>
         <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-xl font-bold mb-4">Sugestão de acordo com o seu perfil financeiro</h2>
-            <ul class="list-disc ml-5">
-                <?php foreach ($sugestoes as $sugestao): ?>
-                    <li>
-                        <strong><?php echo htmlspecialchars($sugestao['nome']); ?></strong>:
-                        <?php echo htmlspecialchars($sugestao['descricao']); ?>
-                        <a href="<?php echo htmlspecialchars($sugestao['link']); ?>" target="_blank" class="text-blue-600 underline ml-2">Saiba mais</a>
-                    </li>
+            <h2 class="text-xl font-bold mb-4">Dicas e sugestões para seu perfil</h2>
+
+            <div id="sugestoesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <?php foreach ($sugestoes as $s): ?>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-md font-semibold"><?php echo htmlspecialchars($s['titulo']); ?></h3>
+                                <p class="text-sm text-gray-600 mt-2"><?php echo htmlspecialchars($s['descricao']); ?></p>
+                            </div>
+                            <div class="text-xs text-gray-400 ml-3"><?php echo htmlspecialchars($s['categoria']); ?></div>
+                        </div>
+
+                        <?php if (!empty($s['dicas'])): ?>
+                            <ul class="mt-3 text-sm list-disc ml-5 text-gray-700">
+                                <?php foreach ($s['dicas'] as $d): ?>
+                                    <li><?php echo htmlspecialchars($d); ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+
+                        <?php if (!empty($s['link'])): ?>
+                            <div class="mt-3">
+                                <a href="<?php echo htmlspecialchars($s['link']); ?>" target="_blank" class="text-blue-600 underline text-sm">Saiba mais</a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 <?php endforeach; ?>
-            </ul>
+            </div>
         </div>
 
         <!--Sugestor-->
-        <div class="bg-white p-6 rounded-lg shadow-md">
+        <!-- <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-bold mb-4">Opções e Dicas de Investimento</h2>
             <ul class="list-disc ml-5">
                 <?php foreach ($investimentos as $titulo => $descricao): ?>
                     <li><strong><?php echo $titulo; ?>:</strong> <?php echo $descricao; ?></li>
                 <?php endforeach; ?>
             </ul>
-        </div>
+        </div> -->
 
         <!-- Informações de Mercado -->
         <div class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-bold mb-4">Opções e Dicas de Investimento</h2>
+            <!-- <h2 class="text-xl font-bold mb-4">Opções e Dicas de Investimento</h2>
             <ul class="list-disc ml-5">
                 <?php foreach ($investimentos as $titulo => $descricao): ?>
                     <li><strong><?php echo $titulo; ?>:</strong> <?php echo $descricao; ?></li>
                 <?php endforeach; ?>
-            </ul>
+            </ul> -->
 
             <!-- Informações de Mercado da API Apple -->
-            <div id="marketData" class="mt-6">
+            <!-- <div id="marketData" class="mt-6">
                 <h3 class="text-lg font-bold mb-2">Informações de Mercado</h3>
                 <p class="text-gray-600">Carregando dados de mercado...</p>
-            </div>
+            </div> -->
 
             <!-- IPCA -->
-            <div id="ipcaData" class="mt-8">
+            <!-- <div id="ipcaData" class="mt-8">
                 <h3 class="text-lg font-bold mb-2">Índice de Preços ao Consumidor Amplo (IPCA)</h3>
                 <canvas id="ipcaChart" height="60"></canvas>
                 <p id="ipcaAtual" class="mt-2 text-gray-700"></p>
-            </div>
+            </div> -->
 
             <!-- Títulos Tesouro IPCA+ -->
-            <div id="ipcaTitulos" class="mt-4 bg-gray-50 p-4 rounded shadow">
+            <!-- <div id="ipcaTitulos" class="mt-4 bg-gray-50 p-4 rounded shadow">
                 <h4 class="text-md font-bold mb-2">Títulos Tesouro IPCA+</h4>
                 <div id="listaIpcaTitulos" class="text-sm text-gray-800">Carregando títulos IPCA...</div>
-            </div>
+            </div> -->
 
             <!-- Bitcoin -->
-            <div id="bitcoinData" class="mt-8">
+            <!-- <div id="bitcoinData" class="mt-8">
                 <h3 class="text-lg font-bold mb-2">Preço do Bitcoin (BTC)</h3>
                 <canvas id="bitcoinChart" height="60"></canvas>
                 <p id="bitcoinAtual" class="mt-2 text-gray-700"></p>
-            </div>
+            </div> -->
 
             <!-- Cotação do Dólar -->
-            <div id="dolarData" class="mt-8">
+            <!-- <div id="dolarData" class="mt-8">
                 <h3 class="text-lg font-bold mb-2">Cotação do Dólar (USD/BRL)</h3>
                 <canvas id="dolarChart" height="60"></canvas>
                 <p id="dolarAtual" class="mt-2 text-gray-700"></p>
-            </div>
+            </div> -->
 
             <!-- Taxa Selic -->
-            <div id="selicData" class="mt-8">
+            <!-- <div id="selicData" class="mt-8">
                 <h3 class="text-lg font-bold mb-2">Taxa de Juros Selic</h3>
                 <canvas id="selicChart" height="60"></canvas>
                 <p id="selicAtual" class="mt-2 text-gray-700"></p>
-            </div>
+            </div> -->
 
         </div>
 
@@ -465,258 +569,182 @@ switch ($perfil_usuario) {
         });
     });
 
-    // Taxa Selic anual (acumulada no mês, mas exibindo como anual)
-    fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados?formato=json&dataInicial=01/01/2025')
-        .then(res => res.json())
-        .then(data => {
-            const ultimos = data.slice(-30);
-            const labels = ultimos.map(d => d.data);
-            const valores = ultimos.map(d => parseFloat(d.valor.replace(',', '.')));
-            document.getElementById('selicAtual').innerText = 'Última taxa anual: ' + valores[valores.length-1].toFixed(2) + '% a.a.';
+//     // Taxa Selic anual (acumulada no mês, mas exibindo como anual)
+//     fetch('https://api
+//         .then(res => res.json())
+//         .then(data => {
+//             const ultimos = data.slice(-30);
+//             const labels = ultimos.map(d => d.data);
+//             const valores = ultimos.map(d => parseFloat(d.valor.replace(',', '.')));
+//             document.getElementById('selicAtual').innerText = 'Última taxa anual: ' + valores[valores.length-1].toFixed(2) + '% a.a.';
         
-            new Chart(document.getElementById('selicChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Selic acumulada no mês (%)',
-                        data: valores,
-                        borderColor: '#16a34a',
-                        backgroundColor: 'rgba(22,163,74,0.1)',
-                        fill: true,
-                        tension: 0.2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true },
-                        title: {
-                            display: true,
-                            text: 'Taxa Selic acumulada no mês (últimos 30 meses)'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Data',
-                                font: { size: 14 }
-                            },
-                            ticks: {
-                                autoSkip: true,
-                                maxTicksLimit: 10,
-                                font: { size: 12 }
-                            }
-                        },
-                        y: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Taxa (%)',
-                                font: { size: 14 }
-                            },
-                            ticks: {
-                                font: { size: 12 }
-                            }
-                        }
-                    }
-                }
-            });
-        });
+//             new Chart(document.getElementById('selicChart').getContext('2d'), {
+//                 type: 'line',
+//                 data: {
+//                     labels: labels,
+//                     datasets: [{
+//                         label: 'Selic acumulada no mês (%)',
+//                         data: valores,
+//                         borderColor: '#16a34a',
+//                         backgroundColor: 'rgba(22,163,74,0.1)',
+//                         fill: true,
+//                         tension: 0.2
+//                     }]
+//                 },
+//                 options: {
+//                     responsive: true,
+//                     plugins: {
+//                         legend: { display: true },
+//                         title: {
+//                             display: true,
+//                             text: 'Taxa Selic acumulada no mês (últimos 30 meses)'
+//                         }
+//                     },
+//                     scales: {
+//                         x: {
+//                             display: true,
+//                             title: {
+//                                 display: true,
+//                                 text: 'Data',
+//                                 font: { size: 14 }
+//                             },
+//                             ticks: {
+//                                 autoSkip: true,
+//                                 maxTicksLimit: 10,
+//                                 font: { size: 12 }
+//                             }
+//                         },
+//                         y: {
+//                             display: true,
+//                             title: {
+//                                 display: true,
+//                                 text: 'Taxa (%)',
+//                                 font: { size: 14 }
+//                             },
+//                             ticks: {
+//                                 font: { size: 12 }
+//                             }
+//                         }
+//                     }
+//                 }
+//             });
+//         });
 
-    // IPCA mensal
-    fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.10844/dados?formato=json&dataInicial=01/01/2018')
-    .then(res => res.json())
-    .then(data => {
-        const ultimos = data.slice(-30);
-        const labels = ultimos.map(d => d.data);
-        const valores = ultimos.map(d => parseFloat(d.valor.replace(',', '.')));
-        document.getElementById('ipcaAtual').innerText = 'Último IPCA: ' + valores[valores.length-1].toFixed(2) + '%';
+//     // IPCA mensal
+//     fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.10844/dados?formato=json&dataInicial=01/01/2018')
+//     .then(res => res.json())
+//     .then(data => {
+//         const ultimos = data.slice(-30);
+//         const labels = ultimos.map(d => d.data);
+//         const valores = ultimos.map(d => parseFloat(d.valor.replace(',', '.')));
+//         document.getElementById('ipcaAtual').innerText = 'Último IPCA: ' + valores[valores.length-1].toFixed(2) + '%';
 
-        new Chart(document.getElementById('ipcaChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'IPCA (%)',
-                    data: valores,
-                    borderColor: '#eab308',
-                    backgroundColor: 'rgba(234,179,8,0.1)',
-                    fill: true,
-                    tension: 0.2
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: true },
-                    title: {
-                        display: true,
-                        text: 'IPCA mensal (últimos 30 meses)'
-                    }
-                },
-                scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Data',
-                            font: { size: 14 }
-                        },
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 10,
-                            font: { size: 12 }
-                        }
-                    },
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'IPCA (%)',
-                            font: { size: 14 }
-                        },
-                        ticks: {
-                            font: { size: 12 }
-                        }
-                    }
-                }
-            }
-        });
-    });
+//         new Chart(document.getElementById('ipcaChart').getContext('2d'), {
+//             type: 'line',
+//             data: {
+//                 labels: labels,
+//                 datasets: [{
+//                     label: 'IPCA (%)',
+//                     data: valores,
+//                     borderColor: '#eab308',
+//                     backgroundColor: 'rgba(234,179,8,0.1)',
+//                     fill: true,
+//                     tension: 0.2
+//                 }]
+//             },
+//             options: {
+//                 responsive: true,
+//                 plugins: {
+//                     legend: { display: true },
+//                     title: {
+//                         display: true,
+//                         text: 'IPCA mensal (últimos 30 meses)'
+//                     }
+//                 },
+//                 scales: {
+//                     x: {
+//                         display: true,
+//                         title: {
+//                             display: true,
+//                             text: 'Data',
+//                             font: { size: 14 }
+//                         },
+//                         ticks: {
+//                             autoSkip: true,
+//                             maxTicksLimit: 10,
+//                             font: { size: 12 }
+//                         }
+//                     },
+//                     y: {
+//                         display: true,
+//                         title: {
+//                             display: true,
+//                             text: 'IPCA (%)',
+//                             font: { size: 14 }
+//                         },
+//                         ticks: {
+//                             font: { size: 12 }
+//                         }
+//                     }
+//                 }
+//             });
+//     });
 
-    // Preço do Bitcoin (últimos 30 dias) usando CoinGecko
-    fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=brl&days=30')
-    .then(res => res.json())
-    .then(data => {
-        const prices = data.prices; // [timestamp, price]
-        const labels = prices.map(p => {
-            const date = new Date(p[0]);
-            return date.toLocaleDateString('pt-BR');
-        });
-        const valores = prices.map(p => p[1]);
-        document.getElementById('bitcoinAtual').innerText = 'Último preço: R$ ' + valores[valores.length-1].toLocaleString('pt-BR', {minimumFractionDigits: 2});
+//     // Preço do Bitcoin (últimos 30 dias) usando CoinGecko
+//     fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=brl&days=30')
+//     .then(res => res.json())
+//     .then(data => {
+//         const prices = data.prices; // [timestamp, price]
+//         const labels = prices.map(p => {
+//             const date = new Date(p[0]);
+//             return date.toLocaleDateString('pt-BR');
+//         });
+//         const valores = prices.map(p => p[1]);
+//         document.getElementById('bitcoinAtual').innerText = 'Último preço: R$ ' + valores[valores.length-1].toLocaleString('pt-BR', {minimumFractionDigits: 2});
 
-        new Chart(document.getElementById('bitcoinChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Bitcoin (R$)',
-                    data: valores,
-                    borderColor: '#f7931a',
-                    backgroundColor: 'rgba(247,147,26,0.1)',
-                    fill: true,
-                    tension: 0.2
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: true },
-                    title: {
-                        display: true,
-                        text: 'Preço do Bitcoin (últimos 30 dias)'
-                    }
-                },
-                scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Data',
-                            font: { size: 14 }
-                        },
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 10,
-                            font: { size: 12 }
-                        }
-                    },
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Preço (R$)',
-                            font: { size: 14 }
-                        },
-                        ticks: {
-                            font: { size: 12 }
-                        }
-                    }
-                }
-            }
-        });
-    });
-
-fetch('./proxy_tesouro_ipca.php')
-    .then(res => res.json())
-    .then(data => {
-        
-        let titulos = [];
-        if (data && Array.isArray(data.response)) {
-            titulos = data.response;
-        } else if (Array.isArray(data)) {
-            titulos = data;
-        } else if (data.bondData) {
-            titulos = data.bondData;
-        }
-
-        if (!titulos || titulos.length === 0) {
-            document.getElementById('listaIpcaTitulos').innerHTML = 'Nenhum título encontrado no momento.';
-            return;
-        }
-
-        let html = '<ul class="list-disc ml-5">';
-        titulos.forEach(titulo => {
-            html += `<li>
-                <strong>${titulo.bondName}</strong> (${titulo.maturityDate})<br>
-                <span>Tipo: ${titulo.bondType}</span><br>
-                <span>Taxa Indicativa: ${titulo.interestRate}% a.a.</span><br>
-                <span>Preço Unitário: R$ ${Number(titulo.unitPrice).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-            </li>`;
-        });
-        html += '</ul>';
-        document.getElementById('listaIpcaTitulos').innerHTML = html;
-    })
-    .catch((err) => {
-        document.getElementById('listaIpcaTitulos').innerHTML = '<span class="text-red-500">Erro ao carregar títulos: ' + err.message + '</span>';
-        console.error('Erro ao buscar títulos:', err);
-    });
-    </script>
-
-    <script>
-        function addGlassHoverEffect(divId, corBase = '#FFD600', corFundo = 'rgba(255,255,255,0.15)') {
-            const div = document.getElementById(divId);
-            if (!div) return;
-        
-            div.addEventListener('mousemove', function(e) {
-                const rect = div.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                div.style.background = `
-                    radial-gradient(circle at ${x}px ${y}px, ${corBase}55 0%, ${corBase}22 40%, ${corFundo} 100%)
-                `;
-                div.style.transition = 'background 0.2s';
-            });
-        
-            div.addEventListener('mouseleave', function() {
-                div.style.background = '';
-            });
-        }
-
-        // Aplique nas suas divs
-        window.addEventListener('DOMContentLoaded', function() {
-            addGlassHoverEffect('weatherGlass', '#1133A6', 'rgba(255,255,255,0.15)');
-            addGlassHoverEffect('weatherGlass1', '#1133A6', 'rgba(255,255,255,0.15)');
-            addGlassHoverEffect('weatherGlass2', '#1133A6', 'rgba(255,255,255,0.15)');
-            addGlassHoverEffect('weatherGlass3', '#1133A6', 'rgba(255,255,255,0.15)');
-            addGlassHoverEffect('weatherGlass4', '#1133A6', 'rgba(255,255,255,0.15)');
-            addGlassHoverEffect('weatherGlass5', '#1133A6', 'rgba(255,255,255,0.15)');
-        });
-    </script>
-
-</body>
-</html>
+//         new Chart(document.getElementById('bitcoinChart').getContext('2d'), {
+//             type: 'line',
+//             data: {
+//                 labels: labels,
+//                 datasets: [{
+//                     label: 'Bitcoin (R$)',
+//                     data: valores,
+//                     borderColor: '#f7931a',
+//                     backgroundColor: 'rgba(247,147,26,0.1)',
+//                     fill: true,
+//                     tension: 0.2
+//                 }]
+//             },
+//             options: {
+//                 responsive: true,
+//                 plugins: {
+//                     legend: { display: true },
+//                     title: {
+//                         display: true,
+//                         text: 'Preço do Bitcoin (últimos 30 dias)'
+//                     }
+//                 },
+//                 scales: {
+//                     x: {
+//                         display: true,
+//                         title: {
+//                             display: true,
+//                             text: 'Data',
+//                             font: { size: 14 }
+//                         },
+//                         ticks: {
+//                             autoSkip: true,
+//                             maxTicksLimit: 10,
+//                             font: { size: 12 }
+//                         }
+//                     },
+//                     y: {
+//                         display: true,
+//                         title: {
+//                             display: true,
+//                             text: 'Preço (R$)',
+//                             font: { size: 14 }
+//                         },
+//                         ticks: {
+//                             font: { size: 12 }
+//                         }

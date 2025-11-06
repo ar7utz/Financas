@@ -141,7 +141,74 @@ $dados = obterDados($filtro);
         </div>
     </div>
 
-    <div class="flex flex-col items-center align-middle justify-between p-4 bg-gray-100 rounded-md mb-6">
+    <?php
+        // Sugestões condicionais por perfil do usuário.
+        $usuario_id = $_SESSION['user_id'] ?? $_SESSION['usuario_id'] ?? null;
+        $perfil = null;
+        if ($usuario_id) {
+            $sql = "SELECT perfil_financeiro FROM user WHERE id = ?";
+            if ($stmt = $conn->prepare($sql)) {
+                $stmt->bind_param('i', $usuario_id);
+                $stmt->execute();
+                $res = $stmt->get_result();
+                if ($row = $res->fetch_assoc()) {
+                    foreach (['perfil','perfil_investidor','perfil_financeiro'] as $col) {
+                        if (!empty($row[$col])) {
+                            $perfil = strtolower(trim($row[$col]));
+                            break;
+                        }
+                    }
+                }
+                $stmt->close();
+            }
+        }
+
+        $sugestoes_sidebar = null;
+        if ($perfil) {
+            if (str_contains($perfil, 'conserv')) {
+            $sugestoes_file = __DIR__ . '/../Sugestor/perfilConservador.php';
+        } elseif (str_contains($perfil, 'moder')) {
+            $sugestoes_file = __DIR__ . '/../Sugestor/perfilModerado.php';
+        } elseif (str_contains($perfil, 'agress')) {
+            $sugestoes_file = __DIR__ . '/../Sugestor/perfilAgressivo.php';
+        } else {
+            $sugestoes_file = __DIR__ . '/../Sugestor/perfilConservador.php';
+        }
+
+        if (file_exists($sugestoes_file)) {
+            $sugestoes_sidebar = include $sugestoes_file;
+        }
+    }
+    ?>
+
+    <div class="p-8 mb-6 bg-gray-100">
+        <h2 class="font-semibold mb-3 text-center">Dicas rápidas</h2>
+
+        <?php if ($sugestoes_sidebar && is_array($sugestoes_sidebar) && count($sugestoes_sidebar) > 0): ?>
+            <!-- Cards em coluna na sidebar -->
+            <div class="flex flex-col space-y-3">
+                <?php foreach (array_slice($sugestoes_sidebar, 0, 3) as $s): ?>
+                    <div class="bg-white p-3 rounded shadow-sm text-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <strong><?php echo htmlspecialchars($s['titulo']); ?></strong>
+                                <p class="text-gray-600 mt-1"><?php echo htmlspecialchars($s['descricao']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <!-- Usuário ainda não possui perfil definido -->
+            <div class="bg-white p-3 rounded shadow-sm text-sm">
+                <p class="text-gray-700 mb-3">Você ainda não definiu seu perfil financeiro.</p>
+                <p class="text-gray-600 text-sm mb-3">Definir seu perfil ajuda o sistema a sugerir investimentos e dicas adequadas ao seu grau de risco.</p>
+                <a href="../usuario/perfil.php" class="inline-block w-full text-center bg-tollens text-white px-3 py-2 rounded hover:opacity-90">Definir meu perfil</a>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- <div class="flex flex-col items-center align-middle justify-between p-4 bg-gray-100 rounded-md mb-6">
         <form id="graficoForm" class="flex flex-col md:flex-row gap-4 mb-6 items-center">
             <div>
                 <label for="chartType" class="mr-2 font-semibold">Tipo de Gráfico:</label>
@@ -171,14 +238,12 @@ $dados = obterDados($filtro);
             </div>
             <button id="updateChart" type="button" class="bg-tollens text-white px-4 py-2 rounded hover:bg-green-500">Atualizar Gráfico</button>
         </form>
-    </div>
+    </div> -->
 
-
-    <div class="flex flex-col items-center align-middle justify-between p-4 rounded-md mb-6 bg-slate-400">
+    <!-- <div class="flex flex-col items-center align-middle justify-between p-4 rounded-md mb-6 bg-slate-400">
         <canvas id="dynamicChart" width="400" height="200"></canvas>
         <?php include_once('../../assets/templates/graficos/graficos_extend.php'); ?>
-    </div>
-
+    </div> -->
 
     <script> //Função para buscar e exibir o horário local
         function atualizarHorario() {
@@ -203,8 +268,6 @@ $dados = obterDados($filtro);
 
         window.onload = atualizarHorario;
     </script>
-
-
 
     <script> //api de clima tempo
         const apiKey = 'fa72d24f3537d09a7c4a3fe63b902d32';

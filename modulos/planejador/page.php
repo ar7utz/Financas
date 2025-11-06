@@ -9,6 +9,27 @@ if (!isset($_SESSION['user_id'])) {
 
 $usuario_id = $_SESSION['user_id'];
 
+$perfil_usuario = null;
+$hasPerfil = false;
+$sqlUser = "SELECT perfil_financeiro FROM user WHERE id = ? LIMIT 1";
+if ($stmtU = $conn->prepare($sqlUser)) {
+    $stmtU->bind_param('i', $usuario_id);
+    $stmtU->execute();
+    $resU = $stmtU->get_result();
+    $userRow = $resU->fetch_assoc();
+    $stmtU->close();
+
+    if ($userRow) {
+        foreach (['perfil_financeiro','perfil','perfil_investidor'] as $col) {
+            if (!empty($userRow[$col]) && trim($userRow[$col]) !== '') {
+                $perfil_usuario = trim($userRow[$col]);
+                $hasPerfil = true;
+                break;
+            }
+        }
+    }
+}
+
 // Buscar todas as metas do usuário
 $sql = "SELECT * FROM planejador WHERE usuario_id = ? ORDER BY criado_em DESC";
 $stmt = $conn->prepare($sql);
@@ -17,7 +38,17 @@ $stmt->execute();
 $result = $stmt->get_result();
 $metas = $result->fetch_all(MYSQLI_ASSOC);
 
-
+// Buscar soma de movimentações por meta para exibir "Investido até agora"
+$sql_somas = "SELECT meta_id, COALESCE(SUM(valor),0) AS total_aplicado FROM movimentacoes WHERE usuario_id = ? GROUP BY meta_id";
+$stmt_somas = $conn->prepare($sql_somas);
+$stmt_somas->bind_param('i', $usuario_id);
+$stmt_somas->execute();
+$res_somas = $stmt_somas->get_result();
+$somas = [];
+while ($row = $res_somas->fetch_assoc()) {
+    $somas[(int)$row['meta_id']] = (float)$row['total_aplicado'];
+}
+$stmt_somas->close();
 ?>
 
 <!DOCTYPE html>
@@ -38,11 +69,22 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
 
     <div class="container mx-auto p-4 justify-between">
         <h1 class="text-2xl font-bold mb-4 text-center">Suas Metas Financeiras</h1>
-        <a href="../perfil_financeiro/page.php">testeperfilfinanceiro</a>
+        <a class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4" href="../perfil_financeiro/page.php">Descubra seu perfil financeiro</a>
 
-        <a href="./planner.php">
-            <button class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Criar +</button>
-        </a>
+        <!-- botão de criar: só permite se usuário tiver perfil definido -->
+        <?php if ($hasPerfil): ?>
+            <a href="./planner.php">
+                <button class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Criar +</button>
+            </a>
+        <?php else: ?>
+            <button class="bg-gray-400 text-white py-2 px-4 rounded mb-4 cursor-not-allowed" disabled title="Faça o teste de perfil financeiro primeiro">Criar +</button>
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-sm mb-4">
+                <strong>Atenção:</strong> você precisa realizar o teste de perfil financeiro antes de criar uma meta.
+                <div class="mt-2">
+                    <a href="../perfil_financeiro/page.php" class="inline-block bg-tollens text-white px-3 py-2 rounded hover:opacity-90">Fazer teste agora</a>
+                </div>
+            </div>
+        <?php endif; ?>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <?php foreach ($metas as $meta): ?>
@@ -58,9 +100,12 @@ $metas = $result->fetch_all(MYSQLI_ASSOC);
                         </button>
                     </div>
                     <p><strong>Valor da Meta:</strong> R$ <?php echo number_format($meta['preco_meta'], 2, ',', '.'); ?></p>
-                    <p><strong>Valor Atual:</strong> R$ <?php echo number_format($meta['capital'], 2, ',', '.'); ?></p>
+                    <p><strong>Valor de Entrada:</strong> R$ <?php echo number_format($meta['capital'], 2, ',', '.'); ?></p>
                     <p><strong>Investimento Mensal:</strong> R$ <?php echo number_format($meta['quanto_quero_pagar_mes'], 2, ',', '.'); ?></p>
-                    <p><strong>Investido até agora:</strong> R$ <?php echo number_format($meta['preco_meta']); ?></p>
+
+                    <!-- Exibe o total aplicado para esta meta -->
+                    <p><strong>Investido até agora:</strong> R$ <?php echo number_format($somas[$meta['id']] ?? 0, 2, ',', '.'); ?></p>
+
                     <a href="./exibir_meta.php?id=<?php echo $meta['id']; ?>">
                         <button class="border-2 border-black bg-tollens text-white py-2 px-4 rounded hover:bg-ghostwhite hover:text-black hover:border-black mt-6">
                             Abrir

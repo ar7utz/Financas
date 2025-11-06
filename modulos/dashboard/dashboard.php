@@ -123,13 +123,13 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         ?>
 
         <!--div transação-->
-        <div class="flex flex-col gap-2 mb-4 lg:flex-row lg:items-center lg:justify-center">
+        <div class="flex flex-col gap-2 mb-4">
             <!-- Saldo -->
-            <div class="order-1 lg:order-2 bg-white p-4 rounded-lg shadow-md text-center w-full mb-2 lg:mb-0 lg:w-1/3 lg:mx-4">
+            <div class="order-1 bg-white p-4 rounded-lg shadow-md text-center w-full mb-2">
                 <p class="font-bold text-tollens">SALDO</p>
                 <p class="text-xl font-semibold"><?php echo 'R$ '. number_format($saldo, 2); ?></p>
             </div>
-            <div class="order-2 lg:order-1 flex w-full gap-2 lg:w-auto">
+            <div class="order-2 flex w-full gap-2 lg:w-auto">
                 <!-- Entradas -->
                 <div class="bg-white p-4 rounded-lg shadow-md w-1/2 text-center flex-1 lg:w-32 lg:mr-2">
                     <p class="font-bold text-green-600">Entradas</p>
@@ -146,10 +146,13 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             <!-- Histórico -->
             <div class="bg-white p-6 rounded-lg shadow-md">
             <div class="flex flex-row relative justify-between items-center">
-                <button id="btnExportar" class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Exportar ▼</button>
-                <div id="exportOptions" class="hidden absolute bg-white border rounded shadow-md mt-1 right-0 z-10">
-                    <button onclick="exportarPDF()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button>
-                    <button onclick="exportarExcel()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar Excel</button>
+                <div class="relative">
+                    <button id="btnExportar" class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Exportar ▼</button>
+                    <!-- dropdown posicionado abaixo do botão -->
+                    <div id="exportOptions" class="hidden absolute right-0 top-full mt-2 w-48 bg-white border rounded shadow-md z-10">
+                        <button onclick="exportarPDF()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button>
+                        <button onclick="exportarExcel()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar Excel</button>
+                    </div>
                 </div>
 
                 <div class="flex justify-center mb-4">
@@ -165,28 +168,29 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             <div class="p-4 mb-8 mt-6 rounded-lg shadow-lg">
                 <div class="flex items-center justify-between cursor-pointer lg:hidden" onclick="toggleFiltros()">
                     <h3 class="text-lg font-bold">Filtros</h3>
-                    <span id="iconeFiltros" class="ml-4 text-2xl transition-transform duration-200"><i class="fa fa-chevron-down"></i></span>
+                    <span id="iconeFiltros" class=" text-2xl transition-transform duration-200"><i class="fa fa-chevron-down"></i></span>
                 </div>
 
                 <div class="hidden lg:flex lg:items-center lg:justify-start">
                     <h3 class="text-lg font-bold">Filtros</h3>
                 </div>
 
-                <div id="filtrosContainer" class="hidden mt-2 flex-col gap-2 lg:flex lg:flex-row lg:items-start lg:justify-center">
-                    <div class="w-full lg:w-auto">
-                        <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" class="border border-gray-300 rounded p-2 w-full">
+                <div id="filtrosContainer" class="hidden mt-2 flex-col gap-2 lg:flex lg:flex-row lg:justify-center">
+                    <div class="w-full lg:flex-row">
+                        <div class="w-full lg:w-auto">
+                            <label for="Procurar" class="w-full lg:w-auto font-semibold">Procurar:</label>
+                            <input type="text" id="filtroSearch" name="filtroSearch" placeholder="Procurar" class="border border-gray-300 rounded p-2 w-full mb-1">
+                        </div>
                     </div>
 
                     <form id="filterForm" method="POST" action="" onchange="document.getElementById('filterForm').submit()" class="w-full lg:w-auto">
-                        <label for="filter" class="block mb-1 font-semibold">Filtrar por:</label>
+                        <label for="filter" class="block font-semibold">Filtrar por:</label>
                         <select id="filter" name="filtro" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
                             <option value="data-desc" <?php echo ($filtro == 'data-desc') ? 'selected' : ''; ?>>Data (Mais recentes)</option>
                             <option value="data-asc" <?php echo ($filtro == 'data-asc') ? 'selected' : ''; ?>>Data (Mais antigos)</option>
                             <option value="valor-desc" <?php echo ($filtro == 'valor-desc') ? 'selected' : ''; ?>>Valor (Maior para menor)</option>
                             <option value="valor-asc" <?php echo ($filtro == 'valor-asc') ? 'selected' : ''; ?>>Valor (Menor para maior)</option>
                             <option value="categoria" <?php echo ($filtro == 'categoria') ? 'selected' : ''; ?>> Categoria </option>
-                            <option value="valor-positivo" <?php echo ($filtro == 'valor-positivo') ? 'selected' : ''; ?>>Apenas Entradas</option>
-                            <option value="valor-negativo" <?php echo ($filtro == 'valor-negativo') ? 'selected' : ''; ?>>Apenas Saídas</option>
                             <option value="descricao-asc" <?php echo ($filtro == 'descricao-asc') ? 'selected' : ''; ?>>Descrição (A-Z)</option>
                             <option value="descricao-desc" <?php echo ($filtro == 'descricao-desc') ? 'selected' : ''; ?>>Descrição (Z-A)</option>
                         </select>
@@ -194,7 +198,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
                     <div class="w-full flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4 lg:w-auto">
                         <div class="w-full lg:w-auto">
-                            <label for="ano" class="block mb-1 font-semibold">Filtrar por Ano:</label>
+                            <label for="ano" class="block font-semibold">Filtrar por Ano:</label>
                             <select id="ano" name="ano" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
                                 <option value="">Selecionar Ano</option>
                                 <?php 
@@ -211,7 +215,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         </div>
 
                         <div class="w-full lg:w-auto">
-                            <label for="mes" class="block mb-1 font-semibold">Mês:</label>
+                            <label for="mes" class="block font-semibold">Mês:</label>
                             <select id="mes" name="mes" class="border border-gray-300 rounded p-2 w-full lg:w-auto" disabled>
                                 <option value="">Selecionar Mês</option>
                             </select>
@@ -219,30 +223,38 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <div class="w-full lg:w-auto">
-                        <label for="FiltroCategoria" class="block mb-1 font-semibold">Categoria:</label>
-                        <select id="FiltroCategoria" name="FiltroCategoria" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
-                            <option value="">Selecionar Categoria</option>
-                            <?php 
-                            // Busca as categorias que possuem transações
-                            $sql_categoria = "
-                                SELECT DISTINCT c.id, c.nome_categoria 
-                                FROM categoria c
-                                JOIN transacoes t ON c.id = t.categoria_id
-                                WHERE t.usuario_id = ?
-                                ORDER BY c.nome_categoria ASC
-                            ";
+                        <label for="FiltroCategoria" class="block font-semibold">Categoria:</label>
+                        <div class="flex items-center gap-2">
+                            <select id="FiltroCategoria" name="FiltroCategoria" class="border border-gray-300 rounded p-2 w-full lg:w-auto">
+                                <option value="">Selecionar Categoria</option>
+                                <?php 
+                                // Busca as categorias que possuem transações
+                                $sql_categoria = "
+                                    SELECT DISTINCT c.id, c.nome_categoria 
+                                    FROM categoria c
+                                    JOIN transacoes t ON c.id = t.categoria_id
+                                    WHERE t.usuario_id = ?
+                                    ORDER BY c.nome_categoria ASC
+                                ";
 
-                            $stmt_categoria = $conn->prepare($sql_categoria);
-                            $stmt_categoria->bind_param('i', $usuario_id);
-                            $stmt_categoria->execute();
-                            $resultado_categoria = $stmt_categoria->get_result();
+                                $stmt_categoria = $conn->prepare($sql_categoria);
+                                $stmt_categoria->bind_param('i', $usuario_id);
+                                $stmt_categoria->execute();
+                                $resultado_categoria = $stmt_categoria->get_result();
 
-                            while ($categoria = $resultado_categoria->fetch_assoc()): ?>
-                                <option value="<?php echo $categoria['id']; ?>">
-                                    <?php echo htmlspecialchars($categoria['nome_categoria']); ?>
-                                </option>
-                            <?php endwhile; ?>
-                        </select>
+                                while ($categoria = $resultado_categoria->fetch_assoc()): ?>
+                                    <option value="<?php echo $categoria['id']; ?>">
+                                        <?php echo htmlspecialchars($categoria['nome_categoria']); ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+
+                            <!-- Botão X para limpar filtros -->
+                            <button id="limparFiltrosBtn" type="button" title="Limpar filtros"
+                                class="ml-2 inline-flex items-center justify-center w-10 h-10 bg-gray-100 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200">
+                                &times;
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -256,7 +268,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     $usuario_id = $_SESSION['user_id'];
 
                     // Paginação
-                    $itensPorPagina = 5;
+                    $itensPorPagina = 10; // mostrar 10 transações por página
                     $paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
                     $offset = ($paginaAtual - 1) * $itensPorPagina;
 
@@ -266,25 +278,20 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     $stmtTotal->bind_param('i', $usuario_id);
                     $stmtTotal->execute();
                     $resultTotal = $stmtTotal->get_result();
-                    $totalTransacoes = $resultTotal->fetch_assoc()['total'];
-                    $totalPaginas = ceil($totalTransacoes / $itensPorPagina);
+                    $totalTransacoes = intval($resultTotal->fetch_assoc()['total'] ?? 0);
+                    $totalPaginas = $totalTransacoes > 0 ? ceil($totalTransacoes / $itensPorPagina) : 1;
 
-                    // Busca as transações da página atual
-                    $sql = "SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY data DESC LIMIT ? OFFSET ?";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param('iii', $usuario_id, $itensPorPagina, $offset);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-
+                    // Busca as transações da página atual (com JOIN para trazer nome da categoria)
                     $sql = "
                         SELECT t.*, c.nome_categoria AS categoria_nome
                         FROM transacoes t
                         LEFT JOIN categoria c ON t.categoria_id = c.id
                         WHERE t.usuario_id = ?
-                        ORDER BY $order_by";
-
+                        ORDER BY $order_by
+                        LIMIT ? OFFSET ?
+                    ";
                     $stmt = $conn->prepare($sql);
-                    $stmt->bind_param('i', $usuario_id);
+                    $stmt->bind_param('iii', $usuario_id, $itensPorPagina, $offset);
                     $stmt->execute();
                     $resultado = $stmt->get_result();
 
@@ -325,13 +332,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                             echo '    <div class="actions hidden items-center space-x-2">';
                             echo '      <a href="../transacoes/page_editar.php?id=' . $id . '" rel="noopener noreferrer" onclick="event.stopPropagation();">';
                             echo '        <button class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500"><i class="fa fa-pencil" aria-hidden="true"></i></button>';
-                            echo '      </a>';
-                            echo '      <a href="#" rel="noopener noreferrer" onclick="event.stopPropagation(); abrirModalExcluir(' . $id . ');">';
-                            echo '        <button class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $id . '"><i class="fa fa-trash" aria-hidden="true"></i></button>';
-                            echo '      </a>';
-                            // mover ações para os próprios botões (evita que stopPropagation em listeners bloqueie o acionamento)
-                            echo '      <a href="#" rel="noopener noreferrer" onclick="event.preventDefault();">';
-                            echo '        <button type="button" class="bg-tollens text-white py-1 px-3 rounded hover:bg-purple-500" onclick="event.stopPropagation(); location.href=\'../transacoes/page_editar.php?id=' . $id . '\'"><i class="fa fa-pencil" aria-hidden="true"></i></button>';
                             echo '      </a>';
                             echo '      <a href="#" rel="noopener noreferrer" onclick="event.preventDefault();">';
                             echo '        <button type="button" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-500" data-id="' . $id . '" onclick="event.stopPropagation(); abrirModalExcluir(' . $id . ');"><i class="fa fa-trash" aria-hidden="true"></i></button>';
@@ -925,6 +925,34 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                 document.querySelectorAll('.actions').forEach(a => a.classList.add('hidden'));
                 document.querySelectorAll('.mobile-transacao').forEach(t => t.classList.remove('bg-gray-50'));
             });
+        });
+    </script>
+
+    <script>
+        // Limpar filtros: limpa campos e recarrega a página para estado inicial
+        document.getElementById('limparFiltrosBtn').addEventListener('click', function () {
+            // Campos a limpar
+            const ids = ['filtroSearch', 'filter', 'ano', 'mes', 'FiltroCategoria'];
+
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    // zera o valor (selects voltam para option vazio)
+                    el.value = '';
+                }
+            });
+
+            // Resetar opções de mês
+            const mesSelect = document.getElementById('mes');
+            if (mesSelect) {
+                mesSelect.innerHTML = '<option value=\"\">Selecionar Mês</option>';
+                mesSelect.disabled = true;
+            }
+
+            // Opcional: remover parâmetros da URL e recarregar (GET)
+            const path = window.location.pathname;
+            window.location.href = path;
         });
     </script>
 </body>
