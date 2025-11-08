@@ -141,6 +141,13 @@ $dados = obterDados($filtro);
         </div>
     </div>
 
+    <div>
+        <?php include_once '../../assets/templates/graficos/grafico_mes.php' ?>
+    </div>
+
+    <div>
+        <?php include_once '../../assets/templates/graficos/grafico_dia.php' ?>
+    </div>
     <?php
         // Sugestões condicionais por perfil do usuário.
         $usuario_id = $_SESSION['user_id'] ?? $_SESSION['usuario_id'] ?? null;
@@ -182,7 +189,7 @@ $dados = obterDados($filtro);
     ?>
 
     <div class="p-8 mb-6 bg-gray-100">
-        <h2 class="font-semibold mb-3 text-center">Dicas rápidas</h2>
+        <h2 class="font-semibold mb-3 text-center">Dicas rápidas e seguras</h2>
 
         <?php if ($sugestoes_sidebar && is_array($sugestoes_sidebar) && count($sugestoes_sidebar) > 0): ?>
             <!-- Cards em coluna na sidebar -->

@@ -66,7 +66,6 @@ $valores_saidas_json = json_encode($valores_saidas);
     </div>
 
     <script>
-        // Dados do PHP para o gráfico
         const categorias = <?php echo $categorias_json; ?>;
         const valoresEntradas = <?php echo $valores_entradas_json; ?>;
         const valoresSaidas = <?php echo $valores_saidas_json; ?>;

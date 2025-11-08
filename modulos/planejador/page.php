@@ -69,7 +69,10 @@ $stmt_somas->close();
 
     <div class="container mx-auto p-4 justify-between">
         <h1 class="text-2xl font-bold mb-4 text-center">Suas Metas Financeiras</h1>
-        <a class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4" href="../perfil_financeiro/page.php">Descubra seu perfil financeiro</a>
+
+        <?php if (!$hasPerfil): ?>
+            <a class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4 inline-block" href="../perfil_financeiro/page.php">Descubra seu perfil financeiro</a>
+        <?php endif; ?>
 
         <!-- botão de criar: só permite se usuário tiver perfil definido -->
         <?php if ($hasPerfil): ?>

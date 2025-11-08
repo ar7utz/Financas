@@ -268,7 +268,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     $usuario_id = $_SESSION['user_id'];
 
                     // Paginação
-                    $itensPorPagina = 10; // mostrar 10 transações por página
+                    $itensPorPagina = 10;
                     $paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
                     $offset = ($paginaAtual - 1) * $itensPorPagina;
 
@@ -281,7 +281,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     $totalTransacoes = intval($resultTotal->fetch_assoc()['total'] ?? 0);
                     $totalPaginas = $totalTransacoes > 0 ? ceil($totalTransacoes / $itensPorPagina) : 1;
 
-                    // Busca as transações da página atual (com JOIN para trazer nome da categoria)
                     $sql = "
                         SELECT t.*, c.nome_categoria AS categoria_nome
                         FROM transacoes t
@@ -874,17 +873,15 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         function toggleFiltros() {
             const container = document.getElementById('filtrosContainer');
             const icone = document.getElementById('iconeFiltros');
-            container.classList.toggle('hidden'); // mostra/esconde no mobile; lg:flex mantém visível no desktop
+            container.classList.toggle('hidden');
             icone.classList.toggle('rotate-180');
         }
 
-        // Garante comportamento correto ao redimensionar (se mudar para lg, mostra; se voltar mobile, mantém oculto até clicar)
         window.addEventListener('resize', function() {
             const container = document.getElementById('filtrosContainer');
-            if (window.innerWidth >= 1024) { // breakpoint padrão do Tailwind para lg
+            if (window.innerWidth >= 1024) {
                 container.classList.remove('hidden');
             } else {
-                //container.classList.add('hidden');
             }
         });
     </script>
@@ -896,7 +893,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                     if (item.dataset.hasListener) return;
                     item.dataset.hasListener = '1';
 
-                    // Toggle geral: abre/fecha .actions em qualquer tamanho de tela
                     item.addEventListener('click', function(e) {
                         const actions = item.querySelector('.actions');
                         if (!actions) return;
@@ -904,7 +900,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                         item.classList.toggle('bg-gray-50');
                     });
 
-                    // Previne propagação ao clicar em botões/links dentro do card
                     item.querySelectorAll('a, button').forEach(btn => {
                         btn.addEventListener('click', function(ev) { ev.stopPropagation(); });
                     });
@@ -913,14 +908,12 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
             setupCardToggles();
 
-            // Observador para itens inseridos dinamicamente (fetch)
             const transacoesContainer = document.getElementById('transacoesContainer');
             if (transacoesContainer) {
                 const obs = new MutationObserver(() => setupCardToggles());
                 obs.observe(transacoesContainer, { childList: true, subtree: true });
             }
 
-            // Ao redimensionar, garante que actions fiquem ocultas e remove destaque visual
             window.addEventListener('resize', function() {
                 document.querySelectorAll('.actions').forEach(a => a.classList.add('hidden'));
                 document.querySelectorAll('.mobile-transacao').forEach(t => t.classList.remove('bg-gray-50'));
@@ -929,7 +922,6 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
     </script>
 
     <script>
-        // Limpar filtros: limpa campos e recarrega a página para estado inicial
         document.getElementById('limparFiltrosBtn').addEventListener('click', function () {
             // Campos a limpar
             const ids = ['filtroSearch', 'filter', 'ano', 'mes', 'FiltroCategoria'];
@@ -938,21 +930,67 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
                 const el = document.getElementById(id);
                 if (!el) return;
                 if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                    // zera o valor (selects voltam para option vazio)
                     el.value = '';
                 }
             });
 
-            // Resetar opções de mês
             const mesSelect = document.getElementById('mes');
             if (mesSelect) {
                 mesSelect.innerHTML = '<option value=\"\">Selecionar Mês</option>';
                 mesSelect.disabled = true;
             }
 
-            // Opcional: remover parâmetros da URL e recarregar (GET)
             const path = window.location.pathname;
             window.location.href = path;
+        });
+    </script>
+
+    <script>
+        function formatCurrencyBR(value) {
+            let digits = value.replace(/\D/g, '');
+            if (digits === '') return '';
+
+            while (digits.length < 3) {
+                digits = '0' + digits;
+            }
+
+            const cents = digits.slice(-2);
+            let intPart = digits.slice(0, -2);
+
+            intPart = intPart.replace(/^0+(?!$)/, '');
+
+            intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            return intPart + ',' + cents;
+        }
+
+        function attachCurrencyMask(input) {
+            input.addEventListener('input', function (e) {
+                const caretPos = input.selectionStart;
+                const oldLength = input.value.length;
+
+                const formatted = formatCurrencyBR(input.value);
+                input.value = formatted;
+
+                const newLength = formatted.length;
+                const diff = newLength - oldLength;
+                input.setSelectionRange(Math.max(0, caretPos + diff), Math.max(0, caretPos + diff));
+            });
+
+            input.addEventListener('blur', function () {
+                if (input.value.trim() === '') {
+                    input.value = '0,00';
+                } else {
+                    input.value = formatCurrencyBR(input.value);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('input[name="valor"]').forEach(function (inp) {
+                attachCurrencyMask(inp);
+                if (!inp.value || inp.value.trim() === '') inp.value = '0,00';
+            });
         });
     </script>
 </body>

@@ -8,13 +8,20 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// ID do usuário logado (corrigido: definir antes de usar)
+$usuario_id = intval($_SESSION['user_id']);
+
 // Buscar planilhas do usuário
 $sql = "SELECT id, nome_arquivo, data_criacao FROM planilhas WHERE usuario_id = ? ORDER BY data_criacao DESC";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $usuario_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$planilhas = $result->fetch_all(MYSQLI_ASSOC);
+$planilhas = [];
+if ($stmt) {
+    $stmt->bind_param('i', $usuario_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $planilhas = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    $stmt->close();
+}
 
 // CRIAR A BASE DE DADOS PARA SALVAR AS PLANILHAS //
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
@@ -96,25 +103,9 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
     ?>
 
     <div class="container mx-auto p-4">
-        <!-- Botão "Criar Planilha" no topo -->
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl font-bold">Suas Planilhas</h1>
-            <div class="flex items-center">
-                <!-- Formulário de Upload -->
-                <form action="upload_planilha.php" method="POST" enctype="multipart/form-data" class="space-x-2 p-2">
-                    <input type="file" name="planilha" required class="border p-2 rounded">
-                    <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Importar Planilha</button>
-                </form>
-                <a href="./planilha.php">
-                    <button class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">
-                        Criar uma Planilha
-                    </button>
-                </a>
-            </div>
-        </div>
 
         <!-- Seção de Modelos de Planilhas -->
-        <h1 class="text-2xl font-bold text-center">Modelo de planilhas</h1>
+        <h1 class="text-2xl font-bold text-center mb-6">Modelo de planilhas</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Card 1: Orçamento Mensal -->
             <div class="bg-white rounded-lg shadow-lg p-6">
@@ -125,7 +116,6 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
                 <button onclick="abrirModelo('Orçamento Mensal')" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500">
                     Abrir Modelo
                 </button>
-                <a href="../../assets/planilhas/planilha-de-controle-financeiro.xlsx">baixar planilha</a>
             </div>
 
             <!-- Card 2: Fluxo de Caixa -->
@@ -151,25 +141,70 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
 
-        <h1 class="text-2xl font-bold text-center mt-4">Minhas Planilhas</h1>
-        <!-- Lista de Planilhas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php if (!empty($planilhas)): ?>
-                <?php foreach ($planilhas as $planilha): ?>
-                    <div class="bg-white p-4 rounded shadow">
-                        <h2 class="text-lg font-bold truncate"> <?php echo htmlspecialchars($planilha['nome_arquivo']); ?> </h2>
-                        <p class="text-gray-700 text-sm">Data: <?php echo date('d/m/Y', strtotime($planilha['data_criacao'])); ?></p>
-                        <a href="../../assets/uploads/planilhas/ <?php echo htmlspecialchars($planilha['nome_arquivo']); ?>" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 mt-4 inline-block" download>
-                            Baixar Planilha
-                        </a>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="w-full text-center col-span-1 md:col-span-2 lg:col-span-3">
-                    <p class="text-gray-600 text-center">Nenhuma planilha importada ainda.</p>
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-center mt-4">Minhas Planilhas</h1>
+                <div class="flex flex-col justify-center items-center">
+                    <!-- Formulário de Upload -->
+                    <form id="importForm" action="upload_planilha.php" method="POST" enctype="multipart/form-data" class="flex flex-col space-x-2 p-2">
+                        <input id="importFile"
+                               type="file"
+                               name="planilha"
+                               accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                               required
+                               class="border p-2 rounded" />
+                        <button id="importBtn" type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">Importar Planilha</button>
+                    </form>
+                    <script>
+                        (function(){
+                            const form = document.getElementById('importForm');
+                            const input = document.getElementById('importFile');
+                            const allowedExt = ['.xls', '.xlsx'];
+                            const allowedTypes = [
+                                'application/vnd.ms-excel',
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                            ];
+
+                            form.addEventListener('submit', function(e){
+                                if (!input.files || !input.files.length) {
+                                    e.preventDefault();
+                                    alert('Selecione um arquivo Excel (.xls ou .xlsx).');
+                                    return;
+                                }
+                                const file = input.files[0];
+                                const name = (file.name || '').toLowerCase();
+                                if (!allowedExt.some(ext => name.endsWith(ext))) {
+                                    e.preventDefault();
+                                    alert('Apenas arquivos Excel (.xls, .xlsx) são permitidos.');
+                                    return;
+                                }
+                                if (file.type && !allowedTypes.includes(file.type)) {
+                                    e.preventDefault();
+                                    alert('Tipo de arquivo inválido. Por favor selecione um arquivo Excel.');
+                                    return;
+                                }
+                            });
+                        })();
+                    </script>
                 </div>
-            <?php endif; ?>
         </div>
+            <!-- Lista de Planilhas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php if (!empty($planilhas)): ?>
+                    <?php foreach ($planilhas as $planilha): ?>
+                        <div class="bg-white p-4 rounded shadow">
+                            <h2 class="text-lg font-bold truncate"> <?php echo htmlspecialchars($planilha['nome_arquivo']); ?> </h2>
+                            <p class="text-gray-700 text-sm">Data: <?php echo date('d/m/Y', strtotime($planilha['data_criacao'])); ?></p>
+                            <a href="../../assets/uploads/planilhas/ <?php echo htmlspecialchars($planilha['nome_arquivo']); ?>" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 mt-4 inline-block" download>
+                                Baixar Planilha
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="w-full text-center col-span-1 md:col-span-2 lg:col-span-3">
+                        <p class="text-gray-600 text-center">Nenhuma planilha importada ainda.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
     </div>
 
     <!-- Modal de Edição da Planilha -->
@@ -178,7 +213,6 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
             <h2 class="text-2xl font-bold mb-4">Editando: <span id="modeloSelecionado"></span></h2>
             <div class="overflow-x-auto">
                 <table id="tabelaPlanilha" class="min-w-full bg-white border border-gray-300">
-                    <!-- Cabeçalho e linhas serão preenchidos dinamicamente -->
                 </table>
             </div>
             <div class="mt-4">
@@ -196,11 +230,9 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-        // Função para abrir o modal com o modelo de planilha
         function abrirModelo(modelo) {
             let dados = [];
 
-            // Dados do modelo selecionado
             switch (modelo) {
                 case 'Orçamento Mensal':
                     dados = [
@@ -236,32 +268,28 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
                     break;
             }
 
-            // Exibir o modal
             document.getElementById('modalPlanilha').classList.remove('hidden');
             document.getElementById('modeloSelecionado').textContent = modelo;
 
-            // Preencher a tabela com os dados
             const tabela = document.getElementById('tabelaPlanilha');
-            tabela.innerHTML = ''; // Limpar tabela anterior
+            tabela.innerHTML = '';
 
             dados.forEach((linha, index) => {
                 const tr = document.createElement('tr');
                 linha.forEach((celula, i) => {
                     const td = document.createElement(index === 0 ? 'th' : 'td');
                     td.textContent = celula;
-                    td.setAttribute('contenteditable', index !== 0); // Permitir edição, exceto no cabeçalho
+                    td.setAttribute('contenteditable', index !== 0);
                     tr.appendChild(td);
                 });
                 tabela.appendChild(tr);
             });
         }
 
-        // Função para fechar o modal
         function fecharModal() {
             document.getElementById('modalPlanilha').classList.add('hidden');
         }
 
-        // Função para exportar a planilha para Excel
         function exportarParaExcel() {
             const tabela = document.getElementById('tabelaPlanilha');
             const ws = XLSX.utils.table_to_sheet(tabela);
@@ -270,9 +298,7 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
             XLSX.writeFile(wb, "planilha_editada.xlsx");
         }
 
-        // Função para exportar a planilha para PDF
         function exportarParaPDF() {
-            // Importa jsPDF do módulo UMD
             const { jsPDF } = window.jspdf || {};
 
             if (!jsPDF) {
@@ -282,7 +308,6 @@ $planilhas = $result->fetch_all(MYSQLI_ASSOC);
         
             const doc = new jsPDF();
         
-            // Certifique-se de que o plugin autoTable está disponível
             if (typeof doc.autoTable === 'undefined') {
                 console.error("O plugin autoTable não está carregado corretamente.");
                 return;

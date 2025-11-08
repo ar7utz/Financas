@@ -34,7 +34,6 @@ $capital = $meta['capital'];
 $quanto_quero_pagar_mes = $meta['quanto_quero_pagar_mes'];
 $quanto_tempo_quero_pagar = $meta['quanto_tempo_quero_pagar'];
 
-// 1. Quanto precisa investir por mês para pagar no tempo desejado
 if ($quanto_tempo_quero_pagar > 0) {
     $valor_necessario_por_mes = ($preco_meta - $capital) / $quanto_tempo_quero_pagar;
     $valor_necessario_por_mes = $valor_necessario_por_mes > 0 ? $valor_necessario_por_mes : 0;
@@ -42,14 +41,12 @@ if ($quanto_tempo_quero_pagar > 0) {
     $valor_necessario_por_mes = null;
 }
 
-// 2. Quanto tempo levaria pagando o valor que quer investir por mês
 if ($quanto_quero_pagar_mes > 0) {
     $meses_necessarios = ceil(($preco_meta - $capital) / $quanto_quero_pagar_mes);
 } else {
     $meses_necessarios = 'Indefinido (defina um valor para investir mensalmente)';
 }
 
-// Formatação do tempo
 if (is_numeric($meses_necessarios)) {
     $anos = floor($meses_necessarios / 12);
     $meses_restantes = $meses_necessarios % 12;
@@ -86,51 +83,86 @@ $investimentos = [
     "Tesouro IPCA+" => "Protege contra a inflação e gera rendimentos acima do IPCA.",
 ];
 
-$sqlPerfil = "SELECT * FROM user WHERE perfil_financeiro = ?";
-$stmtPerfil = $conn->prepare($sqlPerfil);
-$stmtPerfil->bind_param('i', $perfil_financeiro);
-$stmtPerfil->execute();
-$resultPerfil = $stmtPerfil->get_result();
-$perfil_financeiro = $resultPerfil->fetch_assoc();
-$stmtPerfil->close();
+// -- Buscar e normalizar o perfil do usuário (mesma lógica usada em usuario/perfil.php) --
+$perfil_text = null;
+$sqlUser = "SELECT perfil_financeiro FROM `user` WHERE id = ? LIMIT 1";
+if ($stmtUser = $conn->prepare($sqlUser)) {
+    $stmtUser->bind_param('i', $usuario_id);
+    $stmtUser->execute();
+    $resUser = $stmtUser->get_result();
+    $userRow = $resUser->fetch_assoc();
+    $stmtUser->close();
 
-$perfil_financeiro = $perfil_financeiro['nome'] ?? null;
-
-$sqlMovimentação = "SELECT * FROM movimentacoes WHERE usuario_id = ? AND meta_id = ?";
-$stmtMovimentação = $conn->prepare($sqlMovimentação);
-$stmtMovimentação->bind_param('ii', $usuario_id, $meta_id);
-$stmtMovimentação->execute();
-$resultMovimentação = $stmtMovimentação->get_result();
-$movimentações = $resultMovimentação->fetch_assoc();
-$stmtMovimentação->close();
-
-$movimentações = $movimentações['valor'];
-
-if ($perfil_financeiro) {
-    switch ($perfil_financeiro) {
-        case 'Conservador':
-            $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
-            break;
-        case 'Moderado':
-            $sugestoes = include __DIR__ . '/../Sugestor/perfilModerado.php';
-            break;
-        case 'Agressivo':
-            $sugestoes = include __DIR__ . '/../Sugestor/perfilAgressivo.php';
-            break;
-        default:
-            $lower = strtolower($perfil_financeiro);
-            if (str_contains($lower, 'conserv')) {
-                $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
-            } elseif (str_contains($lower, 'moder')) {
-                $sugestoes = include __DIR__ . '/../Sugestor/perfilModerado.php';
-            } elseif (str_contains($lower, 'agress')) {
-                $sugestoes = include __DIR__ . '/../Sugestor/perfilAgressivo.php';
-            } else {
-                $sugestoes = [];
+    if ($userRow && isset($userRow['perfil_financeiro']) && $userRow['perfil_financeiro'] !== null && $userRow['perfil_financeiro'] !== '') {
+        $pf = $userRow['perfil_financeiro'];
+        if (is_numeric($pf)) {
+            $sqlResp = "SELECT perfil FROM respostas_perfil WHERE id = ? LIMIT 1";
+            if ($stmtResp = $conn->prepare($sqlResp)) {
+                $stmtResp->bind_param('i', $pf);
+                $stmtResp->execute();
+                $resResp = $stmtResp->get_result();
+                $rowResp = $resResp->fetch_assoc();
+                $stmtResp->close();
+                $perfil_text = $rowResp['perfil'] ?? null;
             }
+        } else {
+            $perfil_text = trim($pf) !== '' ? $pf : null;
+        }
+    }
+}
+
+// Normaliza para as três categorias esperadas (Conservador / Moderado / Agressivo)
+if (!empty($perfil_text)) {
+    $pfn = strtolower($perfil_text);
+    if (str_contains($pfn, 'conserv')) $perfil_text = 'Conservador';
+    elseif (str_contains($pfn, 'moder')) $perfil_text = 'Moderado';
+    elseif (str_contains($pfn, 'agress') || str_contains($pfn, 'arroj')) $perfil_text = 'Agressivo';
+    else $perfil_text = ucfirst($perfil_text);
+}
+
+$perfil_normalizado = is_string($perfil_text) ? strtolower($perfil_text) : null;
+
+// Carrega sugestões conforme perfil (garante arquivo correto)
+$sugestoes = [];
+
+// mapa de perfil => arquivo
+$mapSugestoes = [
+    'conservador' => __DIR__ . '/../Sugestor/perfilConservador.php',
+    'moderado'    => __DIR__ . '/../Sugestor/perfilModerado.php',
+    'agressivo'   => __DIR__ . '/../Sugestor/perfilAgressivo.php',
+    'arrojado'    => __DIR__ . '/../Sugestor/perfilAgressivo.php'
+];
+
+if ($perfil_normalizado) {
+    // tenta encontrar o arquivo pelo nome do perfil
+    $arquivo = null;
+    foreach ($mapSugestoes as $key => $path) {
+        if (str_contains($perfil_normalizado, $key)) {
+            $arquivo = $path;
             break;
+        }
+    }
+    // fallback se não encontrou por contains, tenta chave exata
+    if ($arquivo === null && isset($mapSugestoes[$perfil_normalizado])) {
+        $arquivo = $mapSugestoes[$perfil_normalizado];
+    }
+
+    // inclui o arquivo se existir, senão deixa vazio e registra no log de erro (opcional)
+    if ($arquivo && file_exists($arquivo)) {
+        $sugestoes = include $arquivo;
+        if (!is_array($sugestoes)) $sugestoes = [];
+    } else {
+        // fallback seguro: tenta carregar conservador se existir
+        $fallback = __DIR__ . '/../Sugestor/perfilConservador.php';
+        if (file_exists($fallback)) {
+            $sugestoes = include $fallback;
+            if (!is_array($sugestoes)) $sugestoes = [];
+        } else {
+            $sugestoes = [];
+        }
     }
 } else {
+    // usuário sem perfil definido -> não carregar sugestões, será exibida mensagem na view
     $sugestoes = [];
 }
 
@@ -145,8 +177,6 @@ $stmtMovSum->close();
 
 $total_aplicado = floatval($rowMovSum['total_aplicado']); // Aporte total já feito pelo usuário nesta meta
 
-// Atualiza agora os cálculos levando em conta o aporte já realizado (total_aplicado)
-// 1. Quanto precisa investir por mês para pagar no tempo desejado (considerando capital inicial + total_aplicado)
 if ($quanto_tempo_quero_pagar > 0) {
     $valor_restante = max($preco_meta - $capital - $total_aplicado, 0);
     $valor_necessario_por_mes = $valor_restante / $quanto_tempo_quero_pagar;
@@ -155,7 +185,6 @@ if ($quanto_tempo_quero_pagar > 0) {
     $valor_necessario_por_mes = null;
 }
 
-// 2. Quanto tempo levaria pagando o valor que quer investir por mês (considerando aporte atual como somatório já aplicado)
 if ($quanto_quero_pagar_mes > 0) {
     $valor_restante2 = max($preco_meta - $capital - $total_aplicado, 0);
     $meses_necessarios = $valor_restante2 > 0 ? ceil($valor_restante2 / $quanto_quero_pagar_mes) : 0;
@@ -163,7 +192,6 @@ if ($quanto_quero_pagar_mes > 0) {
     $meses_necessarios = 'Indefinido (defina um valor para investir mensalmente)';
 }
 
-// Formatação do tempo (mantém lógica existente)
 if (is_numeric($meses_necessarios)) {
     $anos = floor($meses_necessarios / 12);
     $meses_restantes = $meses_necessarios % 12;
@@ -208,8 +236,8 @@ if (is_numeric($meses_necessarios)) {
     <div class="container mx-auto p-6">
         <h1 class="text-2xl font-bold mb-6 text-center">Sua Meta Financeira: <span class="text-blue-600"><?php echo htmlspecialchars($meta['razao']); ?></span></h1>
         <div class="mb-2">
-            <?php if ($perfil_financeiro && !empty($perfil_financeiro['nome'])): ?>
-                Perfil financeiro: <strong><?php echo htmlspecialchars($perfil_financeiro['nome']); ?></strong>
+            <?php if (!empty($perfil_text)): ?>
+                Perfil financeiro: <strong><?php echo htmlspecialchars($perfil_text); ?></strong>
             <?php else: ?>
                 Você ainda não definiu seu perfil financeiro.
                 <a href="../usuario/perfil.php" class="text-blue-600 underline ml-2">Clique aqui para definir seu perfil</a>
@@ -280,41 +308,42 @@ if (is_numeric($meses_necessarios)) {
         </div>
 
         <!-- Sugestão -->
-        <?php
-        if (empty($sugestoes)) {
-            $sugestoes = include __DIR__ . '/../Sugestor/perfilConservador.php';
-        }
-        ?>
         <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-xl font-bold mb-4">Dicas e sugestões para seu perfil</h2>
 
-            <div id="sugestoesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <?php foreach ($sugestoes as $s): ?>
-                    <div class="bg-white p-4 rounded-lg shadow-sm">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <h3 class="text-md font-semibold"><?php echo htmlspecialchars($s['titulo']); ?></h3>
-                                <p class="text-sm text-gray-600 mt-2"><?php echo htmlspecialchars($s['descricao']); ?></p>
+            <?php if (empty($sugestoes) && empty($perfil_text)): ?>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-sm">
+                    Você ainda não definiu seu perfil financeiro. <a href="../perfil_financeiro/page.php" class="text-blue-600 underline">Faça o teste</a> para receber sugestões personalizadas.
+                </div>
+            <?php else: ?>
+                <div id="sugestoesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <?php foreach ($sugestoes as $s): ?>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h3 class="text-md font-semibold"><?php echo htmlspecialchars($s['titulo']); ?></h3>
+                                    <p class="text-sm text-gray-600 mt-2"><?php echo htmlspecialchars($s['descricao']); ?></p>
+                                </div>
+                                <div class="text-xs text-gray-400 ml-3"><?php echo htmlspecialchars($s['categoria'] ?? ''); ?></div>
                             </div>
-                            <div class="text-xs text-gray-400 ml-3"><?php echo htmlspecialchars($s['categoria']); ?></div>
+
+                            <?php if (!empty($s['dicas'])): ?>
+                                <ul class="mt-3 text-sm list-disc ml-5 text-gray-700">
+                                    <?php foreach ($s['dicas'] as $d): ?>
+                                        <li><?php echo htmlspecialchars($d); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
+
+                            <?php if (!empty($s['link'])): ?>
+                                <div class="mt-3">
+                                    <a href="<?php echo htmlspecialchars($s['link']); ?>" target="_blank" class="text-blue-600 underline text-sm">Saiba mais</a>
+                                </div>
+                            <?php endif; ?>
                         </div>
-
-                        <?php if (!empty($s['dicas'])): ?>
-                            <ul class="mt-3 text-sm list-disc ml-5 text-gray-700">
-                                <?php foreach ($s['dicas'] as $d): ?>
-                                    <li><?php echo htmlspecialchars($d); ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php endif; ?>
-
-                        <?php if (!empty($s['link'])): ?>
-                            <div class="mt-3">
-                                <a href="<?php echo htmlspecialchars($s['link']); ?>" target="_blank" class="text-blue-600 underline text-sm">Saiba mais</a>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!--Sugestor-->
@@ -328,7 +357,7 @@ if (is_numeric($meses_necessarios)) {
         </div> -->
 
         <!-- Informações de Mercado -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
+        <!-- <div class="bg-white p-6 rounded-lg shadow-md"> -->
             <!-- <h2 class="text-xl font-bold mb-4">Opções e Dicas de Investimento</h2>
             <ul class="list-disc ml-5">
                 <?php foreach ($investimentos as $titulo => $descricao): ?>
@@ -376,7 +405,7 @@ if (is_numeric($meses_necessarios)) {
                 <p id="selicAtual" class="mt-2 text-gray-700"></p>
             </div> -->
 
-        </div>
+        <!-- </div> -->
 
         <!-- Modal de Confirmação de Exclusão -->
         <div id="modalConfirmarExclusaoMov" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">

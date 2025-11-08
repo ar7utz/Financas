@@ -27,6 +27,34 @@ if ($resultado->num_rows > 0) {
     $telefone = $usuario['telefone'];
     $email = $usuario['email'];
     $foto = $usuario['foto'];
+
+    // -- novo: determinar texto do perfil financeiro a ser exibido --
+    $perfil_text = null;
+    if (!empty($usuario['perfil_financeiro'])) {
+        $pf = $usuario['perfil_financeiro'];
+        if (is_numeric($pf)) {
+            $stmtP = $conn->prepare("SELECT perfil FROM respostas_perfil WHERE id = ? LIMIT 1");
+            if ($stmtP) {
+                $stmtP->bind_param('i', $pf);
+                $stmtP->execute();
+                $resP = $stmtP->get_result();
+                $rowP = $resP->fetch_assoc();
+                $perfil_text = $rowP['perfil'] ?? null;
+                $stmtP->close();
+            }
+        } else {
+            $perfil_text = trim($pf) !== '' ? $pf : null;
+        }
+    }
+
+    // Normaliza para as opções esperadas
+    if (!empty($perfil_text)) {
+        $pfn = strtolower($perfil_text);
+        if (str_contains($pfn, 'conserv')) $perfil_text = 'Conservador';
+        elseif (str_contains($pfn, 'moder')) $perfil_text = 'Moderado';
+        elseif (str_contains($pfn, 'agress') || str_contains($pfn, 'arroj')) $perfil_text = 'Agressivo';
+        else $perfil_text = ucfirst($perfil_text);
+    }
     } else {
     echo "Utilizador não encontrado.";
     exit;
@@ -97,10 +125,18 @@ if ($rowInvest = $resultInvest->fetch_assoc()) {
                     </div>
                 </div>
 
-                <div class="flex flex-col">
+                <!-- Novo campo: Perfil Financeiro -->
+                <div class="flex flex-col mt-3">
                     <div>
-                        <label for="">Total Investido até o momento:</label>
-                        <input type="text" value="<?php echo number_format($totalInvestido, 2, ',', '.');?>" class="border p-2 w-full rounded-md" disabled>
+                        <label for="">Perfil Financeiro:</label>
+                        <?php if (!empty($perfil_text)): ?>
+                            <input type="text" value="<?php echo htmlspecialchars($perfil_text); ?>" class="border p-2 w-full rounded-md" disabled>
+                        <?php else: ?>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-gray-700">Você ainda não realizou o teste de perfil financeiro.</span>
+                                <a href="../perfil_financeiro/page.php" class="inline-block bg-tollens text-white px-3 py-2 rounded">Fazer teste</a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 

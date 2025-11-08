@@ -77,7 +77,10 @@ $valores_saidas = json_encode(array_values($saidas));
                     label: 'Entradas',
                     data: valoresEntradas,
                     backgroundColor: [
-                        '#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0'
+                        '#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0', '#00bcd4', '#6495ED', 
+                        '#00BFFF', '#00CED1', '#008B8B', '#98FB98', '#2E8B57', '#9ACD32', '#DAA520', 
+                        '#A0522D', '#F4A460', '#DEB887', '#8A2BE2', '#EE82EE', '#FFC0CB', '#FA8072', 
+                        '#FF6347', '#F0E68C', '#FFE4C4', '#E6E6FA', '#B0E0E6', '#EEE8AA', '#C84153'
                     ],
                     borderColor: '#fff',
                     borderWidth: 1
@@ -111,7 +114,11 @@ $valores_saidas = json_encode(array_values($saidas));
                     label: 'Saídas',
                     data: valoresSaidas,
                     backgroundColor: [
-                        '#f44336', '#03a9f4', '#ffc107', '#8bc34a', '#673ab7'
+                        '#f44336', '#03a9f4', '#ffc107', '#8bc34a', '#673ab7', '#1ABC9C', '#3498DB', 
+                        '#9B59B6', '#E67E22', '#E74C3C', '#16A085', '#27AE60', '#2980B9', '#8E44AD', 
+                        '#F39C12', '#D35400', '#C0392B', '#7F8C8D', '#34495E', '#F1C40F', '#95A5A6', 
+                        '#FF6F61', '#6A5ACD', '#008080', '#DC143C', '#B22222', '#FFB6C1', '#40E0D0', 
+                        '#556B2F'
                     ],
                     borderColor: '#fff',
                     borderWidth: 1
