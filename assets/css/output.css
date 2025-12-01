@@ -3704,10 +3704,6 @@ video {
     justify-content: center;
   }
 
-  .lg\:justify-between {
-    justify-content: space-between;
-  }
-
   .lg\:gap-4 {
     gap: 1rem;
   }

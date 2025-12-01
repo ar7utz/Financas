@@ -74,9 +74,15 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="../../node_modules/toastify-js/src/toastify.css">
     <script src="../../node_modules/toastify-js/src/toastify.js"></script>
 
-    <!-- jsPDF para PDF -->
+    <!-- jsPDF (UMD build) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        if (window.jspdf && window.jspdf.jsPDF) {
+            window.jsPDF = window.jspdf.jsPDF;
+        }
+    </script>
+    <!-- versão do autotable compatível com jspdf v2.x -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <!-- SheetJS para Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -119,7 +125,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
         $stmt->execute();
         $resultado = $stmt->get_result();
         $row = $resultado->fetch_assoc();
-        $saidas = abs($row['total']); // Valor absoluto para garantir que seja positivo
+        $saidas = abs($row['total']);
         ?>
 
         <!--div transação-->
@@ -148,10 +154,9 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             <div class="flex flex-row relative justify-between items-center">
                 <div class="relative">
                     <button id="btnExportar" class="bg-tollens text-white py-2 px-4 rounded hover:bg-green-500 mb-4">Exportar ▼</button>
-                    <!-- dropdown posicionado abaixo do botão -->
-                    <div id="exportOptions" class="hidden absolute right-0 top-full mt-2 w-48 bg-white border rounded shadow-md z-10">
-                        <button onclick="exportarPDF()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button>
-                        <button onclick="exportarExcel()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Exportar Excel</button>
+                    <div id="exportOptions" class="hidden absolute right-0 top-full mt-2 w-full bg-white border rounded shadow-md z-10">
+                        <button onclick="exportarPDF()" class="block w-full text-left px-2 py-2 hover:bg-gray-100">Exportar PDF</button>
+                        <button onclick="exportarExcel()" class="block w-full text-left px-2 py-2 hover:bg-gray-100">Exportar Excel</button>
                     </div>
                 </div>
 
@@ -726,102 +731,189 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
 
         // Função para exportar PDF
         function exportarPDF() {
-            const { jsPDF } = window.jspdf;
+            const { jsPDF } = window.jspdf || window;
             const doc = new jsPDF('p', 'mm', 'a4');
 
+            // parâmetros de página
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 10;
+            const contentWidth = pageWidth - margin * 2;
+
             // Dados do usuário e extrato
-            const saldo = "<?php echo number_format($saldo, 2, ',', '.'); ?>";
-            const entradas = "<?php echo number_format($entradas, 2, ',', '.'); ?>";
-            const saidas = "<?php echo number_format($saidas, 2, ',', '.'); ?>";
+            const saldo = "<?php echo number_format($saldo, 2, '.', ','); ?>";
+            const entradas = "<?php echo number_format($entradas, 2, '.', ','); ?>";
+            const saidas = "<?php echo number_format($saidas, 2, '.', ','); ?>";
             const dataExport = new Date().toLocaleString('pt-BR');
             const usuario = "<?php echo htmlspecialchars($_SESSION['nome'] ?? 'Usuário Finstash'); ?>";
             const logoUrl = '../../assets/logo/cube_logo_no_background.png';
 
-            // Dados das transações
-            const transacoes = [
-                <?php
-                $resultado->data_seek(0);
-                while ($row = $resultado->fetch_assoc()):
-                    $data = DateTime::createFromFormat('Y-m-d', $row['data']);
-                    $data_formatada = $data !== false ? $data->format('d/m/Y') : "Data inválida";
-                    $categoria_nome = $row['categoria_nome'] ?? 'Sem categoria';
-                ?>
-                ,{
-                    data: "<?php echo $data_formatada; ?>",
-                    descricao: "<?php echo htmlspecialchars($row['descricao']); ?>",
-                    categoria: "<?php echo htmlspecialchars($categoria_nome); ?>",
-                    valor: "R$ <?php echo number_format($row['valor'], 2, ',', '.'); ?>"
-                },
-                <?php endwhile; ?>
-            ];
+            // Dados das transações (gerados pelo PHP)
+            <?php
+            // Recria array de exportação de forma segura (usa nova query para garantir todos os registros)
+            $exportRows = [];
+            $sql_export = "SELECT t.*, c.nome_categoria AS categoria_nome FROM transacoes t LEFT JOIN categoria c ON t.categoria_id = c.id WHERE t.usuario_id = ? ORDER BY $order_by";
+            $stmt_export = $conn->prepare($sql_export);
+            if ($stmt_export) {
+                $stmt_export->bind_param('i', $usuario_id);
+                $stmt_export->execute();
+                $res_export = $stmt_export->get_result();
+                while ($r = $res_export->fetch_assoc()) {
+                    $d = DateTime::createFromFormat('Y-m-d', $r['data']);
+                    $data_format = $d ? $d->format('d/m/Y') : $r['data'];
+                    $exportRows[] = [
+                        'data' => $data_format,
+                        'descricao' => $r['descricao'],
+                        'categoria' => $r['categoria_nome'] ?? 'Sem categoria',
+                        'valor' => 'R$ ' . number_format($r['valor'], 2, '.', ',')
+                    ];
+                }
+                $stmt_export->close();
+            }
+            ?>
+            const transacoes = <?php echo json_encode($exportRows, JSON_UNESCAPED_UNICODE); ?>;
 
-            // Carregar a logo e só então gerar o PDF
-            const img = new Image();
-            img.src = logoUrl;
-            img.onload = function() {
-                // Logo
-                doc.addImage(img, 'PNG', 10, 10, 25, 25);
+            // helper para inserir cabeçalho fixo
+            function desenharCabecalho() {
+                // Logo e textos do cabeçalho
+                try {
+                    if (imgObj && imgObj.complete && imgObj.naturalWidth) {
+                        doc.addImage(imgObj, 'PNG', margin, 10, 25, 25);
+                    }
+                } catch (e) { /* segue sem logo */ }
 
-                // Título e cabeçalho
                 doc.setFontSize(18);
                 doc.setTextColor(33, 37, 41);
-                doc.text("FINSTASH", 40, 18);
+                doc.text("FINSTASH", margin + 30, 18);
                 doc.setFontSize(10);
-                doc.text("EXTRATO DE CONTA", 40, 25);
+                doc.text("EXTRATO DE CONTA", margin + 30, 25);
 
-                // Data/hora da exportação
                 doc.setFontSize(9);
                 doc.setTextColor(100);
-                doc.text("Exportado em: " + dataExport, 150, 15, { align: "right" });
+                doc.text("Exportado em: " + dataExport, pageWidth - margin, 15, { align: "right" });
 
-                // Dados do usuário
                 doc.setFontSize(10);
                 doc.setTextColor(33, 37, 41);
-                doc.text("Usuário: " + usuario, 10, 40);
+                doc.text("Usuário: " + usuario, margin, 40);
 
-                // Saldo, Entradas, Saídas
                 doc.setFontSize(11);
                 doc.setTextColor(0, 0, 0);
-                doc.text(`Saldo: R$ ${saldo}   |   Entradas: R$ ${entradas}   |   Saídas: R$ ${saidas}`, 10, 48);
+                doc.text(`Saldo: R$ ${saldo}   |   Entradas: R$ ${entradas}   |   Saídas: R$ ${saidas}`, margin, 48);
 
-                // Linha azul
                 doc.setDrawColor(41, 128, 185);
                 doc.setLineWidth(1.5);
-                doc.line(10, 52, 200, 52);
+                doc.line(margin, 52, pageWidth - margin, 52);
+            }
 
-                // Tabela de transações
-                doc.autoTable({
-                    startY: 56,
-                    head: [[
-                        "Data",
-                        "Descrição",
-                        "Categoria",
-                        "Valor"
-                    ]],
-                    body: transacoes.map(t => [
-                        t.data,
-                        t.descricao,
-                        t.categoria,
-                        t.valor
-                    ]),
-                    styles: {
-                        fontSize: 10,
-                        cellPadding: 2,
-                        valign: 'middle'
-                    },
-                    headStyles: {
-                        fillColor: [41, 128, 185],
-                        textColor: 255,
-                        fontStyle: 'bold'
-                    },
-                    alternateRowStyles: {
-                        fillColor: [240, 248, 255]
-                    },
-                    margin: { left: 10, right: 10 }
-                });
+            // tenta carregar imagem (sincronia com onload)
+            const imgObj = new Image();
+            imgObj.crossOrigin = "anonymous";
+            imgObj.src = logoUrl;
 
-                doc.save("extrato_finstash.pdf");
+            imgObj.onload = function() {
+                gerarDocumentoComImagem(imgObj);
             };
+            imgObj.onerror = function() {
+                gerarDocumentoComImagem(null);
+            };
+
+            function gerarDocumentoComImagem(imgLoaded) {
+                // desenha cabeçalho
+                desenharCabecalho();
+
+                // tabela de transações via autoTable (se disponível)
+                if (typeof doc.autoTable === 'function') {
+                    doc.autoTable({
+                        startY: 56,
+                        head: [[ "Data", "Descrição", "Categoria", "Valor" ]],
+                        body: transacoes.map(t => [ t.data, t.descricao, t.categoria, t.valor ]),
+                        styles: { fontSize: 10, cellPadding: 2, valign: 'middle' },
+                        headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+                        alternateRowStyles: { fillColor: [240, 248, 255] },
+                        margin: { left: margin, right: margin }
+                    });
+
+                    // pega posição final da tabela
+                    const finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY : (56 + 10);
+
+                    // adiciona gráficos um seguido do outro a partir de finalY + espaço
+                    addChartsAfter(finalY + 8);
+                } else {
+                    // fallback manual: lista simples e depois gráficos
+                    let y = 56;
+                    doc.setFontSize(10);
+                    doc.text("Data  |  Descrição  |  Categoria  |  Valor", margin, y);
+                    y += 6;
+                    transacoes.forEach(t => {
+                        if (y > pageHeight - 40) { doc.addPage(); desenharCabecalho(); y = 60; }
+                        const line = `${t.data}  |  ${t.descricao}  |  ${t.categoria}  |  ${t.valor}`;
+                        doc.text(line, margin, y);
+                        y += 6;
+                    });
+                    addChartsAfter(y + 8);
+                }
+            }
+
+            // Adiciona os gráficos em sequência abaixo das transações
+            function addChartsAfter(startY) {
+                const chartIds = ['graficoAnoCanvas', 'graficoMesCanvas', 'graficoPizzaCanvas'];
+                let y = startY || 10;
+
+                const instMap = {
+                    'graficoAnoCanvas': window.__graficoAnoInstance,
+                    'graficoMesCanvas': window.__graficoMesInstance,
+                    'graficoPizzaCanvas': window.__graficoPizzaInstance
+                };
+
+                for (const id of chartIds) {
+                    const canvas = document.getElementById(id);
+                    if (!canvas) continue;
+
+                    try {
+                        // tenta usar a instância Chart.js para gerar imagem (mais confiável)
+                        const inst = instMap[id] || (canvas.chart ? canvas.chart : null);
+                        let imgData = null;
+
+                        if (inst && typeof inst.update === 'function') {
+                            try { inst.update('none'); } catch (e) { /* ignore */ }
+                            if (typeof inst.toBase64Image === 'function') {
+                                imgData = inst.toBase64Image('image/png', 1);
+                            }
+                        }
+
+                        // fallback para canvas.toDataURL
+                        if (!imgData && typeof canvas.toDataURL === 'function') {
+                            imgData = canvas.toDataURL('image/png');
+                        }
+
+                        if (!imgData) {
+                          console.warn('Não foi possível obter imagem do gráfico:', id);
+                          continue;
+                        }
+
+                        // calcula dimensões reais do canvas para manter proporção
+                        const canvasW = canvas.width || canvas.clientWidth || canvas.getBoundingClientRect().width;
+                        const canvasH = canvas.height || canvas.clientHeight || canvas.getBoundingClientRect().height;
+                        const imgW = contentWidth;
+                        const imgH = canvasW ? (canvasH / canvasW) * imgW : (imgW * 0.6);
+
+                        if (y + imgH > pageHeight - margin) {
+                            doc.addPage();
+                            desenharCabecalho();
+                            y = margin + 10;
+                        }
+
+                        doc.addImage(imgData, 'PNG', margin, y, imgW, imgH);
+                        y += imgH + 8;
+                    } catch (err) {
+                        console.warn('Erro ao adicionar gráfico "' + id + '" ao PDF:', err);
+                        continue;
+                    }
+                }
+
+                // salva após inserir todos os gráficos
+                doc.save("extrato_finstash.pdf");
+            }
         }
 
         // Função para exportar Excel
@@ -830,7 +922,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             const ws_data = [
                 ["Extrato Finstash"],
                 ["Exportado em:", new Date().toLocaleString('pt-BR')],
-                ["Saldo", "<?php echo number_format($saldo, 2, ',', '.'); ?>", "Entradas", "<?php echo number_format($entradas, 2, ',', '.'); ?>", "Saídas", "<?php echo number_format($saidas, 2, ',', '.'); ?>"],
+                ["Saldo", "<?php echo number_format($saldo, 2, '.', ','); ?>", "Entradas", "<?php echo number_format($entradas, 2, ',', '.'); ?>", "Saídas", "<?php echo number_format($saidas, 2, ',', '.'); ?>"],
                 [],
                 ["Data", "Descrição", "Categoria", "Valor"]
                 <?php
@@ -847,7 +939,7 @@ $meses = $resultado_meses->fetch_all(MYSQLI_ASSOC);
             XLSX.utils.book_append_sheet(wb, ws, "Extrato");
             XLSX.writeFile(wb, "extrato_finstash.xlsx");
         }
-        </script>
+    </script>
 
     <script>//Detecta o fuso horário local e preenche o campo oculto
         document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;

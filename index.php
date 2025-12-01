@@ -93,7 +93,6 @@
             <p class="text-gray-700">Junte-se a milhares de usuários satisfeitos que já estão transformando suas vidas financeiras com o Finstash. Cadastre-se hoje mesmo e comece a trilhar o caminho para a liberdade financeira!</p>
         </div>
 
-
     </main>
 </body>
 </html>
