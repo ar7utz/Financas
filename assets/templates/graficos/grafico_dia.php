@@ -244,13 +244,19 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
                     }
                 },
                  tooltip: {
-                     callbacks: {
-                         label: function(context) {
-                             const v = Number(context.formattedValue || 0);
-                             return context.dataset.label + ': R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                         }
-                     }
-                 }
+                    callbacks: {
+                        label: function(context) {
+                            let raw = context.raw;
+                            if (raw === undefined && context.parsed && typeof context.parsed.y !== 'undefined') raw = context.parsed.y;
+                            if (raw === undefined) {
+                                const s = String(context.formattedValue || '0').replace(/\./g,'').replace(',', '.');
+                                raw = Number(s);
+                            }
+                            const v = (typeof raw === 'number' && !isNaN(raw)) ? raw : 0;
+                            return context.dataset.label + ': R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        }
+                    }
+                }
              },
              layout: {
                 // reserva um padding inferior para legenda (evita quebra de linha que empurra a página)

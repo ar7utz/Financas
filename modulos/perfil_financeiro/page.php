@@ -27,7 +27,7 @@
                 Conhecer seu perfil é fundamental para tomar decisões mais seguras, montar uma carteira adequada e receber sugestões de investimentos alinhadas com suas necessidades e expectativas.
             </p>
             <div class="w-full flex flex-col items-center mb-8">
-                <img src="../../assets/img/perfil_investidor_ilustracao.svg" alt="Ilustração perfil financeiro" class="w-40 mb-4">
+                <!-- <img src="../../assets/img/perfil_investidor_ilustracao.svg" alt="Ilustração perfil financeiro" class="w-40 mb-4"> -->
                 <p class="text-gray-700 text-base max-w-xl">
                     Ao identificar seu perfil, você evita escolhas impulsivas, reduz as chances de prejuízo e aumenta as oportunidades de alcançar seus objetivos financeiros. 
                     O perfil é a base para recomendações personalizadas, respeitando seu apetite ao risco, horizonte de investimento e liquidez desejada.

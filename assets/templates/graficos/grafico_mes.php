@@ -279,7 +279,15 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const v = Number(context.formattedValue || 0);
+                            // preferir valor numérico cru/parced (Chart.js v3+)
+                            let raw = context.raw;
+                            if (raw === undefined && context.parsed && typeof context.parsed.y !== 'undefined') raw = context.parsed.y;
+                            if (raw === undefined) {
+                                // fallback: normalizar string "3.000,00" -> "3000.00"
+                                const s = String(context.formattedValue || '0').replace(/\./g,'').replace(',', '.');
+                                raw = Number(s);
+                            }
+                            const v = (typeof raw === 'number' && !isNaN(raw)) ? raw : 0;
                             return context.dataset.label + ': R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                         }
                     }
