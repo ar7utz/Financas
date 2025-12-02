@@ -65,6 +65,16 @@
                                 backgroundColor: '#28a745',
                             }).showToast();
                             break;
+                        case 'CadastroSucesso':
+                            Toastify({
+                                text: 'Usuário cadastrado com sucesso!',
+                                duration: 3000,
+                                close: true,
+                                gravity: 'top',
+                                position: 'right',
+                                backgroundColor: '#28a745',
+                            }).showToast();
+                            break;
                         default:
                             Toastify({
                                 text: 'Ação desconhecida!',
